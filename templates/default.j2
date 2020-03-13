@@ -1,0 +1,17 @@
+default menu.c32   
+ prompt 0   
+ timeout 900
+ ONTIMEOUT   
+ menu title ######## PXE Boot Menu ########  
+ label 1  
+ menu label ^1) Install Bootstrap Node
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/bootstrap.ign
+ label 2  
+ menu label ^2) Install Master Node
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/master.ign
+ label 3  
+ menu label ^3) Install Worker Node
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/worker.ign

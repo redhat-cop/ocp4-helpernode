@@ -1,0 +1,1 @@
+/export	*(rw,sync,root_squash)

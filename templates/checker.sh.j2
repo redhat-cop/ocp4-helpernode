@@ -1,0 +1,192 @@
+#!/bin/bash
+
+##################################################
+# FUNCTIONS
+##################################################
+
+##
+show_help () {
+echo "Usage:"
+echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|install-info|haproxy|services|nfs-info}"
+echo ""
+}
+##
+dns-masters () {
+echo "======================"
+echo "DNS Config for Masters"
+echo "======================"
+echo ""
+egrep --color=none -A 4 '^; Create entries for the master hosts' /var/named/zonefile.db
+echo ""
+echo "======================"
+echo "DNS Lookup for Masters"
+echo "======================"
+{% for m in masters %}
+echo ""
+echo "{{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "-------------------------------------------------"
+echo "IP: $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+{% endfor %}
+}
+###
+dns-workers () {
+echo "======================"
+echo "DNS Config for Workers"
+echo "======================"
+echo ""
+egrep --color=none -A 4 '^; Create entries for the worker' /var/named/zonefile.db
+echo ""
+echo "======================"
+echo "DNS Lookup for Workers"
+echo "======================"
+{% for w in workers %}
+echo ""
+echo "{{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "-------------------------------------------------"
+echo "IP: $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+{% endfor %}
+}
+###
+dns-etcd () {
+echo "==================="
+echo "DNS Config for ETCD"
+echo "==================="
+echo ""
+egrep --color=none -A 4 '^; The ETCd cluster lives' /var/named/zonefile.db
+echo ""
+echo "==================="
+echo "DNS lookup for ETCD"
+echo "==================="
+for i in etcd-{0..2}
+do
+  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain }} +short
+done
+echo ""
+echo "==================="
+echo "SRV config for ETCD"
+echo "==================="
+echo ""
+egrep --color=none -A 4 '^; The SRV' /var/named/zonefile.db
+echo ""
+echo "==================="
+echo "SRV lookup for ETCD"
+echo "==================="
+dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain }} SRV +short
+echo ""
+}
+###
+install-info () {
+cat <<EOF
+
+This server should also be used as the install node. Apache is running on http://{{ helper.ipaddr }}:8080 You can put your openshift-install artifacts (bios images and ignition files) in /var/www/html
+
+Quickstart Notes:
+	mkdir ~/install
+	cd ~/install
+	vi install-config.yaml
+	openshift-install create ignition-configs
+	cp *.ign /var/www/html/ignition/
+	restorecon -vR /var/www/html/
+
+(See https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html for more details)
+
+EOF
+}
+###
+haproxy () {
+cat <<EOF
+
+HAProxy stats are on http://{{ helper.ipaddr }}:9000 and you should use it to monitor the install when you start.
+
+EOF
+}
+###
+services () {
+echo "Status of services:"
+echo "==================="
+for i in dhcpd named haproxy httpd tftp; do echo -e "Status of $i svc \t\t-> $(systemctl status --no-pager $i | grep --color Active)"; done
+}
+###
+nfs-info () {
+availablesize=$(df -h --output=avail /export | tail -1 | tr -d " ""\t""[:alpha:]")
+warningsize=50
+#
+cat <<EOF
+
+An NFS server has been installed and the entire /export directory has been shared out. To set up the nfs-auto-provisioner; you just need to run the following command after "openshift-install wait-for bootstrap-complete --log-level debug" has finished...
+
+	$(basename $0) nfs-setup
+
+Thats it! Right now, this is an "opinionated" setup (there is no "how do I set this up for..."). For now, this is what you get.
+
+Once it's setup, create a PVC for the registry (an example of one has been provided)
+
+	oc create -f /usr/local/src/registry-pvc.yaml -n openshift-image-registry
+
+Check that with "oc get pv" and "oc get pvc -n openshift-image-registry". Then set the registry to use this NFS volume.
+
+	oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"pvc":{ "claim": "registry-pvc"}}}}'
+
+
+Check the status by watching "oc get pods -n openshift-image-registry"
+
+EOF
+#
+if [ ${availablesize} -le ${warningsize} ]; then
+cat <<EOW
+
+!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!
+
+I've detected that you're using as small disk for your /export directory. OpenShift uses a LOT of storage and it's recommended to use a disk of AT LEAST 100GB. You can do one of two things...
+
+	1) Add a disk to this server and mount it on /export (RECOMMENDED)
+	2) Grow the / volume (not ideal but okay)
+
+If you proceed to use this server how it is, you void ANY chance of help from me on slack or github :)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+EOW
+fi
+}
+##
+
+##################################################
+# MAIN SCRIPT 
+##################################################
+
+case "$1" in
+  dns-masters)
+    dns-masters
+    ;;
+  dns-workers)
+    dns-workers
+    ;;
+  dns-etcd)
+    dns-etcd
+    ;;
+  install-info)
+    install-info
+    ;;
+  haproxy)
+    haproxy
+    ;;
+  services)
+    services
+    ;;
+  nfs-info)
+    nfs-info
+    ;;
+  nfs-setup)
+    /usr/local/bin/nfs-provisioner-setup.sh
+    ;;
+  *)
+    show_help
+    exit 1
+    ;;
+esac
+#
+exit 0
+###

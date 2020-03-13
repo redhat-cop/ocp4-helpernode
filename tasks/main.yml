@@ -1,0 +1,415 @@
+---
+# Setup OCP4 Helper Node
+
+- hosts: all
+  vars_files:
+    - ../vars/main.yml
+  handlers:
+  - import_tasks: ../handlers/main.yml
+  tasks:
+
+  - name: Install needed packages
+    yum:
+      name:
+        - bind
+        - bind-utils
+        - firewalld
+        - haproxy
+        - httpd
+        - vim
+        - bash-completion
+        - libselinux-python
+        - podman
+        - nfs-utils
+      state: present
+
+  - name: Install packages for DHCP/PXE install
+    yum:
+      name:
+        - dhcp
+        - syslinux
+        - tftp-server
+      state: present
+    when: not staticips
+
+  - name: Write out dhcp file
+    template:
+      src: ../templates/dhcpd.conf.j2
+      dest: /etc/dhcp/dhcpd.conf
+    notify:
+      - restart dhcpd
+    when: not staticips
+
+  - name: Write out named file
+    template:
+      src: ../templates/named.conf.j2
+      dest: /etc/named.conf
+    notify:
+      - restart bind
+
+  - name: Installing DNS Serialnumber generator
+    copy:
+      src: ../files/set-dns-serial.sh
+      dest: /usr/local/bin/set-dns-serial.sh
+      mode: '0555'
+
+  - name: Set zone serial number
+    shell: "/usr/local/bin/set-dns-serial.sh"
+    register: dymanicserialnumber
+
+  - name: Setting serial number as a fact
+    set_fact:
+      serialnumber: "{{ dymanicserialnumber.stdout }}"
+  
+  - name: Write out "{{ dns.domain }}" zone file
+    template:
+      src: ../templates/zonefile.j2
+      dest: /var/named/zonefile.db
+    notify:
+      - restart bind
+  
+  - name: Write out reverse zone file
+    template:
+      src: ../templates/reverse.j2
+      dest: /var/named/reverse.db
+    notify:
+      - restart bind
+  
+  - name: Write out haproxy config file
+    template:
+      src: ../templates/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify:
+      - restart haproxy
+
+  - name: Copy httpd conf file
+    copy:
+      src: ../files/httpd.conf
+      dest: /etc/httpd/conf/httpd.conf
+    notify:
+      - restart httpd
+
+  - name: Create apache directories for installing
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    with_items:
+      - /var/www/html/install
+      - /var/www/html/ignition
+
+  - name: Delete OCP4 files, if requested, to download again
+    file:
+       state: absent
+       path: "{{ item }}"
+    with_items:
+      - "/usr/local/src/openshift-client-linux.tar.gz"
+      - "/usr/local/src/openshift-install-linux.tar.gz"
+      - "/var/www/html/install/bios.raw.gz"
+      - "/var/lib/tftpboot/rhcos/initramfs.img"
+      - "/var/lib/tftpboot/rhcos/kernel"
+    when: force_ocp_download
+
+  - name: Downloading OCP4 installer Bios
+    get_url:
+      url: "{{ ocp_bios}}"
+      dest: /var/www/html/install/bios.raw.gz
+      mode: 0555
+
+  - name: Open up firewall ports
+    firewalld:
+      permanent: yes
+      immediate: yes
+      state: enabled
+      port: "{{ item }}"
+    with_items:
+      - 67/udp
+      - 53/tcp
+      - 53/udp
+      - 443/tcp
+      - 80/tcp
+      - 8080/tcp
+      - 6443/tcp
+      - 6443/udp
+      - 22623/tcp
+      - 22623/udp
+      - 9000/tcp
+      - 69/udp
+      - 111/tcp
+      - 2049/tcp
+      - 20048/tcp
+      - 50825/tcp
+      - 53248/tcp
+
+  - name: Best effort SELinux repair - DNS
+    shell: "restorecon -vR /var/named || true"
+
+  - name: Best effort SELinux repair - Apache
+    shell: "restorecon -vR /var/www/html || true"
+
+  - name: Create NFS export directory
+    file:
+      path: /export
+      state: directory
+      mode: 0777
+      owner: nfsnobody
+      group: nfsnobody
+    notify:
+      - restart nfs
+
+  - name: Copy NFS export conf file
+    copy:
+      src: ../files/nfs-exports
+      dest: /etc/exports
+    notify:
+      - restart nfs
+
+  - name: Create TFTP config
+    file:
+      path: /var/lib/tftpboot/pxelinux.cfg
+      state: directory
+      mode: 0755
+    notify:
+      - restart tftp
+    when: not staticips
+
+  - name: Create TFTP RHCOS dir
+    file:
+      path: /var/lib/tftpboot/rhcos
+      state: directory
+      mode: 0755
+    when: not staticips
+
+  - name: SEBool allow haproxy connect any port
+    seboolean:
+      name: haproxy_connect_any
+      state: yes
+      persistent: yes
+    notify:
+      - restart haproxy
+
+  - name: Copy over files needed for TFTP
+    shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
+    when: not staticips
+
+  - name: Downloading OCP4 installer initramfs
+    get_url:
+      url: "{{ ocp_initramfs }}"
+      dest: /var/lib/tftpboot/rhcos/initramfs.img
+      mode: 0555
+    when: not staticips
+
+  - name: Downloading OCP4 installer kernel
+    get_url:
+      url: "{{ ocp_install_kernel }}"
+      dest: /var/lib/tftpboot/rhcos/kernel
+      mode: 0555
+    when: not staticips
+
+  - name: Generate pxe config files
+    block:
+    - name: Set the default tftp file
+      template:
+        src: ../templates/default.j2
+        dest: /var/lib/tftpboot/pxelinux.cfg/default
+        mode: 0555
+      notify:
+        - restart tftp
+
+    - name: Set the bootstrap specific tftp file
+      template:
+        src: ../templates/pxe-bootstrap.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      notify:
+        - restart tftp
+
+    - name: Set the master specific tftp files
+      template:
+        src: ../templates/pxe-master.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ masters }}"
+      notify:
+        - restart tftp
+
+    - name: Set the worker specific tftp files
+      template:
+        src: ../templates/pxe-worker.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ workers }}"
+      notify:
+        - restart tftp
+    when: not staticips
+
+  - name: Installing TFTP Systemd helper
+    copy:
+      src: ../files/start-tftp.sh
+      dest: /usr/local/bin/start-tftp.sh
+      mode: '0555'
+    when: not staticips
+
+  - name: Installing TFTP Systemd unit file
+    copy:
+      src: ../files/helper-tftp.service
+      dest: /etc/systemd/system/helper-tftp.service
+      mode: '0655'
+    when: not staticips
+
+  - name: Systemd daemon reload
+    systemd:
+      daemon_reload: yes
+    when: not staticips
+
+  - name: Starting services
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - named
+      - haproxy
+      - httpd
+      - rpcbind
+      - nfs-server
+      - nfs-lock
+      - nfs-idmap
+
+  - name: Starting DHCP/PXE services
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - dhcpd
+      - tftp
+      - helper-tftp
+    when: not staticips
+
+  - name: Unmasking Services
+    systemd:
+      name: "{{ item }}"
+      enabled: yes
+      masked: no
+    with_items:
+      - tftp
+    when: not staticips
+
+  - name: Set the local resolv.conf file
+    template:
+      src: ../templates/resolv.conf.j2
+      dest: /etc/resolv.conf
+
+  - name: Copy info script over
+    template:
+      src: ../templates/checker.sh.j2
+      dest: /usr/local/bin/helpernodecheck
+      owner: root
+      group: root
+      mode: 0555
+
+  - name: Copying over nfs-provisioner rbac
+    copy:
+      src: ../files/nfs-provisioner-rbac.yaml
+      dest: /usr/local/src/nfs-provisioner-rbac.yaml
+      owner: root
+      group: root
+      mode: 0666
+
+  - name: Copying over nfs-provisioner deployment
+    template:
+      src: ../templates/nfs-provisioner-deployment.yaml.j2
+      dest: /usr/local/src/nfs-provisioner-deployment.yaml
+      owner: root
+      group: root
+      mode: 0666
+
+  - name: Copying over nfs-provisioner storageclass
+    copy:
+      src: ../files/nfs-provisioner-sc.yaml
+      dest: /usr/local/src/nfs-provisioner-sc.yaml
+      owner: root
+      group: root
+      mode: 0666
+
+  - name: Copying over nfs-provisioner setup script
+    copy:
+      src: ../files/nfs-provisioner-setup.sh
+      dest: /usr/local/bin/nfs-provisioner-setup.sh
+      owner: root
+      group: root
+      mode: 0555
+
+  - name: Copying over a sample PVC file for NFS
+    copy:
+      src: ../files/registry-pvc.yaml
+      dest: /usr/local/src/registry-pvc.yaml
+      mode: '0555'
+
+  - name: Downloading OCP4 client
+    get_url:
+      url: "{{ ocp_client }}"
+      dest: /usr/local/src/openshift-client-linux.tar.gz
+
+  - name: Downloading OCP4 Installer
+    get_url:
+      url: "{{ ocp_installer }}"
+      dest: /usr/local/src/openshift-install-linux.tar.gz
+
+  - name: Unarchiving OCP4 client
+    unarchive:
+      src: /usr/local/src/openshift-client-linux.tar.gz
+      dest: /usr/local/bin
+      remote_src: yes
+
+  - name: Unarchiving OCP4 Installer
+    unarchive:
+      src: /usr/local/src/openshift-install-linux.tar.gz
+      dest: /usr/local/bin
+      remote_src: yes
+
+  - name: Removing files that are not needed
+    file:
+      path: /usr/local/bin/README.md
+      state: absent
+
+  - name: Downloading filetranspiler source
+    git:
+      repo: https://github.com/ashcrow/filetranspiler
+      dest: /usr/local/src/filetranspiler
+
+  - name: Building filetranspiler
+    shell: "podman build /usr/local/src/filetranspiler -t filetranspiler:latest"
+
+  - name: Installing filetranspiler
+    copy:
+      src: ../files/filetranspiler
+      dest: /usr/local/bin/filetranspiler
+      mode: '0555'
+
+  - name: Get network device system name
+    shell: "nmcli -t dev show {{ helper.networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
+    register: devicesystemname
+
+  - name: Setting network device system name as a fact
+    set_fact:
+      dsname: "{{ devicesystemname.stdout }}"
+
+  - name: Setting DNS server ip on network interface "{{ dsname }}" to 127.0.0.1
+    shell: 'nmcli con mod "{{ dsname }}" ipv4.dns 127.0.0.1'
+
+  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain }}"
+    shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain }}'
+
+  - name: Restarting NetworkManager
+    service:
+      name: "{{ item }}"
+      state: restarted
+    with_items:
+      - NetworkManager
+ 
+  - name:  Information about this install
+    debug:
+      msg:
+        - "Please run /usr/local/bin/helpernodecheck for information"

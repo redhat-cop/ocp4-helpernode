@@ -1,0 +1,48 @@
+$TTL 1W
+@	IN	SOA	ns1.{{ dns.clusterid }}.{{ dns.domain }}.	root (
+			{{ serialnumber }}	; serial
+			3H		; refresh (3 hours)
+			30M		; retry (30 minutes)
+			2W		; expiry (2 weeks)
+			1W )		; minimum (1 week)
+	IN	NS	ns1.{{ dns.clusterid }}.{{ dns.domain }}.
+	IN	MX 10	smtp.{{ dns.clusterid }}.{{ dns.domain }}.
+;
+; 
+ns1	IN	A	{{ helper.ipaddr }}
+smtp	IN	A	{{ helper.ipaddr }}
+;
+{{ helper.name }}	IN	A	{{ helper.ipaddr }}
+{{ helper.name }}	IN	A	{{ helper.ipaddr }}
+;
+; The api points to the IP of your load balancer
+api		IN	A	{{ helper.ipaddr }}
+api-int		IN	A	{{ helper.ipaddr }}
+;
+; The wildcard also points to the load balancer
+*.apps		IN	A	{{ helper.ipaddr }}
+;
+; Create entry for the bootstrap host
+{{ bootstrap.name }}	IN	A	{{ bootstrap.ipaddr }}
+;
+; Create entries for the master hosts
+{% for m in masters %}
+{{ m.name }}		IN	A	{{ m.ipaddr }}
+{% endfor %}
+;
+; Create entries for the worker hosts
+{% for w in workers %}
+{{ w.name }}		IN	A	{{ w.ipaddr }}
+{% endfor %}
+;
+; The ETCd cluster lives on the masters...so point these to the IP of the masters
+{% for m in masters %}
+etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
+{% endfor %}
+;
+; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
+{% for m in masters %}
+_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{% endfor %}
+;
+;EOF
