@@ -26,7 +26,7 @@ For example; if you want a `$CLUSTERID` of **ocp4**, and you have a `$DOMAIN` of
 
 # Using this playbook
 
-The following are highlevel steps on how to use this playbook. There are more detailed instructions in the ["qucikstarts"](#quickstarts) section.
+The following are highlevel steps on how to use this playbook. There are more detailed instructions in the ["quickstarts"](#quickstarts) section.
 
 ## Prereqs
 
@@ -41,7 +41,7 @@ Install a CentOS 7 server with this recommended setup:
 
 There is a sample [kickstart](docs/examples/helper-ks.cfg) file that is used during testing, if you'd like to automate the initial install of the OS.
 
-Once the base OS is installed, login and install `ansible` and `git`, then glone this repo.
+Once the base OS is installed, login and install `ansible` and `git`, then clone this repo.
 
 ```
 yum -y install ansible git
@@ -60,7 +60,7 @@ cp docs/examples/vars.yaml .
 
 > :warning: **NOTE**, currently this playbook assumes/is limited to a `/24` network
 
-See the `vars.yaml` [documentaion page](docs/vars-doc.md) for more info about what you can define. There's different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
+See the `vars.yaml` [documentaion page](docs/vars-doc.md) for more info about what you can define. There are different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
 
 
 ## Run the playbook
