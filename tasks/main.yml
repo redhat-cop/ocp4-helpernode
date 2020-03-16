@@ -115,7 +115,13 @@
       url: "{{ ocp_bios}}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
-
+      
+  - name: Start firewalld service
+    systemd:
+      name: firewalld
+      state: started
+      enabled: yes
+      
   - name: Open up firewall ports
     firewalld:
       permanent: yes
