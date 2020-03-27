@@ -1,6 +1,6 @@
 # OCP4 Helper Node
 
-> :heavy_exclamation_mark: *Red Hat support cannot assist with problems with the tool* For issues please open a GitHub issue
+> :heavy_exclamation_mark: *Red Hat support cannot assist with problems with this Repo*. For issues please open a GitHub issue
 
 This playbook helps set up an "all-in-one" node, that has all the infrastructure/services in order to install OpenShift 4. After you run the playbook, you'll be ready to begin the installation process.
 
