@@ -224,7 +224,7 @@ ip=192.168.7.20::192.168.7.1:255.255.255.0:bootstrap.ocp4.example.com:enp1s0:non
 nameserver=192.168.7.77
 coreos.inst.install_dev=vda
 coreos.inst.image_url=http://192.168.7.77:8080/install/bios.raw.gz
-coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap-static.ign
+coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap.ign
 ```
 
 ^ Do this for **ALL** of your VMs!!!
