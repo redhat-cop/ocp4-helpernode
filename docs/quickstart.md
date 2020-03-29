@@ -128,7 +128,7 @@ Install `ansible` and `git` and clone this repo
 ```
 yum -y install ansible git
 git clone https://github.com/RedHatOfficial/ocp4-helpernode
-cd ocp4-upi-helpernode
+cd ocp4-helpernode
 ```
 
 Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
