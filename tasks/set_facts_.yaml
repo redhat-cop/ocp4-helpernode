@@ -14,7 +14,7 @@
   when: ansible_distribution_major_version == "7"
 
 - set_fact:
-    dhcp:
+    dhcppkgs:
       - dhcp
       - syslinux
       - tftp-server
@@ -51,7 +51,7 @@
   when: ansible_distribution_major_version == "8"
 
 - set_fact:
-    dhcp_:
+    dhcppkgs:
       - dhcp-server
       - syslinux
       - tftp-server
