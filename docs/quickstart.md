@@ -79,7 +79,7 @@ virsh start ocp4-aHelper
 
 ## Create "empty" VMs
 
-Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs. 
+Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs.
 
 > Make sure you attached these to the `openshift4` network!
 
@@ -89,7 +89,7 @@ Create the master VMs
 
 ```
 for i in master{0..2}
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -104,7 +104,7 @@ Create the bootstrap and worker VMs
 
 ```
 for i in worker{0..1} bootstrap
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -131,10 +131,6 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
-
-> **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
-
 Get the Mac addresses with this command running from your hypervisor host:
 
 ```
@@ -143,6 +139,14 @@ do
   echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
 done
 ```
+
+```
+cp docs/examples/vars.yaml .
+```
+
+Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+
+> **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
 ## Run the playbook
 
@@ -253,7 +257,7 @@ Boot/install the VMs in the following order
 * Masters
 * Workers
 
-On your laptop/workstation visit the status page 
+On your laptop/workstation visit the status page
 
 ```
 firefox http://192.168.7.77:9000
@@ -272,12 +276,12 @@ openshift-install wait-for bootstrap-complete --log-level debug
 Once you see this message below...
 
 ```
-DEBUG OpenShift Installer v4.2.0-201905212232-dirty 
-DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce 
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443... 
-INFO API v1.13.4+838b4fa up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
-DEBUG Bootstrap status: complete                   
+DEBUG OpenShift Installer v4.2.0-201905212232-dirty
+DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443...
+INFO API v1.13.4+838b4fa up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+DEBUG Bootstrap status: complete
 INFO It is now safe to remove the bootstrap resources
 ```
 
@@ -335,7 +339,7 @@ oc get csr | grep 'system:node'
 Once Approved; finish up the install process
 
 ```
-openshift-install wait-for install-complete 
+openshift-install wait-for install-complete
 ```
 
 ## Upgrade
