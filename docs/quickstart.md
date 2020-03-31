@@ -140,9 +140,13 @@ do
 done
 ```
 
+```
+cp docs/examples/vars.yaml .
+```
+
 Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
 
-> **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
+> **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
 ## Run the playbook
 
