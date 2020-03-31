@@ -17,7 +17,7 @@
 
   - name: Install packages for DHCP/PXE install
     package:
-      name: "{{ dhcp_ }}"
+      name: "{{ dhcppkgs }}"
       state: present
     when: not staticips
 
