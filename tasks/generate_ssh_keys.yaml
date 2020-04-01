@@ -1,0 +1,23 @@
+---
+- file:
+    path: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    mode: 0700
+
+- openssh_keypair:
+   path: "{{ ansible_env.HOME }}/.ssh/helper_rsa"
+   size: 4096
+   comment: "{{ ansible_env.USER }}@helper"
+   state: present
+
+- lineinfile:
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+    line: "{{ item.line }}"
+    state: present
+    backup: yes
+    create: yes
+  with_items:
+    - { line: "Host *" }
+    - { line: "    HostName %h.{{ dns.clusterid }}.{{ dns.domain }}" }
+    - { line: "    User core" }
+    - { line: "    IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa" }
