@@ -147,7 +147,7 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-If you're using CentOS 8, you'll need to enable the EPEL repo
+If you're using CentOS 8, you'll need to enable the EPEL repo **FIRST**
 
 ```
 yum -y install epel-release
