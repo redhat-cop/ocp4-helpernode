@@ -1,4 +1,5 @@
 ---
+ssh_gen_key: true
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false

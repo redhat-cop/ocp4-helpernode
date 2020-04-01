@@ -137,20 +137,20 @@ After the helper node is installed; login to it
 ssh root@192.168.7.77
 ```
 
-Install `ansible` and `git` and clone this repo
-
 > **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`
+
+Install EPEL
+
+```
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+```
+
+Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
 git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
-```
-
-If you're using CentOS 8, you'll need to enable the EPEL repo **FIRST**
-
-```
-yum -y install epel-release
 ```
 
 Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
@@ -193,20 +193,21 @@ cd ~/ocp4
 Create a place to store your pull-secret 
 
 ```
-mkdir ~/.openshift
+mkdir -p ~/.openshift
 ```
 
 Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
 
 ```shell
-$ ls -1 ~/.openshift/pull-secret
+# ls -1 ~/.openshift/pull-secret
 /root/.openshift/pull-secret
 ```
 
-Now create an sshkey or copy over one you already have. You can create one with the following command.
+This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can use this key or create/user another one if you wish.
 
-```
-ssh-keygen -t rsa -b 4096 -C "root@helper" -N "" -f ~/.ssh/helper_rsa
+```shell
+# ls -1 ~/.ssh/helper_rsa
+/root/.ssh/helper_rsa
 ```
 
 Next, create an `install-config.yaml` file.
