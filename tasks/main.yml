@@ -10,7 +10,6 @@
   - name: generate ssh keys
     import_tasks: generate_ssh_keys.yaml
     when: ssh
-    tags: test
 
   - name: set setup facts
     include: set_facts_.yaml
