@@ -14,7 +14,7 @@ This playbook assumes the following:
 2. The network you're on does NOT have DHCP (you can disable installing DHCP on the helper).
 3. The ocp4-helpernode will be your LB/DHCP/PXE/DNS and HTTP server.
 4. You still have to do the OpenShift Install steps by hand.
-5. I used CentOS 7, but RHEL 7 will work as well.
+5. I used CentOS 7/8, but RHEL 7/8 will work as well.
 6. You will be running the `openshift-install` command from the ocp4-helpernode.
 
 Below is a highlevel diagram how the ocp4-helpernode fits into your network.
