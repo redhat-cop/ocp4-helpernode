@@ -149,20 +149,20 @@ cd ~/ocp4
 Create a place to store your pull-secret 
 
 ```
-mkdir ~/.openshift
+mkdir -p ~/.openshift
 ```
 
 Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
 
 ```shell
-$ ls -1 ~/.openshift/pull-secret
+# ls -1 ~/.openshift/pull-secret
 /root/.openshift/pull-secret
 ```
 
 This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can use this key or create/user another one if you wish.
 
 ```
-$ ls -1 ~/.ssh/helper_rsa
+# ls -1 ~/.ssh/helper_rsa
 /root/.ssh/helper_rsa
 ```
 
