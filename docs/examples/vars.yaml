@@ -1,4 +1,5 @@
 ---
+ssh_gen_key: False
 disk: vda
 helper:
   name: "helper"
