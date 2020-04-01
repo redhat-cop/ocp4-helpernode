@@ -1,0 +1,19 @@
+---
+- file:
+    path: ~/.ssh
+    state: directory
+    mode: 0700
+
+- openssh_keypair:
+    path: ~/.ssh/id_ssh_ocp4_rsa
+
+- lineinfile:
+    path: ~/.ssh/config
+    line: "{{ item.line }}"
+    state: present
+    backup: yes
+    create: yes
+  with_items:
+    - { line: "Host *.{{ dns.clusterid }}.{{ dns.domain }}" }
+    - { line: "    User core" }
+    - { line: "    IdentityFile ~/.ssh/id_ssh_ocp4_rsa" }
