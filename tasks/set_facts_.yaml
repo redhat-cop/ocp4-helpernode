@@ -1,0 +1,74 @@
+---
+- set_fact:
+    packages:
+      - bind
+      - bind-utils
+      - firewalld
+      - haproxy
+      - httpd
+      - vim
+      - bash-completion
+      - libselinux-python
+      - podman
+      - nfs-utils
+  when: ansible_distribution_major_version == "7"
+
+- set_fact:
+    dhcppkgs:
+      - dhcp
+      - syslinux
+      - tftp-server
+  when: ansible_distribution_major_version == "7"
+
+- set_fact:
+    owner: nobody
+    group: nobody
+  when: ansible_distribution_major_version == "7"
+
+- set_fact:
+    services:
+      - named
+      - haproxy
+      - httpd
+      - rpcbind
+      - nfs-server
+      - nfs-lock
+      - nfs-idmap
+  when: ansible_distribution_major_version == "7"
+
+- set_fact:
+    packages:
+      - bind
+      - bind-utils
+      - firewalld
+      - haproxy
+      - httpd
+      - vim
+      - bash-completion
+      - python3-libselinux
+      - podman
+      - nfs-utils
+  when: ansible_distribution_major_version == "8"
+
+- set_fact:
+    dhcppkgs:
+      - dhcp-server
+      - syslinux
+      - tftp-server
+  when: ansible_distribution_major_version == "8"
+
+# See Fedora Wiki for changes:
+# https://fedoraproject.org/wiki/Changes/RenameNobodyUser
+- set_fact:
+    owner: nobody
+    group: nobody
+  when: ansible_distribution_major_version == "8"
+
+- set_fact:
+    services:
+      - named
+      - haproxy
+      - httpd
+      - rpcbind
+      - nfs-server
+  when: ansible_distribution_major_version == "8"

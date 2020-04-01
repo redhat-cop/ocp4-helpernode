@@ -7,28 +7,17 @@
   handlers:
   - import_tasks: ../handlers/main.yml
   tasks:
+  - name: set setup facts
+    include: set_facts_.yaml
 
   - name: Install needed packages
-    yum:
-      name:
-        - bind
-        - bind-utils
-        - firewalld
-        - haproxy
-        - httpd
-        - vim
-        - bash-completion
-        - libselinux-python
-        - podman
-        - nfs-utils
+    package:
+      name: "{{ packages }}"
       state: present
 
   - name: Install packages for DHCP/PXE install
-    yum:
-      name:
-        - dhcp
-        - syslinux
-        - tftp-server
+    package:
+      name: "{{ dhcppkgs }}"
       state: present
     when: not staticips
 
@@ -158,8 +147,8 @@
       path: /export
       state: directory
       mode: 0777
-      owner: nfsnobody
-      group: nfsnobody
+      owner: "{{ owner }}"
+      group: "{{ group }}"
     notify:
       - restart nfs
 
@@ -274,13 +263,7 @@
       enabled: yes
       state: started
     with_items:
-      - named
-      - haproxy
-      - httpd
-      - rpcbind
-      - nfs-server
-      - nfs-lock
-      - nfs-idmap
+      - "{{ services }}"
 
   - name: Starting DHCP/PXE services
     service:
@@ -384,15 +367,18 @@
     git:
       repo: https://github.com/ashcrow/filetranspiler
       dest: /usr/local/src/filetranspiler
+    when: install_filetranspiler
 
   - name: Building filetranspiler
     shell: "podman build /usr/local/src/filetranspiler -t filetranspiler:latest"
+    when: install_filetranspiler
 
   - name: Installing filetranspiler
     copy:
       src: ../files/filetranspiler
       dest: /usr/local/bin/filetranspiler
       mode: '0555'
+    when: install_filetranspiler
 
   - name: Get network device system name
     shell: "nmcli -t dev show {{ helper.networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"

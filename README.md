@@ -14,7 +14,7 @@ This playbook assumes the following:
 2. The network you're on does NOT have DHCP (you can disable installing DHCP on the helper).
 3. The ocp4-helpernode will be your LB/DHCP/PXE/DNS and HTTP server.
 4. You still have to do the OpenShift Install steps by hand.
-5. I used CentOS 7, but RHEL 7 will work as well.
+5. I used CentOS 7/8, but RHEL 7/8 will work as well.
 6. You will be running the `openshift-install` command from the ocp4-helpernode.
 
 Below is a highlevel diagram how the ocp4-helpernode fits into your network.
@@ -32,23 +32,31 @@ The following are highlevel steps on how to use this playbook. There are more de
 
 ## Prereqs
 
-> :warning: **NOTE** If using RHEL 7, you will need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. [EPEL](https://fedoraproject.org/wiki/EPEL) is also recommended for RHEL 7.
+> :warning: **NOTE** If using RHEL 7, you will need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. [EPEL](https://fedoraproject.org/wiki/EPEL) is also recommended for RHEL 7. If you're using RHEL 8, you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`.
 
-Install a CentOS 7 server with this recommended setup:
+
+Install a CentOS 7 or CentOS 8 server with this recommended setup:
 
 * 4 vCPUs
 * 4 GB of RAM
 * 30GB HD
 * Static IP
 
-There is a sample [kickstart](docs/examples/helper-ks.cfg) file that is used during testing, if you'd like to automate the initial install of the OS.
+There is a sample kickstart file for [EL 7](docs/examples/helper-ks.cfg) and [EL 8](docs/examples/helper-ks8.cfg) that is used during testing, if you'd like to automate the initial install of the OS.
 
 Once the base OS is installed, login and install `ansible` and `git`, then clone this repo.
+
 
 ```
 yum -y install ansible git
 git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
+```
+
+If you're on CentOS 8, you'll need to install EPEL **FIRST**
+
+```
+yum -y install epel-release
 ```
 
 

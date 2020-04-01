@@ -37,23 +37,39 @@ virsh net-autostart openshift4
 virsh net-start openshift4
 ```
 
-## Create a CentOS 7 VM
+## Create a CentOS 7/8 VM
 
-Download the [Kickstart file](examples/helper-ks.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
 
+__EL 7__
 ```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
+```
+
+__EL 8__
+```
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
 
 > **NOTE** Change the path to the ISO for your environment
 
+__EL 7__
 ```
 virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
 --disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
 --boot menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
+--initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+```
+
+__EL 8__
+```
+virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
+--os-variant centos8 --network network=openshift4,model=virtio \
+--boot menu=on --location /var/lib/libvirt/ISO/CentOS-8-x86_64-1905-dvd1.iso \
 --initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
 ```
 
@@ -88,12 +104,18 @@ ssh root@192.168.7.77
 
 Install `ansible` and `git` and clone this repo
 
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos
+> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`
 
 ```
 yum -y install ansible git
 git clone https://github.com/RedHatOfficial/ocp4-helpernode
-cd ocp4-upi-helpernode
+cd ocp4-helpernode
+```
+
+If you're using CentOS 8, you'll need to enable the EPEL repo
+
+```
+yum -y install epel-release
 ```
 
 Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server. 
@@ -124,7 +146,28 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Next, create an `install-config.yaml` file
+Create a place to store your pull-secret 
+
+```
+mkdir ~/.openshift
+```
+
+Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
+
+```shell
+$ ls -1 ~/.openshift/pull-secret
+/root/.openshift/pull-secret
+```
+
+Now create an sshkey or copy over one you already have. You can create one with the following command.
+
+```
+ssh-keygen -t rsa -b 4096 -C "root@helper" -N "" -f ~/.ssh/helper_rsa
+```
+
+Next, create an `install-config.yaml` file.
+
+> :warning: Make sure you update if your filenames or paths are different.
 
 ```
 cat <<EOF > install-config.yaml
@@ -149,14 +192,12 @@ networking:
   - 172.30.0.0/16
 platform:
   none: {}
-pullSecret: '{"auths": ...}'
-sshKey: 'ssh-ed25519 AAAA...'
+pullSecret: '$(< ~/.openshift/pull-secret)'
+sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
 
-Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Then copy the pull secret. Replace `pullSecret` with that pull secret and `sshKey` with your ssh public key.
-
-First, create the installation manifests
+Create the installation manifests
 
 ```
 openshift-install create manifests
@@ -224,7 +265,7 @@ ip=192.168.7.20::192.168.7.1:255.255.255.0:bootstrap.ocp4.example.com:enp1s0:non
 nameserver=192.168.7.77
 coreos.inst.install_dev=vda
 coreos.inst.image_url=http://192.168.7.77:8080/install/bios.raw.gz
-coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap-static.ign
+coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap.ign
 ```
 
 ^ Do this for **ALL** of your VMs!!!
