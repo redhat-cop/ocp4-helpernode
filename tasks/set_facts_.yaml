@@ -20,8 +20,8 @@
         - tftp-server
   
   - set_fact:
-      owner: nobody
-      group: nobody
+      owner: nfsnobody
+      group: nfsnobody
   
   - set_fact:
       services:
