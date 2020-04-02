@@ -140,11 +140,11 @@ do
 done
 ```
 
+Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+
 ```
 cp docs/examples/vars.yaml .
 ```
-
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
