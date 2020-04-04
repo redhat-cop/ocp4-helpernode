@@ -1,0 +1,24 @@
+- fail:
+    msg: "Please revise your vars.yaml file _underscores_ are not legal in hostnames"
+  when: item is search("_")
+  with_items:
+  - "{{ dns.domain }}"
+  - "{{ helper.name }}"
+  - "{{ bootstrap.name }}"
+  register: val0
+  ignore_errors: True
+
+- fail:
+    msg: "Please revise your vars.yaml file _underscores_ are not legal in hostnames"
+  when: item.name is search("_")
+  with_items:
+  - "{{ masters }}"
+  - "{{ workers }}"
+  register: val1
+  ignore_errors: True
+
+- fail:
+    msg: "Please revise your vars.yaml file _underscores_ are not legal in hostnames"
+  when:
+    (val0.failed is defined) or
+    (val1.failed is defined)
