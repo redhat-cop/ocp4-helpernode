@@ -7,6 +7,12 @@
   handlers:
   - import_tasks: ../handlers/main.yml
 
+  # According to RFC 952, and RFC 1123, also RFC about SRV records should be taken into account)
+  # underscores in hostnames are illegal.
+  pre_tasks:
+  - name: validate hostnames
+    import_tasks: validate_host_names.yaml
+
   tasks:
   - name: generate ssh keys
     import_tasks: generate_ssh_keys.yaml
