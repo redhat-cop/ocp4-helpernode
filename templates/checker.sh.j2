@@ -23,10 +23,10 @@ echo "DNS Lookup for Masters"
 echo "======================"
 {% for m in masters %}
 echo ""
-echo "{{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+echo "IP: $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
 }
 ###
@@ -42,10 +42,10 @@ echo "DNS Lookup for Workers"
 echo "======================"
 {% for w in workers %}
 echo ""
-echo "{{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
 }
 ###
@@ -61,7 +61,7 @@ echo "DNS lookup for ETCD"
 echo "==================="
 for i in etcd-{0..2}
 do
-  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain }} +short
+  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short
 done
 echo ""
 echo "==================="
@@ -73,7 +73,7 @@ echo ""
 echo "==================="
 echo "SRV lookup for ETCD"
 echo "==================="
-dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain }} SRV +short
+dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain | lower }} SRV +short
 echo ""
 }
 ###

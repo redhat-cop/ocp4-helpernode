@@ -1,4 +1,10 @@
 ---
+# Set fact based on variable precedence.
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#ansible-variable-precedence
+- set_fact:
+    networkifacename: "{{ ansible_default_ipv4.interface }}"
+  when: helper.networkifacename == ""
+
 - block:
   - set_fact:
       packages:
