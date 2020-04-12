@@ -1,6 +1,12 @@
 ---
-- set_fact:
-    networkifacename: "{{ ansible_default_ipv4.interface }}"
+- block:
+    - assert: 
+        that: "{{ helper.networkifacename is defined }}"
+    - set_fact: 
+        networkifacename: "{{ helper.networkifacename }}"
+  rescue:
+    - set_fact:
+        networkifacename: "{{ ansible_default_ipv4.interface }}"
 
 - block:
   - set_fact:
