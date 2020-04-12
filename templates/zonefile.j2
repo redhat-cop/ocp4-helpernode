@@ -13,7 +13,6 @@ ns1	IN	A	{{ helper.ipaddr }}
 smtp	IN	A	{{ helper.ipaddr }}
 ;
 {{ helper.name }}	IN	A	{{ helper.ipaddr }}
-{{ helper.name }}	IN	A	{{ helper.ipaddr }}
 ;
 ; The api points to the IP of your load balancer
 api		IN	A	{{ helper.ipaddr }}
@@ -40,6 +39,13 @@ api-int		IN	A	{{ helper.ipaddr }}
 etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
+{% if other is defined %}
+; Create entries for the other hosts
+{% for o in other %}
+{{ o.name }}		IN	A	{{ o.ipaddr }}
+{% endfor %}
+;
+{% endif %}
 ; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
 {% for m in masters %}
 _etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain }}.

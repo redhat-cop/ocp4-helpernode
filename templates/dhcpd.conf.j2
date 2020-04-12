@@ -21,6 +21,11 @@ max-lease-time 14400;
 {% for w in workers %}
 		host {{ w.name }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
 {% endfor %}
+{% if other is defined %}
+{% for o in other %}
+		host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
+{% endfor %}
+{% endif %}
 		# this will not give out addresses to hosts not listed above
 		deny unknown-clients;
 
