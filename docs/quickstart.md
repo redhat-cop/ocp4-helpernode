@@ -38,23 +38,39 @@ virsh net-autostart openshift4
 virsh net-start openshift4
 ```
 
-## Create a CentOS 7 VM
+## Create a CentOS 7/8 VM
 
-Download the [Kickstart file](examples/helper-ks.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
 
+__EL 7__
 ```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
+```
+
+__EL 8__
+```
+wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
 
 > **NOTE** Change the path to the ISO for your environment
 
+__EL 7__
 ```
 virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
 --disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
 --os-variant centos7.0 --network network=openshift4,model=virtio \
 --boot menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
+--initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
+```
+
+__EL 8__
+```
+virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
+--os-variant centos8 --network network=openshift4,model=virtio \
+--boot menu=on --location /var/lib/libvirt/ISO/CentOS-8-x86_64-1905-dvd1.iso \
 --initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
 ```
 
@@ -79,7 +95,7 @@ virsh start ocp4-aHelper
 
 ## Create "empty" VMs
 
-Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs. 
+Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs.
 
 > Make sure you attached these to the `openshift4` network!
 
@@ -89,7 +105,7 @@ Create the master VMs
 
 ```
 for i in master{0..2}
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -104,7 +120,7 @@ Create the bootstrap and worker VMs
 
 ```
 for i in worker{0..1} bootstrap
-do 
+do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
@@ -121,19 +137,21 @@ After the helper node is installed; login to it
 ssh root@192.168.7.77
 ```
 
-Install `ansible` and `git` and clone this repo
+> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-x86_64-baseos-rpms`, `rhel-8-for-x86_64-appstream-rpms`, and `ansible-2.9-for-rhel-8-x86_64-rpms`
 
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos
+Install EPEL
+
+```
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+```
+
+Install `ansible` and `git` and clone this repo
 
 ```
 yum -y install ansible git
 git clone https://github.com/RedHatOfficial/ocp4-helpernode
-cd ocp4-upi-helpernode
+cd ocp4-helpernode
 ```
-
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
-
-> **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
 
 Get the Mac addresses with this command running from your hypervisor host:
 
@@ -143,6 +161,14 @@ do
   echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
 done
 ```
+
+Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+
+```
+cp docs/examples/vars.yaml .
+```
+
+> **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
 ## Run the playbook
 
@@ -168,7 +194,29 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Next, create an `install-config.yaml` file
+Create a place to store your pull-secret 
+
+```
+mkdir -p ~/.openshift
+```
+
+Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
+
+```shell
+# ls -1 ~/.openshift/pull-secret
+/root/.openshift/pull-secret
+```
+
+This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can use this key or create/user another one if you wish.
+
+```shell
+# ls -1 ~/.ssh/helper_rsa
+/root/.ssh/helper_rsa
+```
+
+Next, create an `install-config.yaml` file.
+
+> :warning: Make sure you update if your filenames or paths are different.
 
 ```
 cat <<EOF > install-config.yaml
@@ -193,14 +241,12 @@ networking:
   - 172.30.0.0/16
 platform:
   none: {}
-pullSecret: '{"auths": ...}'
-sshKey: 'ssh-ed25519 AAAA...'
+pullSecret: '$(< ~/.openshift/pull-secret)'
+sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
 
-Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Then copy the pull secret. Replace `pullSecret` with that pull secret and `sshKey` with your ssh public key.
-
-First, create the installation manifests
+Create the installation manifests
 
 ```
 openshift-install create manifests
@@ -253,7 +299,7 @@ Boot/install the VMs in the following order
 * Masters
 * Workers
 
-On your laptop/workstation visit the status page 
+On your laptop/workstation visit the status page
 
 ```
 firefox http://192.168.7.77:9000
@@ -272,12 +318,12 @@ openshift-install wait-for bootstrap-complete --log-level debug
 Once you see this message below...
 
 ```
-DEBUG OpenShift Installer v4.2.0-201905212232-dirty 
-DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce 
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443... 
-INFO API v1.13.4+838b4fa up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
-DEBUG Bootstrap status: complete                   
+DEBUG OpenShift Installer v4.2.0-201905212232-dirty
+DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443...
+INFO API v1.13.4+838b4fa up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+DEBUG Bootstrap status: complete
 INFO It is now safe to remove the bootstrap resources
 ```
 
@@ -335,7 +381,7 @@ oc get csr | grep 'system:node'
 Once Approved; finish up the install process
 
 ```
-openshift-install wait-for install-complete 
+openshift-install wait-for install-complete
 ```
 
 ## Upgrade

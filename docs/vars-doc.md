@@ -194,6 +194,28 @@ The [default](../vars/main.yml#L4-L8) is to use the latest stable OpenShift 4 re
 
 > Also, you can point this to ANY apache server...not just the OpenShift 4 mirrors (*cough* *cough* disconnected hint here *cough* *cough*)
 
+### Filetranspiler 
+
+Originally, [filetranspiler](https://github.com/ashcrow/filetranspiler) was used to write out static ip configurations. You no longer need to do this as you can just pass `ip=...` into the kernel parameters to get static IPs setup.
+
+This tool can still be useful to write out other files. Therefore, you can install it by setting the following option:
+
+```
+install_filetranspiler: true
+```
+
+Default is set to `false` as to NOT install it.
+
+### SSH Key
+
+This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssk/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
+
+```
+ssh_gen_key: true
+```
+
+Default is set to `true`, set it to `false` if you don't want it to create the SSH KEY or config for you
+
 # Example Vars file
 
 Below are example `vars.yaml` files.
