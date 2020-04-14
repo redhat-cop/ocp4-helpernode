@@ -41,6 +41,7 @@ oc create -f ${deploy} -n ${nfsnamespace}
 oc create -f ${sc}
 oc annotate storageclass nfs-storage-provisioner storageclass.kubernetes.io/is-default-class="true"
 oc project default
+oc rollout status deployment nfs-client-provisioner -n ${nfsnamespace}
 #
 ## Show some info
 cat <<EOF

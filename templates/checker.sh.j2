@@ -125,8 +125,11 @@ Once it's setup, create a PVC for the registry (an example of one has been provi
 
 	oc create -f /usr/local/src/registry-pvc.yaml -n openshift-image-registry
 
-Check that with "oc get pv" and "oc get pvc -n openshift-image-registry". Then set the registry to use this NFS volume.
+Check that with "oc get pv" and "oc get pvc -n openshift-image-registry".
 
+Then set the registry to use this NFS volume. (you may need to remove the emptyDir if you set it beforehand)
+
+	oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p '[{"op": "remove", "path": "/spec/storage/emptyDir" }]'
 	oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"pvc":{ "claim": "registry-pvc"}}}}'
 
 
@@ -145,6 +148,11 @@ I've detected that you're using as small disk for your /export directory. OpenSh
 	2) Grow the / volume (not ideal but okay)
 
 If you proceed to use this server how it is, you void ANY chance of help from me on slack or github :)
+
+Make sure your permissions are right once you've mounted over /export (EL8 shown below, on EL7 the owner is: nfsnobody)
+
+	chown nobody:nobody /export
+	chmod 775 /export
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
