@@ -155,7 +155,7 @@ workers:
 * `workers.macaddr` - The mac address for [dhcp reservation](../templates/dhcpd.conf.j2#L22). This option is not needed if you're doing static ips.
 
 
-**NOTE**: At LEAST 1 worker is needed for installation of OpenShift 4
+**NOTE**: At LEAST 2 workers is needed for installation of OpenShift 4
 
 ## Extra sections
 
@@ -215,6 +215,21 @@ ssh_gen_key: true
 ```
 
 Default is set to `true`, set it to `false` if you don't want it to create the SSH KEY or config for you
+
+### Other Nodes
+
+**OPTIONAL**
+
+If you want to have other DNS/DHCP entires managed by the helper, you can use `other` and specify the ip/mac address
+
+```
+other:
+  - name: "non-cluster-vm"
+    ipaddr: "192.168.7.31"
+    macaddr: "52:54:00:f4:2e:2e"
+```
+
+You can omit `macaddr` if using `staticips=true`
 
 # Example Vars file
 
