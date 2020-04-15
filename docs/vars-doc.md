@@ -32,9 +32,9 @@ helper:
 
 This is how it breaks down
 
-* `helper.name` - This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion")
-* `helper.ipaddr` - Set this to the current IP address of the helper. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
-* `helper.networkifacename` - This is set to the network interface of the helper (what you see when you do `ip addr`)
+* `helper.name` - *REQUIRED*: This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion")
+* `helper.ipaddr` - *REQUIRED* Set this to the current IP address of the helper. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
+* `helper.networkifacename` - *OPTIONAL*: By default the playbook uses `{{ ansible_default_ipv4.interface }}` for the interface of the helper. This option can be set to override the interface used for the helper (if, for example, you're on a dual homed network or your helper has more than one interface).
 
 **NOTE**: The `helper.networkifacename` is the ACTUAL name of the interface, NOT the NetworkManager name (you should _NEVER_ need to set it to something like `System eth0`. Set it to what you see in `ip addr`)
 

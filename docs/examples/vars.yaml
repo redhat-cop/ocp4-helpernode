@@ -3,7 +3,6 @@ disk: vda
 helper:
   name: "helper"
   ipaddr: "192.168.7.77"
-  networkifacename: "eth0"
 dns:
   domain: "example.com"
   clusterid: "ocp4"

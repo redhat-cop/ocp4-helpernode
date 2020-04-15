@@ -1,26 +1,26 @@
 $TTL 1W
-@	IN	SOA	ns1.{{ dns.clusterid }}.{{ dns.domain }}.	root (
+@	IN	SOA	ns1.{{ dns.clusterid }}.{{ dns.domain | lower }}.	root (
 			{{ serialnumber }}	; serial
 			3H		; refresh (3 hours)
 			30M		; retry (30 minutes)
 			2W		; expiry (2 weeks)
 			1W )		; minimum (1 week)
-	IN	NS	ns1.{{ dns.clusterid }}.{{ dns.domain }}.
+	IN	NS	ns1.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
 ; syntax is "last octet" and the host must have fqdn with trailing dot
 1       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
 
 {% for m in masters %}
-{{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
 ;
-{{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
-{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain }}.
-{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
 {% for w in workers %}
-{{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
 ;
 {% if other is defined %}
