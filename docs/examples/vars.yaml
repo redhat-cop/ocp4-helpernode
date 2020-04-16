@@ -3,7 +3,6 @@ disk: vda
 helper:
   name: "helper"
   ipaddr: "192.168.7.77"
-  networkifacename: "eth0"
 dns:
   domain: "example.com"
   clusterid: "ocp4"
@@ -41,3 +40,7 @@ workers:
   - name: "worker2"
     ipaddr: "192.168.7.13"
     macaddr: "52:54:00:8e:10:34"
+other:
+  - name: "non-cluster-vm"
+    ipaddr: "192.168.7.31"
+    macaddr: "52:54:00:f4:2e:2e"

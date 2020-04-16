@@ -32,9 +32,9 @@ helper:
 
 This is how it breaks down
 
-* `helper.name` - This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion")
-* `helper.ipaddr` - Set this to the current IP address of the helper. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
-* `helper.networkifacename` - This is set to the network interface of the helper (what you see when you do `ip addr`)
+* `helper.name` - *REQUIRED*: This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion")
+* `helper.ipaddr` - *REQUIRED* Set this to the current IP address of the helper. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
+* `helper.networkifacename` - *OPTIONAL*: By default the playbook uses `{{ ansible_default_ipv4.interface }}` for the interface of the helper. This option can be set to override the interface used for the helper (if, for example, you're on a dual homed network or your helper has more than one interface).
 
 **NOTE**: The `helper.networkifacename` is the ACTUAL name of the interface, NOT the NetworkManager name (you should _NEVER_ need to set it to something like `System eth0`. Set it to what you see in `ip addr`)
 
@@ -155,7 +155,7 @@ workers:
 * `workers.macaddr` - The mac address for [dhcp reservation](../templates/dhcpd.conf.j2#L22). This option is not needed if you're doing static ips.
 
 
-**NOTE**: At LEAST 1 worker is needed for installation of OpenShift 4
+**NOTE**: At LEAST 2 workers is needed for installation of OpenShift 4
 
 ## Extra sections
 
@@ -215,6 +215,21 @@ ssh_gen_key: true
 ```
 
 Default is set to `true`, set it to `false` if you don't want it to create the SSH KEY or config for you
+
+### Other Nodes
+
+**OPTIONAL**
+
+If you want to have other DNS/DHCP entires managed by the helper, you can use `other` and specify the ip/mac address
+
+```
+other:
+  - name: "non-cluster-vm"
+    ipaddr: "192.168.7.31"
+    macaddr: "52:54:00:f4:2e:2e"
+```
+
+You can omit `macaddr` if using `staticips=true`
 
 # Example Vars file
 

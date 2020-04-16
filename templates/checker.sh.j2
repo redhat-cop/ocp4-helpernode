@@ -7,7 +7,7 @@
 ##
 show_help () {
 echo "Usage:"
-echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|install-info|haproxy|services|nfs-info}"
+echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|dns-other|install-info|haproxy|services|nfs-info}"
 echo ""
 }
 ##
@@ -16,17 +16,17 @@ echo "======================"
 echo "DNS Config for Masters"
 echo "======================"
 echo ""
-egrep --color=none -A 4 '^; Create entries for the master hosts' /var/named/zonefile.db
+egrep --color=none -A {{ (masters | length) + 1 }} '^; Create entries for the master hosts' /var/named/zonefile.db
 echo ""
 echo "======================"
 echo "DNS Lookup for Masters"
 echo "======================"
 {% for m in masters %}
 echo ""
-echo "{{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+echo "IP: $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
 }
 ###
@@ -35,17 +35,17 @@ echo "======================"
 echo "DNS Config for Workers"
 echo "======================"
 echo ""
-egrep --color=none -A 4 '^; Create entries for the worker' /var/named/zonefile.db
+egrep --color=none -A {{ (workers | length) + 1 }} '^; Create entries for the worker' /var/named/zonefile.db
 echo ""
 echo "======================"
 echo "DNS Lookup for Workers"
 echo "======================"
 {% for w in workers %}
 echo ""
-echo "{{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
 }
 ###
@@ -61,7 +61,7 @@ echo "DNS lookup for ETCD"
 echo "==================="
 for i in etcd-{0..2}
 do
-  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain }} +short
+  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short
 done
 echo ""
 echo "==================="
@@ -73,8 +73,29 @@ echo ""
 echo "==================="
 echo "SRV lookup for ETCD"
 echo "==================="
-dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain }} SRV +short
+dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain | lower }} SRV +short
 echo ""
+}
+###
+dns-other () {
+echo "======================"
+echo "DNS Config for Others"
+echo "======================"
+echo ""
+egrep --color=none -A {{ (other | default([]) | length) + 1 }} '^; Create entries for the other' /var/named/zonefile.db
+echo ""
+echo "======================"
+echo "DNS Lookup for Others"
+echo "======================"
+{% if other is defined %}
+{% for o in other %}
+echo ""
+echo "{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "-------------------------------------------------"
+echo "IP: $(dig @localhost {{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+{% endfor %}
+{% endif %}
 }
 ###
 install-info () {
@@ -125,8 +146,11 @@ Once it's setup, create a PVC for the registry (an example of one has been provi
 
 	oc create -f /usr/local/src/registry-pvc.yaml -n openshift-image-registry
 
-Check that with "oc get pv" and "oc get pvc -n openshift-image-registry". Then set the registry to use this NFS volume.
+Check that with "oc get pv" and "oc get pvc -n openshift-image-registry".
 
+Then set the registry to use this NFS volume. (you may need to remove the emptyDir if you set it beforehand)
+
+	oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p '[{"op": "remove", "path": "/spec/storage/emptyDir" }]'
 	oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"pvc":{ "claim": "registry-pvc"}}}}'
 
 
@@ -145,6 +169,11 @@ I've detected that you're using as small disk for your /export directory. OpenSh
 	2) Grow the / volume (not ideal but okay)
 
 If you proceed to use this server how it is, you void ANY chance of help from me on slack or github :)
+
+Make sure your permissions are right once you've mounted over /export (EL8 shown below, on EL7 the owner is: nfsnobody)
+
+	chown nobody:nobody /export
+	chmod 775 /export
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -166,6 +195,9 @@ case "$1" in
     ;;
   dns-etcd)
     dns-etcd
+    ;;
+  dns-other)
+    dns-other
     ;;
   install-info)
     install-info

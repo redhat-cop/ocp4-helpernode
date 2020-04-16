@@ -61,7 +61,7 @@
     set_fact:
       serialnumber: "{{ dymanicserialnumber.stdout }}"
   
-  - name: Write out "{{ dns.domain }}" zone file
+  - name: Write out "{{ dns.domain | lower }}" zone file
     template:
       src: ../templates/zonefile.j2
       dest: /var/named/zonefile.db
@@ -235,7 +235,7 @@
         src: ../templates/pxe-master.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
-      with_items: "{{ masters }}"
+      with_items: "{{ masters | lower }}"
       notify:
         - restart tftp
 
@@ -244,7 +244,7 @@
         src: ../templates/pxe-worker.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
-      with_items: "{{ workers }}"
+      with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
     when: not staticips
@@ -392,7 +392,7 @@
     when: install_filetranspiler
 
   - name: Get network device system name
-    shell: "nmcli -t dev show {{ helper.networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
+    shell: "nmcli -t dev show {{ networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
     register: devicesystemname
 
   - name: Setting network device system name as a fact
@@ -402,8 +402,8 @@
   - name: Setting DNS server ip on network interface "{{ dsname }}" to 127.0.0.1
     shell: 'nmcli con mod "{{ dsname }}" ipv4.dns 127.0.0.1'
 
-  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain }}"
-    shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain }}'
+  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain | lower }}"
+    shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain | lower }}'
 
   - name: Restarting NetworkManager
     service:

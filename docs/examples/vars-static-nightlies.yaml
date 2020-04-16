@@ -3,7 +3,6 @@ staticips: true
 helper:
   name: "helper"
   ipaddr: "192.168.7.77"
-  networkifacename: "eth0"
 dns:
   domain: "example.com"
   clusterid: "ocp4"
@@ -26,6 +25,10 @@ workers:
     ipaddr: "192.168.7.12"
   - name: "worker2"
     ipaddr: "192.168.7.13"
+other:
+  - name: "non-cluster-vm"
+    ipaddr: "192.168.7.31"
+    macaddr: "52:54:00:f4:2e:2e"
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-initramfs.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-kernel"
