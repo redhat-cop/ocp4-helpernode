@@ -166,6 +166,8 @@ This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can
 /root/.ssh/helper_rsa
 ```
 
+> :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
+
 Next, create an `install-config.yaml` file.
 
 > :warning: Make sure you update if your filenames or paths are different.
