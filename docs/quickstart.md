@@ -194,7 +194,7 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Create a place to store your pull-secret 
+Create a place to store your pull-secret
 
 ```
 mkdir -p ~/.openshift
@@ -385,6 +385,13 @@ Once Approved; finish up the install process
 ```
 openshift-install wait-for install-complete
 ```
+
+## Login to the web console
+
+The OpenShift 4 web console will be running at `https://console-openshift-console.apps.{{ dns.clusterid }}.{{ dns.domain }}` (e.g. `https://console-openshift-console.apps.ocp4.example.com`)
+
+* Username: kubeadmin
+* Password: the output of `cat /root/ocp4/auth/kubeadmin-password`
 
 ## Upgrade
 
