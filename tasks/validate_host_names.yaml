@@ -10,7 +10,7 @@
 
 - fail:
     msg: "Please revise your vars.yaml file invalid characters in hostnames"
-  when: item is search('{{ chars }}')
+  when: item.name is search('{{ chars }}')
   with_items:
   - "{{ masters }}"
   - "{{ workers }}"
