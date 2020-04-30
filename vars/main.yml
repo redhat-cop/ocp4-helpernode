@@ -1,14 +1,15 @@
 ---
-ocp_maj_ver: '4.3'
-ocp_min_ver: '4.3.8'
+maj_ver: '4.3'
+ocp_ver: '4.3.8'
+rhcos_ver: '4.3.8'
 ssh_gen_key: true
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false
 base_url: "https://mirror.openshift.com/pub/openshift-v4"
-ocp_bios: "{{base_url}}/dependencies/rhcos/{{ocp_maj_ver}}/{{ocp_min_ver}}/rhcos-{{ocp_min_ver}}-x86_64-metal.x86_64.raw.gz"
-ocp_initramfs: "{{base_url}}/dependencies/rhcos/{{ocp_maj_ver}}/{{ocp_min_ver}}/rhcos-{{ocp_min_ver}}-x86_64-installer-initramfs.x86_64.img"
-ocp_install_kernel: "{{base_url}}/dependencies/rhcos/{{ocp_maj_ver}}/{{ocp_min_ver}}/rhcos-{{ocp_min_ver}}-x86_64-installer-kernel-x86_64"
-ocp_client: "{{base_url}}/clients/ocp/{{ocp_min_ver}}/openshift-client-linux-{{ocp_min_ver}}.tar.gz"
-ocp_installer: "{{base_url}}/clients/ocp/{{ocp_min_ver}}/openshift-install-linux-{{ocp_min_ver}}.tar.gz"
+ocp_bios: "{{base_url}}/dependencies/rhcos/{{maj_ver}}/{{rhcos_ver}}/rhcos-{{rhcos_ver}}-x86_64-metal.x86_64.raw.gz"
+ocp_initramfs: "{{base_url}}/dependencies/rhcos/{{maj_ver}}/{{rhcos_ver}}/rhcos-{{rhcos_ver}}-x86_64-installer-initramfs.x86_64.img"
+ocp_install_kernel: "{{base_url}}/dependencies/rhcos/{{maj_ver}}/{{rhcos_ver}}/rhcos-{{rhcos_ver}}-x86_64-installer-kernel-x86_64"
+ocp_client: "{{base_url}}/clients/ocp/{{ocp_ver}}/openshift-client-linux-{{ocp_ver}}.tar.gz"
+ocp_installer: "{{base_url}}/clients/ocp/{{ocp_ver}}/openshift-install-linux-{{ocp_ver}}.tar.gz"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
