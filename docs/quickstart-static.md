@@ -118,7 +118,7 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server. 
+Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server.
 
 > **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
 
@@ -146,7 +146,7 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Create a place to store your pull-secret 
+Create a place to store your pull-secret
 
 ```
 mkdir -p ~/.openshift
@@ -165,6 +165,8 @@ This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can
 # ls -1 ~/.ssh/helper_rsa
 /root/.ssh/helper_rsa
 ```
+
+> :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
 
 Next, create an `install-config.yaml` file.
 
@@ -279,7 +281,7 @@ Boot/install the VMs in the following order
 * Masters
 * Workers
 
-On your laptop/workstation visit the status page 
+On your laptop/workstation visit the status page
 
 ```
 firefox http://192.168.7.77:9000
@@ -298,12 +300,12 @@ openshift-install wait-for bootstrap-complete --log-level debug
 Once you see this message below...
 
 ```
-DEBUG OpenShift Installer v4.2.0-201905212232-dirty 
-DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce 
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443... 
-INFO API v1.13.4+838b4fa up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
-DEBUG Bootstrap status: complete                   
+DEBUG OpenShift Installer v4.2.0-201905212232-dirty
+DEBUG Built from commit 71d8978039726046929729ad15302973e3da18ce
+INFO Waiting up to 30m0s for the Kubernetes API at https://api.ocp4.example.com:6443...
+INFO API v1.13.4+838b4fa up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+DEBUG Bootstrap status: complete
 INFO It is now safe to remove the bootstrap resources
 ```
 
@@ -360,16 +362,31 @@ oc get csr | grep 'system:node'
 Once Approved; finish up the install process
 
 ```
-openshift-install wait-for install-complete 
+openshift-install wait-for install-complete
 ```
+
+## Login to the web console
+
+The OpenShift 4 web console will be running at `https://console-openshift-console.apps.{{ dns.clusterid }}.{{ dns.domain }}` (e.g. `https://console-openshift-console.apps.ocp4.example.com`)
+
+* Username: kubeadmin
+* Password: the output of `cat /root/ocp4/auth/kubeadmin-password`
 
 ## Upgrade
 
-If you didn't install the latest 4.3.Z release...then just run the following
+If you didn't install the latest 4.3.Z release then just run the following.
 
 ```
-oc adm upgrade --to-latest=true
+oc adm upgrade --to-latest
 ```
+
+If you're having issues upgrading you can try adding `--force` to the upgrade command.
+
+```
+oc adm upgrade --to-latest --force
+```
+
+See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
 
 Scale the router if you need to
 

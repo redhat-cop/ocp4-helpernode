@@ -194,7 +194,7 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Create a place to store your pull-secret 
+Create a place to store your pull-secret
 
 ```
 mkdir -p ~/.openshift
@@ -213,6 +213,8 @@ This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can
 # ls -1 ~/.ssh/helper_rsa
 /root/.ssh/helper_rsa
 ```
+
+> :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
 
 Next, create an `install-config.yaml` file.
 
@@ -384,13 +386,29 @@ Once Approved; finish up the install process
 openshift-install wait-for install-complete
 ```
 
+## Login to the web console
+
+The OpenShift 4 web console will be running at `https://console-openshift-console.apps.{{ dns.clusterid }}.{{ dns.domain }}` (e.g. `https://console-openshift-console.apps.ocp4.example.com`)
+
+* Username: kubeadmin
+* Password: the output of `cat /root/ocp4/auth/kubeadmin-password`
+
 ## Upgrade
 
-If you didn't install the latest 4.3.Z release...then just run the following
+If you didn't install the latest 4.3.Z release then just run the following.
 
 ```
-oc adm upgrade --to-latest=true
+oc adm upgrade --to-latest
 ```
+
+If you're having issues upgrading you can try adding `--force` to the upgrade command.
+
+```
+oc adm upgrade --to-latest --force
+```
+
+See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
+
 
 Scale the router if you need to
 
