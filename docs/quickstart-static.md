@@ -377,6 +377,12 @@ The OpenShift 4 web console will be running at `https://console-openshift-consol
 If you didn't install the latest 4.3.Z release then just run the following.
 
 ```
+oc adm upgrade --to-latest
+```
+
+If you're having issues upgrading you can try adding `--force` to the upgrade command.
+
+```
 oc adm upgrade --to-latest --force
 ```
 
