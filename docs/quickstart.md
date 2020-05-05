@@ -395,11 +395,20 @@ The OpenShift 4 web console will be running at `https://console-openshift-consol
 
 ## Upgrade
 
-If you didn't install the latest 4.3.Z release...then just run the following
+If you didn't install the latest 4.3.Z release then just run the following.
 
 ```
-oc adm upgrade --to-latest=true
+oc adm upgrade --to-latest
 ```
+
+If you're having issues upgrading you can try adding `--force` to the upgrade command.
+
+```
+oc adm upgrade --to-latest --force
+```
+
+See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
+
 
 Scale the router if you need to
 
