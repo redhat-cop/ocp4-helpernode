@@ -99,6 +99,7 @@ The following are quickstarts. These are written using libvirt, but are generic 
 
 * DHCP install [quickstart](docs/quickstart.md)
 * Static IPs install [quickstart](docs/quickstart-static.md)
+* DHCP install on Power [quickstart](docs/quickstart-ppc64le.md)
 
 # Contributing
 

@@ -32,6 +32,12 @@
       state: present
     when: not staticips
 
+  - name: Install additional package for Intel platforms
+    package:
+      name: "{{ syslinuxpkgs }}"
+      state: present
+    when: not staticips and not ppc64le
+
   - name: Write out dhcp file
     template:
       src: ../templates/dhcpd.conf.j2
@@ -177,7 +183,11 @@
       mode: 0755
     notify:
       - restart tftp
-    when: not staticips
+    when: not staticips and not ppc64le
+
+  - name: generate netboot entry for grub2
+    shell: grub2-mknetdir --net-directory=/var/lib/tftpboot
+    when: not staticips and ppc64le
 
   - name: Create TFTP RHCOS dir
     file:
@@ -196,7 +206,7 @@
 
   - name: Copy over files needed for TFTP
     shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
-    when: not staticips
+    when: not staticips and not ppc64le
 
   - name: Downloading OCP4 installer initramfs
     get_url:
@@ -247,7 +257,39 @@
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
-    when: not staticips
+    when: not staticips and not ppc64le
+
+  - name: Generate grub2 config files
+    block:
+    - name: create grub.cfg
+      copy:
+        dest: /var/lib/tftpboot/boot/grub2/grub.cfg
+        content: |
+          default=0
+          fallback=1
+          timeout=1
+
+    - name: generate grub entry (bootstrap)
+      vars:
+        role: bootstrap
+        mac: "{{ bootstrap.macaddr }}"
+      include_tasks: generate_grub.yml
+
+    - name: generate grub entry (masters)
+      vars:
+        role: master
+        mac: "{{ item.macaddr }}"
+      include_tasks: generate_grub.yml
+      with_items: "{{ masters }}"
+
+    - name: generate grub entry (workers)
+      vars:
+        role: worker
+        mac: "{{ item.macaddr }}"
+      include_tasks: generate_grub.yml
+      with_items: "{{ workers }}"
+    when: not staticips and ppc64le
+
 
   - name: Installing TFTP Systemd helper
     copy:
