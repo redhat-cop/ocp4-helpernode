@@ -340,15 +340,31 @@ First, login to your cluster
 export KUBECONFIG=/root/ocp4/auth/kubeconfig
 ```
 
-Set the registry for your cluster
+Your install may be waiting for worker nodes to get approved. Normally the `machineconfig node approval operator` takes care of this for you. However, sometimes this needs to be done manually. Check pending CSRs with the following command.
 
-First, you have to set the `managementState` to `Managed` for your cluster
+```
+oc get csr
+```
+
+You can approve all pending CSRs in "one shot" with the following
+
+```
+oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs oc adm certificate approve
+```
+
+You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a `watch` on these CSRs
+
+```
+watch oc get csr
+```
+
+In order to setup your registry, you first have to set the `managementState` to `Managed` for your cluster
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
 ```
 
-For PoCs, using `emptyDir` is oka (to use PVs follow [this](https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal) doc)
+For PoCs, using `emptyDir` is okay (to use PVs follow [this](https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal) doc)
 
 ```
 oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
@@ -360,31 +376,13 @@ If you need to expose the registry, run this command
 oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"defaultRoute":true}}'
 ```
 
-> Note: You can watch the operators running with `oc get clusteroperators`
-
-Watch your CSRs. These can take some time; go get come coffee or grab some lunch. You'll see your nodes' CSRs in "Pending" (unless they were "auto approved", if so, you can jump to the `wait-for install-complete` step)
-
-```
-watch oc get csr
-```
-
-To approve them all in one shot...
-
-```
-oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve
-```
-
-Check for the approval status (it should say "Approved,Issued")
-
-```
-oc get csr | grep 'system:node'
-```
-
-Once Approved; finish up the install process
+To finish the install process, run the following
 
 ```
 openshift-install wait-for install-complete
 ```
+
+> Note: You can watch the operators running with `oc get clusteroperators` in another window with a `watch` to see it progress
 
 ## Login to the web console
 
