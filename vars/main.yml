@@ -9,3 +9,4 @@ ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/
 ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.4.3/openshift-client-linux-4.4.3.tar.gz"
 ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.4.3/openshift-install-linux-4.4.3.tar.gz"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
+ppc64le: false
