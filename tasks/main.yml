@@ -189,6 +189,12 @@
     shell: grub2-mknetdir --net-directory=/var/lib/tftpboot
     when: not staticips and ppc64le
 
+  - name: fake pxelinux.0 for ppc64le
+    copy:
+      src: /var/lib/tftpboot/boot/grub2/powerpc-ieee1275/core.elf
+      dest: /var/lib/tftpboot/pxelinux.0
+    when: not staticips and ppc64le
+
   - name: Create TFTP RHCOS dir
     file:
       path: /var/lib/tftpboot/rhcos
