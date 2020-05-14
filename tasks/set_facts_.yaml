@@ -25,8 +25,11 @@
   - set_fact:
       dhcppkgs:
         - dhcp
-        - syslinux
         - tftp-server
+
+  - set_fact:
+      syslinuxpkgs:
+        - syslinux
   
   - set_fact:
       owner: nfsnobody
@@ -60,8 +63,11 @@
   - set_fact:
       dhcppkgs:
         - dhcp-server
-        - syslinux
         - tftp-server
+
+  - set_fact:
+      syslinuxpkgs:
+        - syslinux
   
   # See Fedora Wiki for changes:
   # https://fedoraproject.org/wiki/Changes/RenameNobodyUser

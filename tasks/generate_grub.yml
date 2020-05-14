@@ -1,0 +1,20 @@
+---
+- name: create grub2 block
+  blockinfile:
+    marker: ""
+    content: |
+      if [ ${net_default_mac} == {{ mac }} ]; then
+      default=0
+      fallback=1
+      timeout=1
+      menuentry "CoreOS (BIOS)" {
+         echo "Loading kernel"
+         linux "/rhcos/kernel" ip=dhcp console=tty0 console=ttyS0 rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ role }}.ign
+
+         echo "Loading initrd"
+         initrd  "/rhcos/initramfs.img"
+      }
+      fi
+    dest: /var/lib/tftpboot/boot/grub2/grub.cfg
+  notify:
+  - restart tftp

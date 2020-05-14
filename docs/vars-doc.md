@@ -54,7 +54,7 @@ dns:
 Explanation of the DNS variables:
 
 * `dns.domain` - This is what domain the installed DNS server will have. This needs to match what you will put for the [baseDomain](examples/install-config-example.yaml#L2) inside the `install-config.yaml` file.
-* `dns.clsuterid` - This is what your clusterid will be named and needs to match what you will for [metadata.name](examples/install-config-example.yaml#L12) inside the `install-config.yaml` file.
+* `dns.clusterid` - This is what your clusterid will be named and needs to match what you will for [metadata.name](examples/install-config-example.yaml#L12) inside the `install-config.yaml` file.
 * `dns.forwarder1` - Tis will be set up as the DNS forwarder. This is usually one of the corprate (or "upstream") DNS servers.
 * `dns.forwarder2` - Tis will be set up as the second DNS forwarder. This is usually one of the corprate (or "upstream") DNS servers.
 
@@ -231,6 +231,14 @@ other:
 
 You can omit `macaddr` if using `staticips=true`
 
+### Running on Power
+
+In order to run the helper node on Power for deploying OCP on Power you'll need to pass `-e ppc64le=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file
+
+```
+ppc64le: true
+```
+
 # Example Vars file
 
 Below are example `vars.yaml` files.
@@ -239,3 +247,4 @@ Below are example `vars.yaml` files.
 * [Default vars.yaml using DHCP with Nightlies](examples/vars-nightlies.yaml)
 * [Example of vars.yaml using Static IPs](examples/vars-static.yaml)
 * [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
+* [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
