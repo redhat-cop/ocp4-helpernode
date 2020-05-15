@@ -10,14 +10,29 @@
    comment: "{{ ansible_env.USER }}@helper"
    state: present
 
-- lineinfile:
+- blockinfile:
     path: "{{ ansible_env.HOME }}/.ssh/config"
-    line: "{{ item.line }}"
     state: present
     backup: yes
     create: yes
-  with_items:
-    - { line: "Host *" }
-    - { line: "    HostName %h.{{ dns.clusterid }}.{{ dns.domain }}" }
-    - { line: "    User core" }
-    - { line: "    IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa" }
+    marker: "# {mark} {{ item.name }} MANAGED BLOCK"
+    block: |
+      Host {{ item.name }}
+        HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+  loop: "{{ masters + workers }}"
+
+- blockinfile:
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+    state: present
+    backup: yes
+    create: yes
+    marker: "# {mark} {{ item.name }} MANAGED BLOCK"
+    block: |
+      Host {{ item.name }}
+        HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+  loop: 
+    - name: "{{ bootstrap.name }}"
