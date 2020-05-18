@@ -389,6 +389,15 @@
       dest: /usr/local/src/registry-pvc.yaml
       mode: '0555'
 
+  - name: Generate Chrony machineconfig
+    template:
+      src: ../templates/chrony-machineconfig.j2
+      dest: ./99-{{item}}-chrony-configuration.yaml
+    loop: 
+      - master
+      - worker
+    when: chrony_conf is defined
+
   - name: Downloading OCP4 client
     get_url:
       url: "{{ ocp_client }}"
