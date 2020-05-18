@@ -389,10 +389,15 @@
       dest: /usr/local/src/registry-pvc.yaml
       mode: '0555'
 
+  - name: Create folder for additional machineconfig
+    file:
+      path: ./machineconfig
+      state: dir
+
   - name: Generate Chrony machineconfig
     template:
       src: ../templates/chrony-machineconfig.j2
-      dest: ./99-{{item}}-chrony-configuration.yaml
+      dest: ./machineconfig/99-{{item}}-chrony-configuration.yaml
     loop: 
       - master
       - worker
