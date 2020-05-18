@@ -391,13 +391,13 @@
 
   - name: Create folder for additional machineconfig
     file:
-      path: ./machineconfig
+      path: ../machineconfig
       state: directory
 
   - name: Generate Chrony machineconfig
     template:
       src: ../templates/chrony-machineconfig.j2
-      dest: ./machineconfig/99-{{item}}-chrony-configuration.yaml
+      dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
     loop: 
       - master
       - worker
