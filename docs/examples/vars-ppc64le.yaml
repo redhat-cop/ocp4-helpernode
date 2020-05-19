@@ -48,9 +48,9 @@ other:
 chronyconfig:
   enabled: false
   content:
-    - server: pool1.ntp.org
+    - server: 0.centos.pool.ntp.org
       options: iburst
-    - server: pool2.ntp.org
+    - server: 1.centos.pool.ntp.org
       options: iburst
 
 ppc64le: true
