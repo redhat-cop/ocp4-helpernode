@@ -29,12 +29,10 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
 
-###
-# Uncomment the lines hereunder to specify a ntp (chrony) configuration
-
-# chrony_conf: |
-#   server pool.ntp.org iburst
-#   driftfile /var/lib/chrony/drift
-#   makestep 1.0 3
-#   rtcsync
-#   logdir /var/log/chrony
+chronyconfig:
+  enabled: false
+  content:
+    - server: pool1.ntp.org
+      options: iburst
+    - server: pool2.ntp.org
+      options: iburst

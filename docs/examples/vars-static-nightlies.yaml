@@ -29,18 +29,17 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
+
+chronyconfig:
+  enabled: false
+  content:
+    - server: pool1.ntp.org
+      options: iburst
+    - server: pool2.ntp.org
+      options: iburst
+      
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-initramfs.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-kernel"
 ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-client-linux-4.2.0-0.nightly-2019-09-16-114316.tar.gz"
 ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/openshift-install-linux-4.2.0-0.nightly-2019-09-16-114316.tar.gz"
-
-###
-# Uncomment the lines hereunder to specify a ntp (chrony) configuration
-
-# chrony_conf: |
-#   server pool.ntp.org iburst
-#   driftfile /var/lib/chrony/drift
-#   makestep 1.0 3
-#   rtcsync
-#   logdir /var/log/chrony

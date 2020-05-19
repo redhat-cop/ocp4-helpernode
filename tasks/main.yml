@@ -389,19 +389,31 @@
       dest: /usr/local/src/registry-pvc.yaml
       mode: '0555'
 
-  - name: Create folder for additional machineconfig
-    file:
-      path: ../machineconfig
-      state: directory
+  - name: Chrony configuration
+    block:
+    - name: Create folder for additional machineconfig
+      file:
+        path: ../machineconfig
+        state: directory
 
-  - name: Generate Chrony machineconfig
-    template:
-      src: ../templates/chrony-machineconfig.j2
-      dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
-    loop: 
-      - master
-      - worker
-    when: chrony_conf is defined
+    - name: Create temporary chrony.conf file
+      template:
+        src: ../templates/chrony.conf.j2
+        dest: /tmp/chrony.conf.tmp
+
+    - name: slurp contents of temporary chrony.conf file
+      slurp:
+        src: /tmp/chrony.conf.tmp
+      register: chronybase64
+
+    - name: Generate Chrony machineconfig
+      template:
+        src: ../templates/chrony-machineconfig.j2
+        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+      loop: 
+        - master
+        - worker
+    when: chronyconfig.enabled
 
   - name: Downloading OCP4 client
     get_url:
