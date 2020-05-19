@@ -29,11 +29,11 @@ spec:
             - name: PROVISIONER_NAME
               value: nfs-storage
             - name: NFS_SERVER
-              value: {{ nfs_server | default(helper.ipaddr) }}
+              value: {{ nfs.server | default(helper.ipaddr) }}
             - name: NFS_PATH
-              value: {{ nfs_path | default('/export') }}
+              value: {{ nfs.path | default('/export') }}
       volumes:
         - name: nfs-client-root
           nfs:
-            server: {{ nfs_server | default(helper.ipaddr) }}
-            path: {{ nfs_path | default('/export') }}
+            server: {{ nfs.server | default(helper.ipaddr) }}
+            path: {{ nfs.path | default('/export') }}
