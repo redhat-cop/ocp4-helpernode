@@ -17,8 +17,11 @@
     create: yes
     marker: "# {mark} {{ item.name }} MANAGED BLOCK"
     block: |
-      Host {{ item.name }} {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}
         HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: "{{ masters + workers }}"
@@ -30,8 +33,11 @@
     create: yes
     marker: "# {mark} {{ item.name }} MANAGED BLOCK"
     block: |
-      Host {{ item.name }} {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}
         HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: 
