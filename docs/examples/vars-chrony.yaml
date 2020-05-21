@@ -44,9 +44,8 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
-
 chronyconfig:
-  enabled: false
+  enabled: true
   content:
     - server: 0.centos.pool.ntp.org
       options: iburst
