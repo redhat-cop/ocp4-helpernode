@@ -239,6 +239,23 @@ In order to run the helper node on Power for deploying OCP on Power you'll need 
 ppc64le: true
 ```
 
+### NFS Configuration
+
+This playbook sets up a script called [helpernodecheck](../templates/checker.sh.j2). That script can be used to set up the helpernode as an NFS server (this is the default). It uses the [k8s nfs setup in the incubator repo](https://github.com/kubernetes-incubator/external-storage/blob/master/nfs-client/README.md).
+
+> :warning: Run `helpernodecheck nfs-info` for information after the playbook runs.
+
+You can have that script  connect you to another NFS server, that's not the HelperNode. You do this by adding the following in your `vars.yaml` file.
+
+```
+nfs:
+  server: "192.168.1.100"
+  path: "/exports/helper"
+```
+
+* `nfs.server` - this is the ip address or the hostname of your nfs server
+* `nfs.path` - this is the path the nfs controller is going to mount. **This path MUST exist with the proper permissions!**
+
 # Example Vars file
 
 Below are example `vars.yaml` files.
@@ -248,3 +265,4 @@ Below are example `vars.yaml` files.
 * [Example of vars.yaml using Static IPs](examples/vars-static.yaml)
 * [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
 * [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
+* [Example of vars.yaml DHCP and External NFS](examples/vars-nfs.yaml)

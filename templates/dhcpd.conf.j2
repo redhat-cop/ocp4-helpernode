@@ -30,7 +30,12 @@ max-lease-time 14400;
 		deny unknown-clients;
 
 		# this is PXE specific  
+{% if ppc64le is sameas true %}
+		filename "boot/grub2/powerpc-ieee1275/core.elf";  
+{% else %}
 		filename "pxelinux.0";  
+{% endif %}
+
 		next-server {{ helper.ipaddr }};
      	}
 }
