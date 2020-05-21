@@ -44,4 +44,3 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
-
