@@ -120,7 +120,7 @@ Create the master VMs
 ```
 for i in master{0..2}
 do
-  virt-install --name="ocp4-${i}" --vcpus=2 --ram=16384 \
+  virt-install --name="ocp4-${i}" --vcpus=4 --ram=16384 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot menu=on --print-xml > ocp4-$i.xml
@@ -135,7 +135,7 @@ Create the worker VMs
 ```
 for i in worker{0..1}
 do
-  virt-install --name="ocp4-${i}" --vcpus=2 --ram=8192 \
+  virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
   --os-variant rhel8.0 --network network=openshift4,model=virtio \
   --boot menu=on --print-xml > ocp4-$i.xml
