@@ -21,6 +21,9 @@
         HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: "{{ masters + workers }}"
 
 - blockinfile:
@@ -32,6 +35,9 @@
     block: |
       Host {{ item.name }}
         HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+        User core
+        IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
+      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: 
