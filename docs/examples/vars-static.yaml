@@ -28,4 +28,3 @@ workers:
 other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
-
