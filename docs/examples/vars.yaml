@@ -45,10 +45,3 @@ other:
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
 
-chronyconfig:
-  enabled: false
-  content:
-    - server: 0.centos.pool.ntp.org
-      options: iburst
-    - server: 1.centos.pool.ntp.org
-      options: iburst

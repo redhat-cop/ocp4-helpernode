@@ -29,10 +29,3 @@ other:
   - name: "non-cluster-vm"
     ipaddr: "192.168.7.31"
 
-chronyconfig:
-  enabled: false
-  content:
-    - server: 0.centos.pool.ntp.org
-      options: iburst
-    - server: 1.centos.pool.ntp.org
-      options: iburst

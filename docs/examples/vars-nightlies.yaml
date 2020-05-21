@@ -45,15 +45,6 @@ other:
     ipaddr: "192.168.7.31"
     macaddr: "52:54:00:f4:2e:2e"
 
-chronyconfig:
-  enabled: false
-  content:
-    - server: 0.centos.pool.ntp.org
-      options: iburst
-    - server: 1.centos.pool.ntp.org
-      options: iburst
-
-
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-initramfs.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-kernel"
