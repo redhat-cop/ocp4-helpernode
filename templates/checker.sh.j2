@@ -109,6 +109,7 @@ Quickstart Notes:
 	vi install-config.yaml
 	openshift-install create ignition-configs
 	cp *.ign /var/www/html/ignition/
+	chmod o+r /var/www/html/ignition/*.ign
 	restorecon -vR /var/www/html/
 
 (See https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html for more details)
