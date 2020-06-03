@@ -16,8 +16,13 @@ $TTL 1W
 ;
 {{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
+{% if use_external_lb == true %}
+{{ external_lb.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ external_lb.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{% else %}
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
 ;
 {% for w in workers %}
 {{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.

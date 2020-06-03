@@ -1,8 +1,11 @@
 ---
-ssh_gen_key: true
+ssh_gen_key: false
 install_filetranspiler: false
 staticips: false
+use_external_dns: false
+use_external_lb: false
 force_ocp_download: false
+haproxy_add_masters_to_workers: false
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.4/4.4.3/rhcos-4.4.3-x86_64-metal.x86_64.raw.gz"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.4/4.4.3/rhcos-4.4.3-x86_64-installer-initramfs.x86_64.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.4/4.4.3/rhcos-4.4.3-x86_64-installer-kernel-x86_64"

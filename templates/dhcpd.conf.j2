@@ -6,7 +6,19 @@ max-lease-time 14400;
 	option routers                  {{ dhcp.router }};
 	option broadcast-address        {{ dhcp.bcast }};
 	option subnet-mask              {{ dhcp.netmask }};
-	option domain-name-servers      {{ helper.ipaddr }};
+{% set vars = {'rendered_dns': ''} %}
+{% if use_external_dns == false %}
+{% if vars.update({'rendered_dns': helper.ipaddr}) %}{% endif %}
+{% else %}
+{% for forwarder in dns['forwarders'] %}
+{% if loop.index == 1 %}
+{% if vars.update({'rendered_dns': vars.rendered_dns + forwarder}) %}{% endif %}
+{% else %}
+{% if vars.update({'rendered_dns': vars.rendered_dns + ',' + forwarder}) %}{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+	option domain-name-servers      {{ vars['rendered_dns'] }};
 	option domain-name              "{{ dns.clusterid }}.{{ dns.domain | lower }}";
 
 	subnet {{ dhcp.ipid }} netmask {{ dhcp.netmaskid }} {

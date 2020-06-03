@@ -63,9 +63,9 @@ listen stats
     bind :9000
     mode http
     stats enable
+    stats refresh 10s
     stats uri /
     monitor-uri /healthz
-
 
 frontend openshift-api-server
     bind *:6443
@@ -107,6 +107,11 @@ backend ingress-http
 {% for w in workers %}
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
 {% endfor %}
+{% if haproxy_add_masters_to_workers == true %}
+{% for m in masters %}
+    server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
+{% endfor %}
+{% endif %}
    
 frontend ingress-https
     bind *:443
@@ -120,5 +125,9 @@ backend ingress-https
 {% for w in workers %}
     server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
 {% endfor %}
-
+{% if haproxy_add_masters_to_workers == true %}
+{% for m in masters %}
+    server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
+{% endfor %}
+{% endif %}
 #---------------------------------------------------------------------

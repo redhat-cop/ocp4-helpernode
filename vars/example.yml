@@ -1,0 +1,57 @@
+---
+disk: "sda"
+nic: "ens192"
+static_ip: true
+use_external_dns: false
+use_external_lb: true
+external_lb: "192.168.41.4"
+force_ocp_download: false
+haproxy_add_masters_to_workers: false
+helper:
+  name: "help1"
+  ipaddr: "192.168.41.14"
+  networkifacename: "ens192"
+dns:
+  domain: "test.local"
+  clusterid: "ocp4"
+  forwarders: 
+    - "192.168.41.1"
+    - "192.168.41.2"
+dhcp:
+  router: "192.168.41.254"
+  bcast: "192.168.41.255"
+  netmask: "255.255.255.0"
+  poolstart: "192.168.41.6"
+  poolend: "192.168.41.27"
+  ipid: "192.168.41.0"
+  netmaskid: "255.255.255.0"
+bootstrap:
+  name: "boot"
+  ipaddr: "192.168.41.6"
+  macaddr: "00:50:56:80:33:2f"
+masters:
+  - name: "m1"
+    ipaddr: "192.168.41.7"
+    macaddr: "00:50:56:80:06:a6"
+  - name: "m2"
+    ipaddr: "192.168.41.8"
+    macaddr: "00:50:56:80:10:f3"
+  - name: "m3"
+    ipaddr: "192.168.41.9"
+    macaddr: "00:50:56:80:63:55"
+workers:
+  - name: "w1"
+    ipaddr: "192.168.41.10"
+    macaddr: "00:50:56:80:da:a6"
+  - name: "w2"
+    ipaddr: "192.168.41.11"
+    macaddr: "00:50:56:80:b5:8a"
+  - name: "i1"
+    ipaddr: "192.168.41.12"
+    macaddr: "00:50:56:80:b3:07"
+  - name: "i2"
+    ipaddr: "192.168.41.13"
+    macaddr: "00:50:56:80:0c:72"
+  - name: "i3"
+    ipaddr: "192.168.41.27"
+    macaddr: "00:50:56:80:32:7e"

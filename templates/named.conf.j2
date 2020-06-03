@@ -30,7 +30,11 @@ options {
 
 	/* Fowarders */
 	forward only;
-	forwarders { {{ dns.forwarder1 | default("8.8.8.8") }}; {{ dns.forwarder2 | default("8.8.4.4") }}; };
+	forwarders { 
+{% for forwarder in dns.forwarders %}
+		{{ forwarder | default("8.8.8.8") }};
+{% endfor %}
+	};
 
 	dnssec-enable yes;
 	dnssec-validation no;

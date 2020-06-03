@@ -37,8 +37,6 @@
   
   - set_fact:
       services:
-        - named
-        - haproxy
         - httpd
         - rpcbind
         - nfs-server

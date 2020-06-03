@@ -15,11 +15,20 @@ smtp	IN	A	{{ helper.ipaddr }}
 {{ helper.name | lower }}	IN	A	{{ helper.ipaddr }}
 ;
 ; The api points to the IP of your load balancer
+{% if use_external_lb == true %}
+api		IN	A	{{ external_lb }}
+api-int		IN	A	{{ external_lb }}
+{% else %}
 api		IN	A	{{ helper.ipaddr }}
 api-int		IN	A	{{ helper.ipaddr }}
+{% endif %}
 ;
 ; The wildcard also points to the load balancer
+{% if use_external_lb == true %}
+*.apps		IN	A	{{ external_lb }}
+{% else %}
 *.apps		IN	A	{{ helper.ipaddr }}
+{% endif %}
 ;
 ; Create entry for the bootstrap host
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}

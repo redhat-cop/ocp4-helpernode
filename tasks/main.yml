@@ -30,13 +30,12 @@
     package:
       name: "{{ dhcppkgs }}"
       state: present
-    when: not staticips
 
   - name: Install additional package for Intel platforms
     package:
       name: "{{ syslinuxpkgs }}"
       state: present
-    when: not staticips and not ppc64le
+    when: not ppc64le
 
   - name: Write out dhcp file
     template:
@@ -44,7 +43,6 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips
 
   - name: Write out named file
     template:
@@ -52,41 +50,48 @@
       dest: /etc/named.conf
     notify:
       - restart bind
+    when: not use_external_dns
 
   - name: Installing DNS Serialnumber generator
     copy:
       src: ../files/set-dns-serial.sh
       dest: /usr/local/bin/set-dns-serial.sh
       mode: '0555'
+    when: not use_external_dns
 
   - name: Set zone serial number
     shell: "/usr/local/bin/set-dns-serial.sh"
     register: dymanicserialnumber
+    when: not use_external_dns
 
   - name: Setting serial number as a fact
     set_fact:
       serialnumber: "{{ dymanicserialnumber.stdout }}"
-  
+    when: not use_external_dns
+
   - name: Write out "{{ dns.domain | lower }}" zone file
     template:
       src: ../templates/zonefile.j2
       dest: /var/named/zonefile.db
     notify:
       - restart bind
-  
+    when: not use_external_dns
+
   - name: Write out reverse zone file
     template:
       src: ../templates/reverse.j2
       dest: /var/named/reverse.db
     notify:
       - restart bind
-  
+    when: not use_external_dns
+
   - name: Write out haproxy config file
     template:
       src: ../templates/haproxy.cfg.j2
       dest: /etc/haproxy/haproxy.cfg
     notify:
       - restart haproxy
+    when: not use_external_lb
 
   - name: Copy httpd conf file
     copy:
@@ -155,6 +160,7 @@
 
   - name: Best effort SELinux repair - DNS
     shell: "restorecon -vR /var/named || true"
+    when: not use_external_dns
 
   - name: Best effort SELinux repair - Apache
     shell: "restorecon -vR /var/www/html || true"
@@ -183,18 +189,17 @@
       mode: 0755
     notify:
       - restart tftp
-    when: not staticips and not ppc64le
+    when: not ppc64le
 
   - name: generate netboot entry for grub2
     shell: grub2-mknetdir --net-directory=/var/lib/tftpboot
-    when: not staticips and ppc64le
+    when: ppc64le
 
   - name: Create TFTP RHCOS dir
     file:
       path: /var/lib/tftpboot/rhcos
       state: directory
       mode: 0755
-    when: not staticips
 
   - name: SEBool allow haproxy connect any port
     seboolean:
@@ -203,24 +208,23 @@
       persistent: yes
     notify:
       - restart haproxy
+    when: not use_external_lb
 
   - name: Copy over files needed for TFTP
     shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
-    when: not staticips and not ppc64le
+    when: not ppc64le
 
   - name: Downloading OCP4 installer initramfs
     get_url:
       url: "{{ ocp_initramfs }}"
       dest: /var/lib/tftpboot/rhcos/initramfs.img
       mode: 0555
-    when: not staticips
 
   - name: Downloading OCP4 installer kernel
     get_url:
       url: "{{ ocp_install_kernel }}"
       dest: /var/lib/tftpboot/rhcos/kernel
       mode: 0555
-    when: not staticips
 
   - name: Generate pxe config files
     block:
@@ -232,13 +236,14 @@
       notify:
         - restart tftp
 
-    - name: Set the bootstrap specific tftp file
+    - name: Set the bootstrap specific tftp file with no static config
       template:
         src: ../templates/pxe-bootstrap.j2
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | regex_replace (':', '-')}}"
         mode: 0555
       notify:
         - restart tftp
+      when: not static_ip
 
     - name: Set the master specific tftp files
       template:
@@ -248,6 +253,7 @@
       with_items: "{{ masters | lower }}"
       notify:
         - restart tftp
+      when: not static_ip
 
     - name: Set the worker specific tftp files
       template:
@@ -257,7 +263,60 @@
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
-    when: not staticips and not ppc64le
+      when: not ppc64le and not static_ip
+
+    - name: Set the bootstrap specific tftp file with static config
+      template:
+        src: ../templates/pxe-bootstrap-static.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      when: static_ip
+
+    - name: Set the master specific tftp files
+      template:
+        src: ../templates/pxe-master-static.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ masters | lower }}"
+      notify:
+        - restart tftp
+      when: static_ip
+
+    - name: Set the worker specific tftp files
+      template:
+        src: ../templates/pxe-worker-static.j2
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ workers | lower }}"
+      notify:
+        - restart tftp
+      when: not ppc64le and static_ip
+
+    - name: Add nameservers to bootstrap specific tftp files
+      replace:
+        path: "{{ item[0] }}"
+        regexp: 'NAMESERVERS'
+        replace: "nameserver={{ item[1] }} NAMESERVERS"
+      with_nested:
+        - "{{ lookup('fileglob', '/var/lib/tftpboot/pxelinux.cfg/01-*', wantlist=True) }}"
+        - "{{ dns.forwarders }}"
+      when: static_ip and use_external_dns 
+
+    - name: Add nameservers to bootstrap specific tftp files
+      replace:
+        path: "{{ item }}"
+        regexp: 'NAMESERVERS'
+        replace: "nameserver=192.168.41.14 NAMESERVERS"
+      with_items: "{{ lookup('fileglob', '/var/lib/tftpboot/pxelinux.cfg/01-*', wantlist=True) }}"
+      when: static_ip and not use_external_dns
+
+    - name: Cleanup bootstrap specific tftp files
+      replace:
+        path: "{{ item }}"
+        regexp: ' NAMESERVERS'
+        replace: ""
+      with_items: "{{ lookup('fileglob', '/var/lib/tftpboot/pxelinux.cfg/01-*', wantlist=True) }}"
+      when: static_ip
 
   - name: Generate grub2 config files
     block:
@@ -288,7 +347,7 @@
         mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
       with_items: "{{ workers }}"
-    when: not staticips and ppc64le
+    when: ppc64le
 
 
   - name: Installing TFTP Systemd helper
@@ -296,19 +355,16 @@
       src: ../files/start-tftp.sh
       dest: /usr/local/bin/start-tftp.sh
       mode: '0555'
-    when: not staticips
 
   - name: Installing TFTP Systemd unit file
     copy:
       src: ../files/helper-tftp.service
       dest: /etc/systemd/system/helper-tftp.service
       mode: '0655'
-    when: not staticips
 
   - name: Systemd daemon reload
     systemd:
       daemon_reload: yes
-    when: not staticips
 
   - name: Starting services
     service:
@@ -317,6 +373,20 @@
       state: started
     with_items:
       - "{{ services }}"
+
+  - name: Starting named
+    service:
+      name: named
+      enabled: yes
+      state: started
+    when: not use_external_dns
+
+  - name: Starting haproxy
+    service:
+      name: haproxy
+      enabled: yes
+      state: started
+    when: not use_external_lb
 
   - name: Starting DHCP/PXE services
     service:
@@ -327,7 +397,6 @@
       - dhcpd
       - tftp
       - helper-tftp
-    when: not staticips
 
   - name: Unmasking Services
     systemd:
@@ -336,12 +405,12 @@
       masked: no
     with_items:
       - tftp
-    when: not staticips
 
   - name: Set the local resolv.conf file
     template:
       src: ../templates/resolv.conf.j2
       dest: /etc/resolv.conf
+    when: not use_external_dns
 
   - name: Copy info script over
     template:
@@ -469,9 +538,11 @@
 
   - name: Setting DNS server ip on network interface "{{ dsname }}" to 127.0.0.1
     shell: 'nmcli con mod "{{ dsname }}" ipv4.dns 127.0.0.1'
+    when: not use_external_dns
 
   - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain | lower }}"
     shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain | lower }}'
+    when: not use_external_dns
 
   - name: Restarting NetworkManager
     service:
@@ -479,6 +550,7 @@
       state: restarted
     with_items:
       - NetworkManager
+    when: not use_external_dns
  
   - name:  Information about this install
     debug:
