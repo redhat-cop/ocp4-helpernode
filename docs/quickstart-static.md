@@ -244,6 +244,8 @@ chmod o+r /var/www/html/ignition/*.ign
 
 ## Install VMs
 
+> :warning: Read all the instructions before attempting to install RHCOS!
+
 Install each VM one by one; here's an example for my boostrap node
 
 > **NOTE** If you want to use macvtap (i.e. have the VM "be on your network"); you can use `--network type=direct,source=enp0s31f6,source_mode=bridge,model=virtio` ; replace the interface where applicable
@@ -288,6 +290,10 @@ firefox http://192.168.7.77:9000
 ```
 
 You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+
+### ISO Maker
+
+Manually booting into the ISO and typing in the kernel parameters for ALL nodes can be cumbersome. You **MAY** want to opt to use [Chuckers' ISO maker](https://github.com/chuckersjp/coreos-iso-maker). I've written a little [how to](iso-maker.md) for the HelperNode.
 
 ## Wait for install
 
