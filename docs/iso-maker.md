@@ -110,7 +110,7 @@ cp /var/www/html/ignition/*.ign /var/www/html/
 ln -s /var/www/html/worker.ign /var/www/html/workers.ign
 ln -s /var/www/html/master.ign /var/www/html/masters.ign
 chmod o+r /var/www/html/*
-restoreconf -vR /var/www/html
+restorecon -vR /var/www/html
 ```
 
 ## Run The Playbook
