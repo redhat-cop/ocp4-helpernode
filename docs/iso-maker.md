@@ -45,6 +45,8 @@ rhcos_bios: bios.raw.gz
 
 Few things to note; I had to add the `.3` in the `iso_name` as well as the extra `x86_64`. This var (`iso_name`) is the name of the ISO at the [OpenShift Mirror](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/).
 
+The `iso_checksum` is another thing you need to change that can also be found on the [OpenShift Mirror](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/) in the `sha256sum.txt` file.
+
 Take note that `rhcos_bios` is the name of your bios file on the helpernode.
 
 You also need to edit the `inventory.yml` file based on your environment.
