@@ -101,6 +101,7 @@ The following are quickstarts. These are written using libvirt, but are generic 
 * Static IPs install [quickstart](docs/quickstart-static.md)
 * DHCP install on Power [quickstart](docs/quickstart-ppc64le.md)
 * OCP4 on VMware vSphere UPI Automation [quickstart](https://github.com/RedHatOfficial/ocp4-vsphere-upi-automation)
+* A Video "how-to" done on a [Twitch Stream](docs/yt-twitch.md)
 
 # Contributing
 
