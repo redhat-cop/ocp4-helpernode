@@ -1,82 +1,47 @@
 # Helper Node Quickstart Install
 
-This quickstart will get you up and running for HMC managed PowerVM.  You will need knowledge of the HMC to create the LPARs, here are docs for [HMC](https://www.ibm.com/support/knowledgecenter/en/9009-22A/p9eh6/p9eh6_kickoff.htm).
+This quickstart will get you up and running on PowerVM server managed using [HMC](https://www.ibm.com/support/knowledgecenter/en/9009-22A/p9eh6/p9eh6_kickoff.htm).
 
-> **NOTE** For now static IP is not supported for PowerVM.
 
-To start, login to your HMC GUI to perform required operation or ssh to HMC host to use CLI to do some operations. But most of the operations need to be done with HMC GUI.
+To start, ssh to your HMC host to use the CLI. You can also use the HMC GUI. The steps in these guide are specific to CLI.
 
-## Create Virtual Network
+## Create the LPAR (VM)
 
-We can use exist network, or create a new virtual network for cluster to use only.
-
-List exist virtual network for a managed system:
-```
-lshwres -m <managed_system_name> -r virtualio --rsubtype vnetwork 
-```
-To create or view the virtual network in HMC for a managed system:
-1. Click the managed system you want to list/create the network under `All Systems` view to get the `Partitions` view for the managed system
-2. On left side of view under `PowerVM section` click the  `Virtual Networks`, all exist networks will be list under `Virtial Networks` section, if you want to use exist network, you can stop here, otherwise you can contine to to create a new network
-3. Click the `Add Virtual Network` to open the wizard to create a new virtual network
-> **NOTE** If the cluster cross mutiple managed systems, you need to create the virtual network with same vlan_id on all of the managed systems.
-
-## Create the LPAR
-
- The disk should havs the OS image on it, so it can be set as the first boot device. So Clone the RHEL7/RHEL8 image disk is the best way to create the new disk for helper, and all cluster nodes.
+The following steps describe in brief the LPAR creation process on PowerVM using HMC.
 
 __Create LPAR__
 
-Here are the commands to create the LPAR:
+Here are the commands to create the LPAR when using CLI:
 ```
-mksyscfg -r lpar -m <managed_system> -i name=<lpar_name>, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, \
-  min_mem=4096, desired_mem=4096, max_mem=8192, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0, \
-  max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, \
-  boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+mksyscfg -r lpar -m <managed_system> -i name=<lpar_name>, profile_name=<profile_name>, lpar_env=aixlinux,shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=16384, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
 ```
-In HMC, on the selected managed system's `Partitions` list view by click the `Create Partition ...` to open the `Create Partition(s)` dialog, and using the values from above `mksyscfg` to fill out the dialog for `Partition Name`, `Maximum Virtal Adapters`, and Processor and Memory configuration.
 
 __Add Network__
 
-1. Under managed system's partition list view, double click the new created the LPAR to open the LPAR `General` view
-2. On left `Virtual I/O` section, click the `Virtual Networks` to open the `Virtual Networks` view
-3. Click the `Attach Virtual Network` to open the pop up dialog to select virtual networks to use
-4. Click `OK` to complete the operation
+```
+chsyscfg -m <managed_system> -i 'name=<lpar_name>, profile_name=<profile_name>,"virtual_eth_adapters+=<virtual_ethernet_adapter_details>"'
+```
 
 __Add Storage__
 
-You can use any HMC supported storage from your environment. Below steps are just for using Fibre Channel storage(NPIV):
-1. Under managed system's partition list view, double click the LPAR to open the LPAR `General` view
-2. On left `Virtual I/O` section, click the `Virtual Storage` to open the `Virtual Storage` view
-3. Click the `Virtual Fibre Channel` tab to show table of the defined `virtual Fibere Channel Devices`
-4. Click the `Add Virtual Fibre Channel Device` to popup dialog for `Add Virtual Fibre Channel`
-5. Check box to select the availabe  `Fibre Channel Port`
-6. Click `OK` to complete the operation
-> **NOTE** You need to setup disk on SAN storage to map to the host(LPAR) to let this LPAR to use it
+```
+chsyscfg -m <managed_system> -i 'name=<lpar_name>, profile_name=<profile_name>,"virtual_scsi_adapters=<virtual_scsi_details>"'
+```
 
 ## Boot Up LPAR with Bootp
 
-After the LPAR is created and configured, now it is time to boot it up. There are two ways to do it:
-* Use HMC to boot the LPAR 
-1. Check the LPAR on `Partitions` list view
-2. Click the `Actions` to select `Activate...` from popup menu to open the `Activate` dialog
-3. For `Operation Type`, check the `Normal`, and  for Boot Mode` select `System Management
-4. Using `vtmenu` on HMC host select managed system and LPAR to open the console for that LPAR
-5. In SMS, select `Select Boot Options`->`Select Install/Boot Device`->`Network`->`Bootp`->`Select Device` to select the network adapter to boot from
-6. Continue to start the bootp
-* using HMC CLI to directly boot up LPAR with bootp:
+After the LPAR is created and configured, now it is time to boot it up. The following command can be used to boot the LPAR using the HMC CLI:
+
 ```
 lpar_netboot  -t ent -m <macaddr> -s auto -d auto <lpar_name> <profile_name> <managed_system>
 ```
-> **NOTE** The `<macaddr>` format is `fad38e3ca520`, which does not contain `:`. 
-Before `lpar_netboot`, the console to the LPAR has to be closed, otherwise it will fail.
-After `lpar_netboot` completed, we can open the console to check the boot progress. 
-If the disk is not set as first boot device, the bootp will loop on. To solve it, stop the boot to SMS after bootp complete with write the OS image to disk and reboot. Then set the disk as first boot device in SMS, and continue as normal boot.
+> **NOTE** The `<macaddr>` format is `fad38e3ca520`, which does not contain `:`.
 
 ## Create the Helper Node
 
-Create helper LPAR using the steps descripted in `Create the LPAR` section with proper processor and memory configuration.
+Create helper LPAR using the steps described in `Create the LPAR` section with proper processor and memory configuration.
 
-After helper is up and running, configured it with correct network configurations based on your network:
+After helper is up and running, configure it with correct network configurations based on your network:
 * IP - <helper_ip>
 * NetMask - 255.255.255.0
 * Default Gateway - <default_gateway>
@@ -85,17 +50,14 @@ After helper is up and running, configured it with correct network configuration
 
 ## Create Cluster Nodes
 
-Create 6 LPARs using same steps descripted in above `Create the LPAR` section. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.3/installing/installing_ibm_power/installing-ibm-power.html#minimum-resource-requirements_installing-ibm-power) for these LPARs.
+Create 6 LPARs using the same steps as described in the `Create the LPAR` section. Please follow the [minimum requirements](https://docs.openshift.com/container-platform/4.3/installing/installing_ibm_power/installing-ibm-power.html#minimum-resource-requirements_installing-ibm-power) for these LPARs.
 
 __Bootstrap__
 
 Create bootstrap LPAR
 
 ```
-mksyscfg -r lpar -m <managed_system> -i name=ocp4-bootstrap, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, \
-  min_mem=8192, desired_mem=16384, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0, \
-  max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, \
-  boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+mksyscfg -r lpar -m <managed_system> -i name=ocp4-bootstrap, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=16384, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
 ```
 
 __Masters__
@@ -105,10 +67,7 @@ Create the master LPARs
 ```
 for i in master{0..2}
 do
-  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, \
-    min_mem=4096, desired_mem=8192, max_mem=8192, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0, \
-    max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, \
-    boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux,shared_proc_pool_util_auth=1,min_mem=4096, desired_mem=8192, max_mem=8192, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
 done
 ```
 
@@ -119,13 +78,10 @@ Create the worker LPARs
 ```
 for i in worker{0..1}
 do
-  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, \
-    min_mem=8192, desired_mem=8192, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0, \
-    max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, \
-    boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=8192, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
 done
 ```
-> **NOTE** Make sure attached them to the network your choice, and add storage to them based your storage configuration after seccessfully created LPAR.
+> **NOTE** Make sure you attach the LPARs to the appropriate network and add storage after successful LPAR creation.
 
 ## Prepare the Helper Node
 
@@ -151,7 +107,7 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Get the Mac addresses with this command running from your HMC host:
+Get the Mac addresses of the LPAR from the HMC by running the following command:
 
 ```
 for i in <managed_systems>
@@ -159,14 +115,14 @@ do
   lshwres -m $i -r virtualio --rsubtype eth --level lpar -F lpar_name,mac_addr
 done
 ```
-Or if used SRIOV's logical port for network:
+Or if using SRIOV's then run the following command:
 ```
 for i in <managed_systems>
 do
   lshwres -m $i -r sriov --rsubtype logport --level eth -F lpar_name,mac_addr
 done
 ```
-Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the cluster node LPARs.
+Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the LPARs.
 
 ```
 cp docs/examples/vars-pppc64le.yaml vars.yaml
