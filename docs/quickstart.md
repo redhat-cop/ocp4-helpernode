@@ -306,6 +306,7 @@ On your laptop/workstation visit the status page
 ```
 firefox http://192.168.7.77:9000
 ```
+> :warning: Make sure you don't expose this port in public cloud environments!
 
 You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
