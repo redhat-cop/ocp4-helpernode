@@ -12,3 +12,12 @@ chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
 chronyconfig:
   enabled: false
+
+setup_registry:
+  deploy: true
+  autosync_registry: false
+  registry_image: docker.io/library/registry:2
+  local_repo: "ocp4/openshift4"
+  product_repo: "openshift-release-dev"
+  release_name: "ocp-release"
+  release_tag: "4.4.9-x86_64"

@@ -7,7 +7,7 @@
 ##
 show_help () {
 echo "Usage:"
-echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|dns-other|install-info|haproxy|services|nfs-info}"
+echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|dns-other|local-registry-info|install-info|haproxy|services|nfs-info}"
 echo ""
 }
 ##
@@ -98,6 +98,25 @@ echo "Reverse: $(dig @localhost -x $(dig @localhost {{ o.name }}.{{ dns.clusteri
 {% endif %}
 }
 ###
+local-registry-info () {
+cat <<EOF
+
+This server should also be used to host the local-registry. Local Registry is running on registry.{{ dns.clusterid }}.{{ dns.domain }}:5000
+
+While creating install-config.yaml
+        - Use updated pull secret file with registry credentials located at ~/pull-secret-updated.json
+        - Use registry certificate file located at /opt/registry/certs/domain.crt
+
+Note: Refer docs/examples/install-config-local-registry-example.yaml
+
+While creating ignition-config files
+        OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/{{ setup_registry.local_repo }}:{{ setup_registry.release_tag }} openshift-install create ignition-configs
+
+(See https://docs.openshift.com/container-platform/4.4/installing/install_config/installing-restricted-networks-preparations.html for more details)
+
+EOF
+}
+###
 install-info () {
 cat <<EOF
 
@@ -128,7 +147,7 @@ EOF
 services () {
 echo "Status of services:"
 echo "==================="
-for i in dhcpd named haproxy httpd tftp; do echo -e "Status of $i svc \t\t-> $(systemctl status --no-pager $i | grep --color Active)"; done
+for i in dhcpd named haproxy httpd tftp local-registry; do echo -e "Status of $i svc \t\t-> $(systemctl status --no-pager $i | grep --color Active)"; done
 }
 ###
 nfs-info () {
@@ -200,6 +219,9 @@ case "$1" in
   dns-other)
     dns-other
     ;;
+  local-registry-info)
+    local-registry-info
+	;;
   install-info)
     install-info
     ;;
