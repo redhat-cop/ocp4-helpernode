@@ -109,10 +109,7 @@ While creating install-config.yaml
 
 Note: Refer docs/examples/install-config-local-registry-example.yaml
 
-While creating ignition-config files
-        OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/{{ setup_registry.local_repo }}:{{ setup_registry.release_tag }} openshift-install create ignition-configs
-
-(See https://docs.openshift.com/container-platform/4.4/installing/install_config/installing-restricted-networks-preparations.html for more details)
+(See https://docs.openshift.com/container-platform/latest/installing/install_config/installing-restricted-networks-preparations.html for more details)
 
 EOF
 }
