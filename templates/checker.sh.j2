@@ -104,7 +104,7 @@ cat <<EOF
 This server should also be used to host the local-registry. Local Registry is running on registry.{{ dns.clusterid }}.{{ dns.domain }}:5000
 
 While creating install-config.yaml
-        - Use updated pull secret file with registry credentials located at ~/pull-secret-updated.json
+        - Use updated pull secret file with registry credentials located at ~/.openshift/pull-secret-updated
         - Use registry certificate file located at /opt/registry/certs/domain.crt
 
 Note: Refer docs/examples/install-config-local-registry-example.yaml
