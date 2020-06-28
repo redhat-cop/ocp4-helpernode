@@ -21,6 +21,11 @@ api-int		IN	A	{{ helper.ipaddr }}
 ; The wildcard also points to the load balancer
 *.apps		IN	A	{{ helper.ipaddr }}
 ;
+{%if setup_registry %}
+; Create entry for the local registry
+{{ registry_host }}	IN	A	{{ helper.ipaddr }}
+;
+{% endif %}
 ; Create entry for the bootstrap host
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
 ;

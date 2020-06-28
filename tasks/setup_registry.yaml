@@ -1,0 +1,114 @@
+---
+# tasks file for configure-local-registry
+
+- name: Create registry directories
+  file:
+    path: /opt/registry/{{ item }}
+    state: directory
+  with_items:
+    - auth
+    - certs
+    - data
+
+- name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+  openssl_privatekey:
+    path: /opt/registry/certs/domain.pem
+
+- name: Generate an OpenSSL Certificate Signing Request
+  openssl_csr:
+    path: /opt/registry/certs/domain.csr
+    privatekey_path: /opt/registry/certs/domain.pem
+    basic_constraints:
+      - CA:TRUE
+    basic_constraints_critical: yes
+    common_name: "{{ registry_host }}"
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: /opt/registry/certs/domain.crt
+    privatekey_path: /opt/registry/certs/domain.pem
+    csr_path: /opt/registry/certs/domain.csr
+    provider: selfsigned
+
+- name: Copy Self Signed OpenSSL certificate
+  copy:
+    src: /opt/registry/certs/domain.crt
+    dest: /etc/pki/ca-trust/source/anchors/domain.crt
+    remote_src: yes
+    force: yes
+
+- name: Add the Self Signed OpenSSL certificate to your list of trusted certificates
+  shell: |
+    update-ca-trust || true
+    cat /etc/pki/tls/certs/ca-bundle.trust.crt | grep {{ registry_host }} | wc -l
+  register: cert_trust
+  until: cert_trust.stdout|int == 1
+  retries: 3
+  delay: 10
+
+- name: Create the user and password for local registry
+  shell: htpasswd -bBc /opt/registry/auth/htpasswd admin admin
+  args:
+    creates: /opt/registry/auth/htpasswd
+
+- name: Generate local-registry service file
+  template:
+    src: ../templates/local-registry.service.j2
+    dest: /etc/systemd/system/local-registry.service
+    mode: 0655
+
+- name: Start local-registry
+  systemd:
+    name: local-registry
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Ensure registry pod is up
+  shell: podman ps | grep local-registry
+  register: pod_state
+  until: pod_state.stdout != ""
+  retries: 4
+  delay: 15
+
+- name: Allow traffic at local registry port
+  firewalld:
+    port: 5000/tcp
+    permanent: yes
+    zone: "{{ item }}"
+    state: enabled
+  with_items:
+  - internal
+  - public
+
+- name: Restarting regitry services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - "{{ registry_services }}"
+
+- name: Get local registry pod
+  shell: curl -u admin:admin -k https://{{ local_registry }}/v2/_catalog | grep repositories
+  register: pod_state
+  until: pod_state.stdout != ""
+  retries: 3
+  delay: 30
+
+- name: Mirror the registry
+  when: pod_state.stdout != ""
+  block:
+  - name: Generate the base64-encoded user name and password or token for your mirror registry
+    shell: |
+      registry_token=`echo -n "admin:admin" | base64 -w0`
+      jq '.auths += {"{{ local_registry }}": {"auth": "'$registry_token'","email": "noemail@localhost"}}' < ~/.openshift/pull-secret > ~/.openshift/pull-secret-updated
+    args:
+      creates: ~/.openshift/pull-secret-updated
+
+  - name: Mirror the registry
+    when: setup_registry.autosync_registry
+    shell: oc adm -a ~/pull-secret-updated.json release mirror \
+      --from={{ release_image }} \
+      --to={{ local_registry }}/{{ setup_registry.local_repo }} \
+      --to-release-image={{ local_registry }}/{{ setup_registry.local_repo }}:{{ setup_registry.release_tag }}
+    register: registry

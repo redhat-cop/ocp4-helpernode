@@ -479,8 +479,20 @@
       state: restarted
     with_items:
       - NetworkManager
- 
+
+  - name: Setup Local Registry
+    when: setup_registry.deploy
+    block:
+    - name: Install registry packages
+      package:
+        name: "{{ registry }}"
+        state: present
+
+    - name: Setup Registry
+      import_tasks: setup_registry.yaml
+
   - name:  Information about this install
     debug:
       msg:
         - "Please run /usr/local/bin/helpernodecheck for information"
+
