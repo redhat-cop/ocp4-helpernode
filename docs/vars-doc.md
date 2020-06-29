@@ -236,7 +236,7 @@ You can omit `macaddr` if using `staticips=true`
 **OPTIONAL**
 
 In order to install a local registry on the helper node:
-* A pullsecret obtained at [try.openshift.com](https://cloud.redhat.com/openshift/install/pre-release) - Download and save it as `~/pull-secret.json` on the helper node.
+* A pullsecret obtained at [try.openshift.com](https://cloud.redhat.com/openshift/install/pre-release) - Download and save it as `~/.openshift/pull-secret` on the helper node.
 * you'll need to add the following in your `vars.yaml` file
 
 ```
