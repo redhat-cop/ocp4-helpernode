@@ -10,6 +10,12 @@ $TTL 1W
 ; syntax is "last octet" and the host must have fqdn with trailing dot
 1       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
 
+{% if setup_registry.deploy %} 
+; Create entry for the local registry
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	registry.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+;
+{% endif %}
+
 {% for m in masters %}
 {{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
