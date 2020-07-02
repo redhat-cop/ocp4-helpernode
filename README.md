@@ -97,8 +97,10 @@ Now you're ready to follow the [OCP4 UPI install doc](https://docs.openshift.com
 The following are quickstarts. These are written using libvirt, but are generic enough to be used in BareMetal or other Virtualized Environments.
 
 
-* DHCP install [quickstart](docs/quickstart.md)
-* Static IPs install [quickstart](docs/quickstart-static.md)
+* Bare Metal DHCP install [quickstart](docs/bmquickstart.md)
+* Bare Metal Static IPs install [quickstart](docs/bmquickstart-static.md)
+* Libvirt DHCP install [quickstart](docs/quickstart.md)
+* Libvirt Static IPs install [quickstart](docs/quickstart-static.md)
 * DHCP install on KVM/Power [quickstart](docs/quickstart-ppc64le.md)
 * DHCP install on PowerVM [quickstart](docs/quickstart-powervm.md)
 * OCP4 on VMware vSphere UPI Automation [quickstart](https://github.com/RedHatOfficial/ocp4-vsphere-upi-automation)
