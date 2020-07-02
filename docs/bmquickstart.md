@@ -1,135 +1,29 @@
 # Helper Node Quickstart Install
 
-This quickstart will get you up and running on `libvirt`. This should work on other environments (i.e. Virtualbox); you just have to figure out how to do the virtual network on your own.
+This quickstart will get you up and running. This is assuming you're on bare metal or in another environment without cloud integration.
 
-> **NOTE** If you want to use static ips follow [this guide](quickstart-static.md)
+## Create Instance
 
-To start login to your virtualization server / hypervisor
+Create a machine/vm with the following minimum configuration.
 
-```
-ssh virt0.example.com
-```
+* CentOS/RHEL 7 or 8
+* 50GB HD
+* 4 CPUs
+* 8 GB of RAM
 
-And create a working directory
+In this example, I'll be using the following.
 
-```
-mkdir ~/ocp4-workingdir
-cd ~/ocp4-workingdir
-```
-
-## Create Virtual Network
-
-Download the virtual network configuration file, [virt-net.xml](examples/virt-net.xml)
-
-```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/virt-net.xml
-```
-
-Create a virtual network using this file file provided in this repo (modify if you need to).
-
-```
-virsh net-define --file virt-net.xml
-```
-
-Make sure you set it to autostart on boot
-
-```
-virsh net-autostart openshift4
-virsh net-start openshift4
-```
-
-## Create a CentOS 7/8 VM
-
-Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
-
-__EL 7__
-```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
-```
-
-__EL 8__
-```
-wget https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
-```
-
-Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
-
-> **NOTE** Change the path to the ISO for your environment
-
-__EL 7__
-```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=30 \
---os-variant centos7.0 --network network=openshift4,model=virtio \
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-x86_64-Minimal-1810.iso \
---initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
-```
-
-__EL 8__
-```
-virt-install --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
---os-variant centos8 --network network=openshift4,model=virtio \
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8-x86_64-1905-dvd1.iso \
---initrd-inject helper-ks.cfg --extra-args "inst.ks=file:/helper-ks.cfg" --noautoconsole
-```
-
-The provided Kickstart file installs the helper with the following settings (which is based on the [virt-net.xml](examples/virt-net.xml) file that was used before).
-
+* CentOS 8
+* 50GB HD
+* 4CPUs
+* 8 GB of RAM
 * IP - 192.168.7.77
 * NetMask - 255.255.255.0
 * Default Gateway - 192.168.7.1
 * DNS Server - 8.8.8.8
 
-You can watch the progress by lauching the viewer
 
-```
-virt-viewer --domain-name ocp4-aHelper
-```
-
-Once it's done, it'll shut off...turn it on with the following command
-
-```
-virsh start ocp4-aHelper
-```
-
-## Create "empty" VMs
-
-Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](https://docs.openshift.com/container-platform/4.2/installing/installing_bare_metal/installing-bare-metal.html#minimum-resource-requirements_installing-bare-metal) for these VMs.
-
-> Make sure you attached these to the `openshift4` network!
-
-__Masters__
-
-Create the master VMs
-
-```
-for i in master{0..2}
-do
-  virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
-  --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
-  --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
-  virsh define --file ocp4-$i.xml
-done
-```
-
-__Workers and Bootstrap__
-
-Create the bootstrap and worker VMs
-
-```
-for i in worker{0..1} bootstrap
-do
-  virt-install --name="ocp4-${i}" --vcpus=4 --ram=8192 \
-  --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
-  --os-variant rhel8.0 --network network=openshift4,model=virtio \
-  --boot menu=on --print-xml > ocp4-$i.xml
-  virsh define --file ocp4-$i.xml
-done
-```
-
-## Prepare the Helper Node
+## Setup your Instance to be the HelperNode
 
 After the helper node is installed; login to it
 
@@ -153,19 +47,13 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Get the Mac addresses with this command running from your hypervisor host:
+Get the mac address of the instances/vms/servers that are going to be your OpenShift 4 cluster. At a minimum you need 1 bootstrap, 3 masters, and 2 workers. So you'll need to have 6 Mac Addresses
 
-```
-for i in bootstrap master{0..2} worker{0..1}
-do
-  echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
-done
-```
-
-Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of the "blank" VMs.
+Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of your instances.
 
 ```
 cp docs/examples/vars.yaml .
+vi vars.yaml
 ```
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
@@ -179,7 +67,6 @@ ansible-playbook -e @vars.yaml tasks/main.yml
 ```
 
 After it is done run the following to get info about your environment and some install help
-
 
 ```
 /usr/local/bin/helpernodecheck
@@ -290,12 +177,11 @@ restorecon -vR /var/www/html/
 chmod o+r /var/www/html/ignition/*.ign
 ```
 
-## Install VMs
+## Install Instances
 
-Launch `virt-manager`, and boot the VMs into the boot menu; and select PXE. The vms should boot into the proper PXE profile, based on their IP address.
+PXE boot into your Instances and they should load up the right configuration based on the MAC address. The DHCP server is set up with MAC address filtering and the PXE service is configured to load the right config to the right machine (based on mac address).
 
-
-Boot/install the VMs in the following order
+Boot/install the VMs/Instances in the following order
 
 * Bootstrap
 * Masters
@@ -330,7 +216,9 @@ DEBUG Bootstrap status: complete
 INFO It is now safe to remove the bootstrap resources
 ```
 
-...you can continue....at this point you can delete the bootstrap server.
+...you can continue...at this point you can delete/poweroff the bootstrap server.
+
+> :warning: you can repourpose this machine as another node!
 
 
 ## Finish Install
@@ -399,15 +287,6 @@ If you didn't install the latest 4.3.Z release then just run the following.
 ```
 oc adm upgrade --to-latest
 ```
-
-If you're having issues upgrading you can try adding `--force` to the upgrade command.
-
-```
-oc adm upgrade --to-latest --force
-```
-
-See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
-
 
 Scale the router if you need to
 

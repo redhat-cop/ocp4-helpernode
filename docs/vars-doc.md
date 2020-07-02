@@ -231,6 +231,33 @@ other:
 
 You can omit `macaddr` if using `staticips=true`
 
+### Local Registry
+
+**OPTIONAL**
+
+In order to install a local registry on the helper node:
+* A pullsecret obtained at [try.openshift.com](https://cloud.redhat.com/openshift/install/pre-release) - Download and save it as `~/.openshift/pull-secret` on the helper node.
+* you'll need to add the following in your `vars.yaml` file
+
+```
+setup_registry:
+  deploy: false
+  autosync_registry: false
+  registry_image: docker.io/library/registry:2
+  local_repo: "ocp4/openshift4"
+  product_repo: "openshift-release-dev"
+  release_name: "ocp-release"
+  release_tag: "4.4.9-x86_64"
+```
+
+* `setup_registry.deploy` - Set this to true to enable registry installation.
+* `setup_registry.autosync_registry` - Set this to true to enable mirroring of installation images.
+* `setup_registry.registry_image` - This is the name of the image used for creating registry container.
+* `setup_registry.local_repo` - This is the name of the repo in your registry.
+* `setup_registry.product_repo` - Where the images are hosted in the product repo.
+* `setup_registry.release_name` - This is the name of the image release.
+* `setup_registry.release_tag` - The version of OpenShift you want to sync.
+
 ### Running on Power
 
 In order to run the helper node on Power for deploying OCP on Power you'll need to pass `-e ppc64le=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file

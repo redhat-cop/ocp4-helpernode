@@ -1,0 +1,29 @@
+[Unit]
+Description=OpenShift Registry for HelperNode
+After=network.target syslog.target
+
+[Service]
+Type=simple
+TimeoutStartSec=5m
+ExecStartPre=-/usr/bin/podman rm "local-registry"
+
+ExecStart=/usr/bin/podman run   --name local-registry -p 5000:5000 \
+                                -v /opt/registry/data:/var/lib/registry:z \
+                                -v /opt/registry/auth:/auth:z \
+                                -e "REGISTRY_AUTH=htpasswd" \
+                                -e "REGISTRY_AUTH_HTPASSWD_REALM=Realm" \
+                                -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+                                -v /opt/registry/certs:/certs:z \
+                                -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
+                                -e REGISTRY_HTTP_TLS_KEY=/certs/domain.pem \
+                                {{ setup_registry.registry_image }}
+
+ExecReload=-/usr/bin/podman stop "local-registry"
+ExecReload=-/usr/bin/podman rm "local-registry"
+ExecStop=-/usr/bin/podman stop "local-registry"
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+
