@@ -41,7 +41,7 @@ api-int		IN	A	{{ helper.ipaddr }}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
 {% for m in masters %}
-etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
+etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
 {% if other is defined %}
