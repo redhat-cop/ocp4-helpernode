@@ -216,6 +216,21 @@ ssh_gen_key: true
 
 Default is set to `true`, set it to `false` if you don't want it to create the SSH KEY or config for you
 
+### PXE default config
+
+**OPTIONAL**  
+
+This section influences the creation of pxe artifacts
+
+```
+pxe:
+  generate_default: true
+```
+
+Default is false to prevent unexpected issues booting hosts in the "other" section.    
+* `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options 
+`templates/default.j2` -> `/var/lib/tftpboot/pxelinux.cfg/default`
+
 ### Other Nodes
 
 **OPTIONAL**
