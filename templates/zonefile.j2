@@ -23,7 +23,7 @@ api-int		IN	A	{{ helper.ipaddr }}
 ;
 {%if setup_registry %}
 ; Create entry for the local registry
-{{ registry_host }}	IN	A	{{ helper.ipaddr }}
+registry	IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
