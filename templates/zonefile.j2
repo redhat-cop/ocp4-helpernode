@@ -12,10 +12,10 @@ $TTL 1W
 ns1	IN	A	{{ helper.ipaddr }}
 smtp	IN	A	{{ helper.ipaddr }}
 ;
-{{ helper.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}	IN	A	{{ helper.ipaddr }}
+{{ helper.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ helper.ipaddr }}
 ;
 ; The api points to the IP of your load balancer
-api.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ helper.ipaddr }}
+api.{{ dns.clusterid }}.{{ dns.domain | lower }}			IN	A	{{ helper.ipaddr }}
 api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ helper.ipaddr }}
 ;
 ; The wildcard also points to the load balancer
@@ -23,11 +23,11 @@ api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ helper.ipaddr }}
 ;
 {%if setup_registry %}
 ; Create entry for the local registry
-{{ registry_host }}	IN	A	{{ helper.ipaddr }}
+{{ registry_host }}		IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
-{{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
+{{ bootstrap.name | lower }}		IN	A	{{ bootstrap.ipaddr }}
 ;
 ; Create entries for the master hosts
 {% for m in masters %}
@@ -41,7 +41,7 @@ api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ helper.ipaddr }}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
 {% for m in masters %}
-etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}	IN	A	{{ m.ipaddr }}
+etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}		IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
 {% if other is defined %}
@@ -53,7 +53,7 @@ etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}	IN	A	{{ m.ip
 {% endif %}
 ; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
 {% for m in masters %}
-_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+_etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain | lower }}.	86400	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}
 {% endfor %}
 ;
 ;EOF

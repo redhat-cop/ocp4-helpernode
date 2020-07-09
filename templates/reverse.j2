@@ -8,24 +8,24 @@ $TTL 1W
 	IN	NS	ns1.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
 ; syntax is "last octet" and the host must have fqdn with trailing dot
-{{ helper.ipaddr.split('.')[3] }}       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ helper.ipaddr.split('.')[3] }}	IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 
 {% for m in masters %}
-{{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.
 {% endfor %}
 ;
-{{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.
 ;
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
 {% for w in workers %}
-{{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.
 {% endfor %}
 ;
 {% if other is defined %}
 {% for o in other %}
-{{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
+{{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
 ;
 {% endif %}

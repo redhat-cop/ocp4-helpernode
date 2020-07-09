@@ -105,7 +105,7 @@ backend ingress-http
     balance source
     mode tcp
 {% for w in workers %}
-    server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
+    server {{ w.name | lower }} {{ w.ipaddr }}:80 check
 {% endfor %}
    
 frontend ingress-https
@@ -118,7 +118,7 @@ backend ingress-https
     balance source
     mode tcp
 {% for w in workers %}
-    server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
+    server {{ w.name | lower }} {{ w.ipaddr }}:443 check
 {% endfor %}
 
 #---------------------------------------------------------------------
