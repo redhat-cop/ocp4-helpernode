@@ -118,7 +118,7 @@
 
   - name: Downloading OCP4 installer Bios
     get_url:
-      url: "{{ ocp_bios}}"
+      url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
       
