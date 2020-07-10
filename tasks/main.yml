@@ -229,6 +229,7 @@
         src: ../templates/default.j2
         dest: /var/lib/tftpboot/pxelinux.cfg/default
         mode: 0555
+      when: "{{ pxe.generate_default | default(false) }}"
       notify:
         - restart tftp
 
