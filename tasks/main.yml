@@ -95,16 +95,16 @@
     notify:
       - restart rsyslog
 
-  - name: Enable UDP port 514 for syslog
+  - name: Enable UDP network access for syslog
     replace:
       path: /etc/rsyslog.conf
-      regexp: '#module(load="imudp")*'
+      regexp: '\#module\(load=\"imudp\"\)*'
       replace: 'module(load="imudp")'
 
   - name: Enable UDP port 514 for syslog
     replace:
       path: /etc/rsyslog.conf
-      regexp: '#input(type="imudp" port="514")*'
+      regexp: '\#input\(type=\"imudp\" port=\"514\"\)*'
       replace: 'input(type="imudp" port="514")'
 
   - name: Copy httpd conf file
