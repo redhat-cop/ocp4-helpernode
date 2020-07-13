@@ -27,7 +27,7 @@ global
 
     chroot      /var/lib/haproxy
     pidfile     /var/run/haproxy.pid
-    maxconn     4000
+    maxconn     8000
     user        haproxy
     group       haproxy
     daemon
@@ -40,14 +40,14 @@ global
 # use if not designated in their block
 #---------------------------------------------------------------------
 defaults
-    mode                    http
+    mode                    tcp
     log                     global
     option                  httplog
     option                  dontlognull
-    option http-server-close
-    option forwardfor       except 127.0.0.0/8
+    option                  http-server-close
+    option                  forwardfor except 127.0.0.0/8
     option                  redispatch
-    retries                 3
+    retries                 5
     timeout http-request    10s
     timeout queue           1m
     timeout connect         10s
@@ -55,7 +55,6 @@ defaults
     timeout server          1m
     timeout http-keep-alive 10s
     timeout check           10s
-    maxconn                 3000
 
 #---------------------------------------------------------------------
 
@@ -71,10 +70,10 @@ frontend openshift-api-server
     bind *:6443
     default_backend openshift-api-server
     mode tcp
-    option tcplog
+    option httplog
 
 backend openshift-api-server
-    balance source
+    balance roundrobin
     mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% for m in masters %}
@@ -85,10 +84,10 @@ frontend machine-config-server
     bind *:22623
     default_backend machine-config-server
     mode tcp
-    option tcplog
+    option httplog
 
 backend machine-config-server
-    balance source
+    balance roundrobin
     mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% for m in masters %}
@@ -98,12 +97,12 @@ backend machine-config-server
 frontend ingress-http
     bind *:80
     default_backend ingress-http
-    mode tcp
-    option tcplog
+    mode http
+    option httplog
 
 backend ingress-http
-    balance source
-    mode tcp
+    balance roundrobin
+    mode http
 {% for w in workers %}
     server {{ w.name | lower }} {{ w.ipaddr }}:80 check
 {% endfor %}
@@ -112,10 +111,10 @@ frontend ingress-https
     bind *:443
     default_backend ingress-https
     mode tcp
-    option tcplog
+    option httplog
 
 backend ingress-https
-    balance source
+    balance roundrobin
     mode tcp
 {% for w in workers %}
     server {{ w.name | lower }} {{ w.ipaddr }}:443 check

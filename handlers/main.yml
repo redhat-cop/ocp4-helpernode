@@ -10,6 +10,11 @@
     name: haproxy
     state: restarted
 
+- name: restart rsyslog
+  service:
+    name: restart
+    state: restarted
+
 - name: restart httpd
   service:
     name: httpd

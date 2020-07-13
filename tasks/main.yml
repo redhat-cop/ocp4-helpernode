@@ -88,6 +88,25 @@
     notify:
       - restart haproxy
 
+  - name: Copy syslog-conf file for haproxy
+    copy:
+      src: ../files/haproxy-syslog.conf
+      dest: /etc/rsyslog.d/haproxy.conf
+    notify:
+      - restart rsyslog
+
+  - name: Enable UDP port 514 for syslog
+    replace:
+      path: /etc/rsyslog.conf
+      regexp: '#module(load="imudp")*'
+      replace: 'module(load="imudp")'
+
+  - name: Enable UDP port 514 for syslog
+    replace:
+      path: /etc/rsyslog.conf
+      regexp: '#input(type="imudp" port="514")*'
+      replace: 'input(type="imudp" port="514")'
+
   - name: Copy httpd conf file
     copy:
       src: ../files/httpd.conf
@@ -152,6 +171,7 @@
       - 20048/tcp
       - 50825/tcp
       - 53248/tcp
+      - 514/udp
 
   - name: Best effort SELinux repair - DNS
     shell: "restorecon -vR /var/named || true"
