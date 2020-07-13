@@ -12,7 +12,7 @@
 
 - name: restart rsyslog
   service:
-    name: restart
+    name: rsyslog
     state: restarted
 
 - name: restart httpd
