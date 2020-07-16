@@ -1,8 +1,8 @@
 #!/bin/bash
 nfsnamespace=nfs-provisioner
-rbac=/usr/local/src/nfs-provisioner-rbac.yaml
-deploy=/usr/local/src/nfs-provisioner-deployment.yaml
-sc=/usr/local/src/nfs-provisioner-sc.yaml
+rbac=/usr/local/src/nfs-provisioner-rbac.yml
+deploy=/usr/local/src/nfs-provisioner-deployment.yml
+sc=/usr/local/src/nfs-provisioner-sc.yml
 #
 export PATH=/usr/local/bin:$PATH
 #

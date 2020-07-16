@@ -118,9 +118,9 @@ git clone https://github.com/RedHatOfficial/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server.
+Create the [vars-static.yml](examples/vars-static.yml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server.
 
-> **NOTE** See the `vars.yaml` [documentaion page](vars-doc.md) for more info about what it does.
+> **NOTE** See the `vars.yml` [documentaion page](vars-doc.md) for more info about what it does.
 
 
 ## Run the playbook
@@ -128,7 +128,7 @@ Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addres
 Run the playbook to setup your helper node (using `-e staticips=true` to flag to ansible that you won't be installing dhcp/tftp)
 
 ```
-ansible-playbook -e @vars-static.yaml -e staticips=true tasks/main.yml
+ansible-playbook -e @vars-static.yml -e staticips=true tasks/main.yml
 ```
 
 After it is done run the following to get info about your environment and some install help
@@ -168,12 +168,12 @@ This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can
 
 > :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
 
-Next, create an `install-config.yaml` file.
+Next, create an `install-config.yml` file.
 
 > :warning: Make sure you update if your filenames or paths are different.
 
 ```
-cat <<EOF > install-config.yaml
+cat <<EOF > install-config.yml
 apiVersion: v1
 baseDomain: example.com
 compute:

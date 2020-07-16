@@ -1,6 +1,6 @@
-# How to use vars.yaml
+# How to use vars.yml
 
-This page gives you an explanation of the variables found in the [vars.yaml](examples/vars.yaml) example given in this repo to help you formulate your own/edit the provided example.
+This page gives you an explanation of the variables found in the [vars.yml](examples/vars.yml) example given in this repo to help you formulate your own/edit the provided example.
 
 ## Disk to install RHCOS
 
@@ -53,8 +53,8 @@ dns:
 
 Explanation of the DNS variables:
 
-* `dns.domain` - This is what domain the installed DNS server will have. This needs to match what you will put for the [baseDomain](examples/install-config-example.yaml#L2) inside the `install-config.yaml` file.
-* `dns.clusterid` - This is what your clusterid will be named and needs to match what you will for [metadata.name](examples/install-config-example.yaml#L12) inside the `install-config.yaml` file.
+* `dns.domain` - This is what domain the installed DNS server will have. This needs to match what you will put for the [baseDomain](examples/install-config-example.yml#L2) inside the `install-config.yml` file.
+* `dns.clusterid` - This is what your clusterid will be named and needs to match what you will for [metadata.name](examples/install-config-example.yml#L12) inside the `install-config.yml` file.
 * `dns.forwarder1` - Tis will be set up as the DNS forwarder. This is usually one of the corprate (or "upstream") DNS servers.
 * `dns.forwarder2` - Tis will be set up as the second DNS forwarder. This is usually one of the corprate (or "upstream") DNS servers.
 
@@ -163,7 +163,7 @@ Below are example of "extra" features beyond the default built-in vars that you 
 
 ### Static IPs
 
-In order to use static IPs, you'll need to pass `-e staticips=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file
+In order to use static IPs, you'll need to pass `-e staticips=true` to your `ansible-playbook` command or add the following in your `vars.yml` file
 
 ```
 staticips: true
@@ -175,7 +175,7 @@ This effectively disables DHCP, TFTP, and PXE on the helper. This implicitly mea
 
 ### Nightly Builds
 
-You can have the helper deploy the nightly builds of OpenShift 4. Adding the following to your `vars.yaml` files will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly
+You can have the helper deploy the nightly builds of OpenShift 4. Adding the following to your `vars.yml` files will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly
 
 ```
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
@@ -208,7 +208,7 @@ Default is set to `false` as to NOT install it.
 
 ### SSH Key
 
-This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssk/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
+This playbook [creates an SSH key](../tasks/generate_ssh_keys.yml) as `~/.ssk/helper_rsa` that can be used for the `install-config.yml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
 
 ```
 ssh_gen_key: true
@@ -252,7 +252,7 @@ You can omit `macaddr` if using `staticips=true`
 
 In order to install a local registry on the helper node:
 * A pullsecret obtained at [try.openshift.com](https://cloud.redhat.com/openshift/install/pre-release) - Download and save it as `~/.openshift/pull-secret` on the helper node.
-* you'll need to add the following in your `vars.yaml` file
+* you'll need to add the following in your `vars.yml` file
 
 ```
 setup_registry:
@@ -275,7 +275,7 @@ setup_registry:
 
 ### Running on Power
 
-In order to run the helper node on Power for deploying OCP on Power you'll need to pass `-e ppc64le=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file
+In order to run the helper node on Power for deploying OCP on Power you'll need to pass `-e ppc64le=true` to your `ansible-playbook` command or add the following in your `vars.yml` file
 
 ```
 ppc64le: true
@@ -287,7 +287,7 @@ This playbook sets up a script called [helpernodecheck](../templates/checker.sh.
 
 > :warning: Run `helpernodecheck nfs-info` for information after the playbook runs.
 
-You can have that script  connect you to another NFS server, that's not the HelperNode. You do this by adding the following in your `vars.yaml` file.
+You can have that script  connect you to another NFS server, that's not the HelperNode. You do this by adding the following in your `vars.yml` file.
 
 ```
 nfs:
@@ -300,11 +300,11 @@ nfs:
 
 # Example Vars file
 
-Below are example `vars.yaml` files.
+Below are example `vars.yml` files.
 
-* [Default vars.yaml using DHCP](examples/vars.yaml)
-* [Default vars.yaml using DHCP with Nightlies](examples/vars-nightlies.yaml)
-* [Example of vars.yaml using Static IPs](examples/vars-static.yaml)
-* [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
-* [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
-* [Example of vars.yaml DHCP and External NFS](examples/vars-nfs.yaml)
+* [Default vars.yml using DHCP](examples/vars.yml)
+* [Default vars.yml using DHCP with Nightlies](examples/vars-nightlies.yml)
+* [Example of vars.yml using Static IPs](examples/vars-static.yml)
+* [Example of vars.yml using Static IPs with Nightlies](examples/vars-static-nightlies.yml)
+* [Example of vars.yml for Power](examples/vars-ppc64le.yml)
+* [Example of vars.yml DHCP and External NFS](examples/vars-nfs.yml)

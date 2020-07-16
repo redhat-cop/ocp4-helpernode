@@ -60,23 +60,23 @@ cd ocp4-helpernode
 
 ## Setup your Environment Vars
 
-Inside that dir there is a [vars.yaml](docs/examples/vars.yaml) file under `docs/examples/var.yaml` ... **__modify it__** to match your network and the environment. (the example one assumes a `/24`)
+Inside that dir there is a [vars.yml](docs/examples/vars.yml) file under `docs/examples/var.yml` ... **__modify it__** to match your network and the environment. (the example one assumes a `/24`)
 
 ```
-cp docs/examples/vars.yaml .
+cp docs/examples/vars.yml .
 ```
 
 > :warning: **NOTE**, currently this playbook assumes/is limited to a `/24` network
 
-See the `vars.yaml` [documentaion page](docs/vars-doc.md) for more info about what you can define. There are different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
+See the `vars.yml` [documentaion page](docs/vars-doc.md) for more info about what you can define. There are different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
 
 
 ## Run the playbook
 
-Once you edited your `vars.yaml` file; run the playbook
+Once you edited your `vars.yml` file; run the playbook
 
 ```
-ansible-playbook -e @vars.yaml tasks/main.yml
+ansible-playbook -e @vars.yml tasks/main.yml
 ```
 
 ## Helper Script

@@ -11,15 +11,15 @@
   # underscores in hostnames are illegal.
   pre_tasks:
   - name: validate hostnames
-    import_tasks: validate_host_names.yaml
+    import_tasks: validate_host_names.yml
 
   tasks:
   - name: generate ssh keys
-    import_tasks: generate_ssh_keys.yaml
+    import_tasks: generate_ssh_keys.yml
     when: ssh_gen_key
 
   - name: set setup facts
-    include: set_facts_.yaml
+    include: set_facts_.yml
 
   - name: Install needed packages
     package:
@@ -354,24 +354,24 @@
 
   - name: Copying over nfs-provisioner rbac
     copy:
-      src: ../files/nfs-provisioner-rbac.yaml
-      dest: /usr/local/src/nfs-provisioner-rbac.yaml
+      src: ../files/nfs-provisioner-rbac.yml
+      dest: /usr/local/src/nfs-provisioner-rbac.yml
       owner: root
       group: root
       mode: 0666
 
   - name: Copying over nfs-provisioner deployment
     template:
-      src: ../templates/nfs-provisioner-deployment.yaml.j2
-      dest: /usr/local/src/nfs-provisioner-deployment.yaml
+      src: ../templates/nfs-provisioner-deployment.yml.j2
+      dest: /usr/local/src/nfs-provisioner-deployment.yml
       owner: root
       group: root
       mode: 0666
 
   - name: Copying over nfs-provisioner storageclass
     copy:
-      src: ../files/nfs-provisioner-sc.yaml
-      dest: /usr/local/src/nfs-provisioner-sc.yaml
+      src: ../files/nfs-provisioner-sc.yml
+      dest: /usr/local/src/nfs-provisioner-sc.yml
       owner: root
       group: root
       mode: 0666
@@ -386,8 +386,8 @@
 
   - name: Copying over a sample PVC file for NFS
     copy:
-      src: ../files/registry-pvc.yaml
-      dest: /usr/local/src/registry-pvc.yaml
+      src: ../files/registry-pvc.yml
+      dest: /usr/local/src/registry-pvc.yml
       mode: '0555'
 
   - name: Chrony configuration
@@ -410,7 +410,7 @@
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
-        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+        dest: ../machineconfig/99-{{item}}-chrony-configuration.yml
       loop: 
         - master
         - worker
@@ -490,7 +490,7 @@
         state: present
 
     - name: Setup Registry
-      import_tasks: setup_registry.yaml
+      import_tasks: setup_registry.yml
 
   - name:  Information about this install
     debug:

@@ -122,20 +122,20 @@ do
   lshwres -m $i -r sriov --rsubtype logport --level eth -F lpar_name,mac_addr
 done
 ```
-Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the LPARs.
+Edit the [vars.yml](examples/vars-ppc64le.yml) file with the mac addresses of the LPARs.
 
 ```
-cp docs/examples/vars-pppc64le.yaml vars.yaml
+cp docs/examples/vars-pppc64le.yml vars.yml
 ```
 
-> **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
+> **NOTE** See the `vars.yml` [documentation page](vars-doc.md) for more info about what it does.
 
 ## Run the playbook
 
 Run the playbook to setup your helper node
 
 ```
-ansible-playbook -e @vars.yaml tasks/main.yml
+ansible-playbook -e @vars.yml tasks/main.yml
 ```
 
 After it is done run the following to get info about your environment and some install help
@@ -176,12 +176,12 @@ This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can
 
 > :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
 
-Next, create an `install-config.yaml` file.
+Next, create an `install-config.yml` file.
 
 > :warning: Make sure you update if your filenames or paths are different.
 
 ```
-cat <<EOF > install-config.yaml
+cat <<EOF > install-config.yml
 apiVersion: v1
 baseDomain: example.com
 compute:

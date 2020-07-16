@@ -103,11 +103,11 @@ cat <<EOF
 
 This server should also be used to host the local-registry. Local Registry is running on registry.{{ dns.clusterid }}.{{ dns.domain }}:5000
 
-While creating install-config.yaml
+While creating install-config.yml
         - Use updated pull secret file with registry credentials located at ~/.openshift/pull-secret-updated
         - Use registry certificate file located at /opt/registry/certs/domain.crt
 
-Note: Refer docs/examples/install-config-local-registry-example.yaml
+Note: Refer docs/examples/install-config-local-registry-example.yml
 
 (See https://docs.openshift.com/container-platform/latest/installing/install_config/installing-restricted-networks-preparations.html for more details)
 
@@ -122,7 +122,7 @@ This server should also be used as the install node. Apache is running on http:/
 Quickstart Notes:
 	mkdir ~/install
 	cd ~/install
-	vi install-config.yaml
+	vi install-config.yml
 	openshift-install create ignition-configs
 	cp *.ign /var/www/html/ignition/
 	chmod o+r /var/www/html/ignition/*.ign
@@ -161,7 +161,7 @@ Thats it! Right now, this is an "opinionated" setup (there is no "how do I set t
 
 Once it's setup, create a PVC for the registry (an example of one has been provided)
 
-	oc create -f /usr/local/src/registry-pvc.yaml -n openshift-image-registry
+	oc create -f /usr/local/src/registry-pvc.yml -n openshift-image-registry
 
 Check that with "oc get pv" and "oc get pvc -n openshift-image-registry".
 
