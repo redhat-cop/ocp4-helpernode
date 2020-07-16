@@ -16,7 +16,7 @@ cd coreos-iso-maker
 
 ## Configuring ISO Maker
 
-Onced cloned, you'll need to modify the `group_vars/all.yml` file to match your environment.
+Onced cloned, you'll need to modify the `group_vars/all.yaml` file to match your environment.
 
 ```yaml
 ---
@@ -49,7 +49,7 @@ The `iso_checksum` is another thing you need to change that can also be found on
 
 Take note that `rhcos_bios` is the name of your bios file on the helpernode.
 
-You also need to edit the `inventory.yml` file based on your environment.
+You also need to edit the `inventory.yaml` file based on your environment.
 
 ```
 ---
@@ -83,13 +83,13 @@ all:
 
 ## ISO Maker Hacking Required
 
-In the `playbook-single.yml` I had to modify the `get_url` task to the right `url`. I needed to add a `.3` in order to download the right URL. Here is a diff of the file...
+In the `playbook-single.yaml` I had to modify the `get_url` task to the right `url`. I needed to add a `.3` in order to download the right URL. Here is a diff of the file...
 
 ```
-diff --git a/playbook-single.yml b/playbook-single.yml
+diff --git a/playbook-single.yaml b/playbook-single.yaml
 index eb8e52a..679a6cc 100644
---- a/playbook-single.yml
-+++ b/playbook-single.yml
+--- a/playbook-single.yaml
++++ b/playbook-single.yaml
 @@ -16,7 +16,7 @@
    - block:
      - name: Get the original ISO
@@ -120,7 +120,7 @@ restorecon -vR /var/www/html
 Now run the playbook.
 
 ```
-ansible-playbook playbook-single.yml
+ansible-playbook playbook-single.yaml
 ```
 
 The playbook will create the ISO file `/tmp/rhcos_install-cluster.iso`. You can use this to boot all your nodes.

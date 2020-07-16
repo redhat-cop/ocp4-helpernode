@@ -190,7 +190,7 @@ To find the latest nighly build links:
 * [Install Artifacts](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/)
 * [Client and Installer](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/)
 
-The [default](../vars/main.yml#L4-L8) is to use the latest stable OpenShift 4 release
+The [default](../vars/main.yaml#L4-L8) is to use the latest stable OpenShift 4 release
 
 > Also, you can point this to ANY apache server...not just the OpenShift 4 mirrors (*cough* *cough* disconnected hint here *cough* *cough*)
 

@@ -175,7 +175,7 @@ cp docs/examples/vars.yaml .
 Run the playbook to setup your helper node
 
 ```
-ansible-playbook -e @vars.yaml tasks/main.yml
+ansible-playbook -e @vars.yaml tasks/main.yaml
 ```
 
 After it is done run the following to get info about your environment and some install help
@@ -254,16 +254,16 @@ Create the installation manifests
 openshift-install create manifests
 ```
 
-Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
+Edit the `manifests/cluster-scheduler-02-config.yaml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
 
 ```shell
-$ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+$ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yaml
 ```
 
 It should look something like this after you edit it.
 
 ```shell
-$ cat manifests/cluster-scheduler-02-config.yml
+$ cat manifests/cluster-scheduler-02-config.yaml
 apiVersion: config.openshift.io/v1
 kind: Scheduler
 metadata:

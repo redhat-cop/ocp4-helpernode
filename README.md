@@ -76,7 +76,7 @@ See the `vars.yaml` [documentaion page](docs/vars-doc.md) for more info about wh
 Once you edited your `vars.yaml` file; run the playbook
 
 ```
-ansible-playbook -e @vars.yaml tasks/main.yml
+ansible-playbook -e @vars.yaml tasks/main.yaml
 ```
 
 ## Helper Script

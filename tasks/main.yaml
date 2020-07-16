@@ -3,9 +3,9 @@
 
 - hosts: all
   vars_files:
-    - ../vars/main.yml
+    - ../vars/main.yaml
   handlers:
-  - import_tasks: ../handlers/main.yml
+  - import_tasks: ../handlers/main.yaml
 
   # According to RFC 952, and RFC 1123, also RFC about SRV records should be taken into account)
   # underscores in hostnames are illegal.
@@ -274,20 +274,20 @@
       vars:
         role: bootstrap
         mac: "{{ bootstrap.macaddr }}"
-      include_tasks: generate_grub.yml
+      include_tasks: generate_grub.yaml
 
     - name: generate grub entry (masters)
       vars:
         role: master
         mac: "{{ item.macaddr }}"
-      include_tasks: generate_grub.yml
+      include_tasks: generate_grub.yaml
       with_items: "{{ masters }}"
 
     - name: generate grub entry (workers)
       vars:
         role: worker
         mac: "{{ item.macaddr }}"
-      include_tasks: generate_grub.yml
+      include_tasks: generate_grub.yaml
       with_items: "{{ workers }}"
     when: not staticips and ppc64le
 
