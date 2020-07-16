@@ -292,6 +292,15 @@ INFO It is now safe to remove the bootstrap resources
 
 ...you can continue....at this point you can delete the bootstrap server.
 
+**Note:**
+If the LPARs are using SEA (ibmveth driver), then the following settings need to be applied to all the OCP nodes
+to avoid install failures due to packet drop issues. SSH to the OCP nodes from helpernode and apply the settings.
+```
+sudo sysctl -w net.ipv4.route.min_pmtu=1450
+sudo sysctl -w net.ipv4.ip_no_pmtu_disc=1
+echo 'net.ipv4.route.min_pmtu = 1450' | sudo tee --append /etc/sysctl.d/88-sysctl.conf > /dev/null
+echo 'net.ipv4.ip_no_pmtu_disc = 1' | sudo tee --append /etc/sysctl.d/88-sysctl.conf > /dev/null
+```
 
 ## Finish Install
 

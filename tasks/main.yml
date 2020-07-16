@@ -443,6 +443,34 @@
       path: /usr/local/bin/README.md
       state: absent
 
+  - name: Create helm source directory
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    with_items:
+      - /usr/local/src/helm
+
+  - name: Downloading helm source binary tarball
+    get_url:
+      url: "{{ helm_source }}"
+      dest: /usr/local/src/helm/helm-client.tar.gz
+
+  - name: Unarchiving helm tarball
+    unarchive:
+      src: /usr/local/src/helm/helm-client.tar.gz
+      dest: /usr/local/src/helm
+      remote_src: yes
+
+  - name: Copy helm cli to bin directory
+    copy:
+      src: /usr/local/src/helm/linux-amd64/helm
+      dest: /usr/local/bin/helm
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: true
+
   - name: Downloading filetranspiler source
     git:
       repo: https://github.com/ashcrow/filetranspiler

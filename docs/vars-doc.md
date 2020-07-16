@@ -173,9 +173,9 @@ This effectively disables DHCP, TFTP, and PXE on the helper. This implicitly mea
 
 **NOTE**: The default setting is `staticips: false` which installs DHCP, TFTP, and PXE.
 
-### Nightly Builds
+### Specifying Artifacts
 
-You can have the helper deploy the nightly builds of OpenShift 4. Adding the following to your `vars.yaml` files will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly
+You can have the helper deploy specific artifacts for a paticular version of OCP. Or, the nightly builds of OpenShift 4 or even OKD. Adding the following to your `vars.yaml` file will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly build:
 
 ```
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
@@ -190,7 +190,17 @@ To find the latest nighly build links:
 * [Install Artifacts](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/)
 * [Client and Installer](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/latest/)
 
-The [default](../vars/main.yml#L4-L8) is to use the latest stable OpenShift 4 release
+You can also point these vars to files local to the helper. This is useful when doing a disconnected insall and you have "sneaker-netted" the artifacts over. For example:
+
+```
+ocp_bios: "file:///tmp/rhcos-42.80.20190828.2-metal-bios.raw.gz"
+ocp_initramfs: "file:///tmp/rhcos-42.80.20190828.2-installer-initramfs.img"
+ocp_install_kernel: "file:///tmp/rhcos-42.80.20190828.2-installer-kernel"
+ocp_client: "file:///tmp/openshift-client-linux-4.2.0-0.nightly-2019-09-16-114316.tar.gz"
+ocp_installer: "file:///tmp/openshift-install-linux-4.2.0-0.nightly-2019-09-16-114316.tar.gz"
+```
+
+The [default](../vars/main.yml#L4-L8) is to use the latest **stable** OpenShift 4 release.
 
 > Also, you can point this to ANY apache server...not just the OpenShift 4 mirrors (*cough* *cough* disconnected hint here *cough* *cough*)
 
@@ -298,6 +308,115 @@ nfs:
 * `nfs.server` - this is the ip address or the hostname of your nfs server
 * `nfs.path` - this is the path the nfs controller is going to mount. **This path MUST exist with the proper permissions!**
 
+### NTP Configuration
+
+If you would like to use your own NTP servers, you can specify them in using the follwing config.
+
+```
+chronyconfig:
+  enabled: true
+  content:
+    - server: 0.centos.pool.ntp.org
+      options: iburst
+    - server: 1.centos.pool.ntp.org
+      options: iburst
+```
+
+* `chronyconfig.enabled` - This will flag the playbook that you want to setup chrony to use a specific config.
+* `content` - This is an array of servers and their options. This eventually makes it's way to [the `chrony.conf` file](../templates/chrony.conf.j2). If you require further `options`, just put them in quotes: `options: "iburst foo bar"`
+
+This playbook does NOT set up Chrony for you, instead it provides you with the `machineConfig` that you can load either pre-install or post-install. After the playbook has ran, you can do one of two things.
+
+__Pre-Install__
+
+When installing OpenShift, there is a step to create the manifests. Here is an example of creating the manifests under the `~/ocp4` directory.
+
+```shell
+openshift-install create manifests
+```
+
+This will create the `manifests` directory and the `openshift` directory under `~/ocp4`
+
+```shell
+# ll ~/ocp4
+total 8
+drwxr-x---. 2 root root 4096 Jul 16 08:08 manifests
+drwxr-x---. 2 root root 4096 Jul 16 08:06 openshift
+```
+
+The playbook created the `machineConfig` files where you cloned the repo. For example, if I cloned the repo in my homedir; it'll be under `~/ocp4-helpernode/machineconfig/`.
+
+```shell
+# ll ~/ocp4-helpernode/machineconfig/
+total 8
+-rw-r--r--. 1 root root 748 Jul 16 07:59 99-master-chrony-configuration.yaml
+-rw-r--r--. 1 root root 748 Jul 16 07:59 99-worker-chrony-configuration.yaml
+```
+
+Copy over these to the `openshift` directory in the installation directory.
+
+```shell
+cp ~/ocp4-helpernode/machineconfig/* ~/ocp4/openshift/
+```
+
+Continue on with the installation. Once done you should have chrony setup pointing to your NTP servers.
+
+```shell
+# oc get machineconfig 99-{master,worker}-chrony-configuration
+NAME                             GENERATEDBYCONTROLLER   IGNITIONVERSION   AGE
+99-master-chrony-configuration                           2.2.0             42s
+99-worker-chrony-configuration                           2.2.0             43s
+```
+
+You can see the config if you login to one of your nodes and take a look at the file.
+
+```shell
+# oc debug node/worker1.ocp4.example.com
+Starting pod/worker1ocp4examplecom-debug ...
+To use host binaries, run `chroot /host`
+Pod IP: 192.168.7.12
+If you don't see a command prompt, try pressing enter.
+sh-4.2# chroot /host
+sh-4.4# cat /etc/chrony.conf 
+server 0.centos.pool.ntp.org iburst
+server 1.centos.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+```
+
+> :bulb: This config should be on all the masters and workers.
+
+__Post-Install__
+
+To set this up post-installation, just apply the `machineConfig` using `oc apply -f`. For example:
+
+```shell
+oc apply  -f ~/ocp4-helpernode/machineconfig/
+```
+
+:warning: This will reboot ALL your nodes (masters/workers) in a "rolling" fashion. You can check this with `oc get nodes`
+
+```shell
+# oc get nodes
+NAME                       STATUS                     ROLES    AGE   VERSION
+master0.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
+master1.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
+master2.ocp4.example.com   Ready,SchedulingDisabled   master   41m   v1.17.1+912792b
+worker0.ocp4.example.com   Ready,SchedulingDisabled   worker   26m   v1.17.1+912792b
+worker1.ocp4.example.com   Ready                      worker   26m   v1.17.1+912792b
+```
+
+
+This should create the `machineConfig`
+
+```shell
+# oc get machineconfig 99-{master,worker}-chrony-configuration
+NAME                             GENERATEDBYCONTROLLER   IGNITIONVERSION   AGE
+99-master-chrony-configuration                           2.2.0             42s
+99-worker-chrony-configuration                           2.2.0             43s
+```
+
 # Example Vars file
 
 Below are example `vars.yaml` files.
@@ -308,3 +427,4 @@ Below are example `vars.yaml` files.
 * [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
 * [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
 * [Example of vars.yaml DHCP and External NFS](examples/vars-nfs.yaml)
+* [Example of vars.yaml which Chrony configuration](examples/vars-chrony.yaml)
