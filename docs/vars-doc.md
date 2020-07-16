@@ -427,3 +427,4 @@ Below are example `vars.yaml` files.
 * [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
 * [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
 * [Example of vars.yaml DHCP and External NFS](examples/vars-nfs.yaml)
+* [Example of vars.yaml which Chrony configuration](examples/vars-chrony.yaml)
