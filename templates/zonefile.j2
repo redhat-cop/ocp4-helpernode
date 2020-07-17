@@ -27,16 +27,16 @@ api-int			IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
-{{ bootstrap.name.split('.')[0] }}		IN	A	{{ bootstrap.ipaddr }}
+{{ bootstrap.name | lower }}		IN	A	{{ bootstrap.ipaddr }}
 ;
 ; Create entries for the master hosts
 {% for m in masters %}
-{{ m.name.split('.')[0] }}		IN	A	{{ m.ipaddr }}
+{{ m.name | lower }}		IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
 ; Create entries for the worker hosts
 {% for w in workers %}
-{{ w.name.split('.')[0] }}		IN	A	{{ w.ipaddr }}
+{{ w.name | lower }}		IN	A	{{ w.ipaddr }}
 {% endfor %}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
