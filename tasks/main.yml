@@ -462,7 +462,7 @@
       dest: /usr/local/src/helm
       remote_src: yes
 
-  - name: Copy helm cli to bin directory
+  - name: Copy helm cli to bin directory for amd64
     copy:
       src: /usr/local/src/helm/linux-amd64/helm
       dest: /usr/local/bin/helm
@@ -470,6 +470,17 @@
       group: root
       mode: '0755'
       remote_src: true
+    when: not ppc64le
+    
+  - name: Copy helm cli to bin directory for ppc64le
+    copy:
+      src: /usr/local/src/helm/linux-ppc64le/helm
+      dest: /usr/local/bin/helm
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: true
+    when: ppc64le
 
   - name: Downloading filetranspiler source
     git:
