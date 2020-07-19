@@ -332,7 +332,7 @@ __Pre-Install__
 When installing OpenShift, there is a step to create the manifests. Here is an example of creating the manifests under the `~/ocp4` directory.
 
 ```shell
-openshift-install create manifests
+openshift-install create manifests --dir=~/ocp4
 ```
 
 This will create the `manifests` directory and the `openshift` directory under `~/ocp4`
