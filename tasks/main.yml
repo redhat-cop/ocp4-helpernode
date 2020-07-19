@@ -480,7 +480,7 @@
       group: root
       mode: '0755'
       remote_src: true
-    when: ppc64le  
+    when: ppc64le
 
   - name: Downloading filetranspiler source
     git:
