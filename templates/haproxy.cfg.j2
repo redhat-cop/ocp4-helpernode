@@ -73,7 +73,7 @@ frontend openshift-api-server
     option httplog
 
 backend openshift-api-server
-    balance source
+    balance leastconn
     mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% for m in masters %}
@@ -87,7 +87,7 @@ frontend machine-config-server
     option httplog
 
 backend machine-config-server
-    balance source
+    balance leastconn
     mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% for m in masters %}
@@ -101,7 +101,7 @@ frontend ingress-http
     option httplog
 
 backend ingress-http
-    balance source
+    balance leastconn
     mode http
 {% for w in workers %}
     server {{ w.name | lower }} {{ w.ipaddr }}:80 check
@@ -114,7 +114,7 @@ frontend ingress-https
     option httplog
 
 backend ingress-https
-    balance source
+    balance leastconn
     mode tcp
 {% for w in workers %}
     server {{ w.name | lower }} {{ w.ipaddr }}:443 check
