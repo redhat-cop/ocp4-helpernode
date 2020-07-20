@@ -113,6 +113,14 @@
       --to-release-image={{ local_registry }}/{{ setup_registry.local_repo }}:{{ setup_registry.release_tag }}
     register: registry
 
+  - name: Generate Local Registry information
+    copy:
+      content: "{{ registry.stdout }}"
+      dest: ../postrun-local-registry-info
+
+  - name: Process Local Registry information
+    shell: "sed -i '1,/Success/d' ../postrun-local-registry-info"
+
   - name: Mirror NFS image (ppc64le)
     when: ppc64le
     shell: "oc image mirror docker.io/ibmcom/nfs-client-provisioner-ppc64le:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner-ppc64le:latest -a ~/.openshift/pull-secret-updated"
