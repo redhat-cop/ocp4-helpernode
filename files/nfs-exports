@@ -1,1 +1,1 @@
-/export	*(rw,sync,root_squash)
+/export	*(rw,sync,no_root_squash)
