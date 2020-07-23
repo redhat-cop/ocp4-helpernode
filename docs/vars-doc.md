@@ -2,6 +2,8 @@
 
 This page gives you an explanation of the variables found in the [vars.yaml](examples/vars.yaml) example given in this repo to help you formulate your own/edit the provided example.
 
+There are [examples provided](#example-vars-file) in this page for various workflows.
+
 ## Disk to install RHCOS
 
 > **OPTIONAL** if doing static ips
