@@ -1,4 +1,5 @@
-- fail:
+- name: Validate values for DNS compatibility
+  fail:
     msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
   when: item is search('{{ chars }}')
   with_items:
