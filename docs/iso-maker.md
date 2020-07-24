@@ -4,6 +4,8 @@ You can create a custom ISO using [Chuckers' ISO Maker repo](https://github.com/
 
 Although very useful, with my opinionated playbook and his opinionated playbook; it makes it difficult to incorporate it within my playbook. Therefore, I've created this little "how to use the ISO maker with the helpernode".
 
+> :rotating_light: This may not work if you're installing a compact cluster!
+
 ## Cloning The Repo
 
 I assume you've done all the steps up to (and including) [creating the ignition files](https://github.com/RedHatOfficial/ocp4-helpernode/blob/master/docs/quickstart-static.md#create-ignition-configs). After the ignition files have been created and copied over to your webserver, clone the ISO maker repo.

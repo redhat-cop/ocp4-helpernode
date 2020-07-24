@@ -216,6 +216,8 @@ openshift-install create manifests
 
 Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
 
+> :rotating_light: Skip this step if you're installing a compact cluster
+
 ```shell
 $ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 ```
