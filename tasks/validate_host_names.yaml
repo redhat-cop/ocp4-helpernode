@@ -13,8 +13,18 @@
   when: item.name is search('{{ chars }}')
   with_items:
   - "{{ masters }}"
+  register: val1
+  ignore_errors: True
+
+- fail:
+    msg: "Please revise your vars.yaml file invalid characters in hostnames"
+  when: item.name is search('{{ chars }}')
+  with_items:
   - "{{ workers }}"
   register: val1
+  when:
+    - workers is defined
+    - workers | length > 0
   ignore_errors: True
 
 - fail:

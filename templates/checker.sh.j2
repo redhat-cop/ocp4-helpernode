@@ -40,6 +40,7 @@ echo ""
 echo "======================"
 echo "DNS Lookup for Workers"
 echo "======================"
+{% if workers is defined %}
 {% for w in workers %}
 echo ""
 echo "{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
@@ -47,6 +48,7 @@ echo "-------------------------------------------------"
 echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
 echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
+{% endif %}
 }
 ###
 dns-etcd () {

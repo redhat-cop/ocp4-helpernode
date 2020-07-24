@@ -35,9 +35,11 @@ registry	IN	A	{{ helper.ipaddr }}
 {% endfor %}
 ;
 ; Create entries for the worker hosts
+{% if workers is defined %}
 {% for w in workers %}
 {{ w.name | lower }}		IN	A	{{ w.ipaddr }}
 {% endfor %}
+{% endif %}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
 {% for m in masters %}
