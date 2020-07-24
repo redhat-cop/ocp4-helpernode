@@ -21,7 +21,7 @@
   when: item.name is search('{{ chars }}')
   with_items:
   - "{{ workers }}"
-  register: val1
+  register: val2
   when:
     - workers is defined
     - workers | length > 0
@@ -29,6 +29,4 @@
 
 - fail:
     msg: "Please revise your vars.yaml file invalid characters in hostnames"
-  when:
-    (val0.failed is defined) or
-    (val1.failed is defined)
+  when: (val0.failed is defined) or (val1.failed is defined) or (var2.failed is defined)
