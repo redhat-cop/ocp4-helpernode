@@ -121,6 +121,11 @@
   - name: Process Local Registry information
     shell: "sed -i '1,/Success/d' ../postrun-local-registry-info"
 
+  - name: Mirror NFS image (x86_64)
+    when: setup_registry.autosync_registry
+    shell: |
+      oc image mirror quay.io/external_storage/nfs-client-provisioner:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest -a ~/.openshift/pull-secret-updated
+
   - name: Mirror NFS image (ppc64le)
     when: ppc64le
     shell: "oc image mirror docker.io/ibmcom/nfs-client-provisioner-ppc64le:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner-ppc64le:latest -a ~/.openshift/pull-secret-updated"

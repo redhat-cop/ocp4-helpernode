@@ -258,6 +258,9 @@
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
+      when:
+        - workers is defined
+        - workers | length > 0
     when: not staticips and not ppc64le
 
   - name: Generate grub2 config files
@@ -289,6 +292,9 @@
         mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
       with_items: "{{ workers }}"
+      when:
+        - workers is defined
+        - workers | length > 0
     when: not staticips and ppc64le
 
 
@@ -413,7 +419,15 @@
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
       loop: 
         - master
+    - name: Generate Chrony machineconfig
+      template:
+        src: ../templates/chrony-machineconfig.j2
+        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+      loop: 
         - worker
+      when:
+        - workers is defined
+        - workers | length > 0
     when: chronyconfig.enabled
 
   - name: Downloading OCP4 client
