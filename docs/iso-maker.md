@@ -4,7 +4,7 @@ You can create a custom ISO using [Chuckers' ISO Maker repo](https://github.com/
 
 Although very useful, with my opinionated playbook and his opinionated playbook; it makes it difficult to incorporate it within my playbook. Therefore, I've created this little "how to use the ISO maker with the helpernode".
 
-> :rotating_light: This may not work if you're installing a compact cluster!
+> :rotating_light: Although this should work with a "compact cluster", CoreOS-ISO-Maker was built with a "full cluster" in mind. YMMV
 
 ## Cloning The Repo
 
