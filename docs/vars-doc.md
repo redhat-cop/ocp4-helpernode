@@ -139,6 +139,8 @@ masters:
 
 Similar to the master section; this sets up worker node configuration. Please note that this is an array.
 
+> :rotating_light: This section is optional if you're installing a compact cluster
+
 ```
 workers:
   - name: "worker0"
@@ -157,7 +159,7 @@ workers:
 * `workers.macaddr` - The mac address for [dhcp reservation](../templates/dhcpd.conf.j2#L22). This option is not needed if you're doing static ips.
 
 
-**NOTE**: At LEAST 2 workers is needed for installation of OpenShift 4
+**NOTE**: At LEAST 2 workers is needed if you're installing a standard version of OpenShift 4
 
 ## Extra sections
 
@@ -204,7 +206,7 @@ ocp_installer: "file:///tmp/openshift-install-linux-4.2.0-0.nightly-2019-09-16-1
 
 The [default](../vars/main.yml#L4-L8) is to use the latest **stable** OpenShift 4 release.
 
-> Also, you can point this to ANY apache server...not just the OpenShift 4 mirrors (*cough* *cough* disconnected hint here *cough* *cough*)
+> Also, you can point this to ANY apache server...not just the OpenShift 4 mirrors (Useful for disconnected installs)
 
 ### Filetranspiler 
 
@@ -429,4 +431,6 @@ Below are example `vars.yaml` files.
 * [Example of vars.yaml using Static IPs with Nightlies](examples/vars-static-nightlies.yaml)
 * [Example of vars.yaml for Power](examples/vars-ppc64le.yaml)
 * [Example of vars.yaml DHCP and External NFS](examples/vars-nfs.yaml)
-* [Example of vars.yaml which Chrony configuration](examples/vars-chrony.yaml)
+* [Example of vars.yaml with Chrony configuration](examples/vars-chrony.yaml)
+* [Example of vars.yaml setting up a Compact Cluster](examples/vars-compact.yaml)
+* [Example of vars.yaml setting up a Compact Cluster with Static IPs](examples/vars-compact-static.yaml)

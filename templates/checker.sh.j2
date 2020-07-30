@@ -31,6 +31,7 @@ echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.
 }
 ###
 dns-workers () {
+{% if workers is defined %}
 echo "======================"
 echo "DNS Config for Workers"
 echo "======================"
@@ -47,6 +48,11 @@ echo "-------------------------------------------------"
 echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
 echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
+{% else %}
+echo "========================"
+echo "WORKERS WERE NOT DEFINED"
+echo "========================"
+{% endif %}
 }
 ###
 dns-etcd () {

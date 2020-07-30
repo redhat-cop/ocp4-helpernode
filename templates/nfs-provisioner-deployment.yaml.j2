@@ -22,7 +22,11 @@ spec:
 {% elif ansible_architecture == "ppc64le" %}
           image: ibmcom/nfs-client-provisioner-ppc64le:latest
 {% else %}
+{% if setup_registry.deploy and  setup_registry.autosync_registry %}
+          image: registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest
+{% else %}
           image: quay.io/external_storage/nfs-client-provisioner:latest
+{% endif %}
 {% endif %}
           volumeMounts:
             - name: nfs-client-root

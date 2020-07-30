@@ -68,7 +68,7 @@ cp docs/examples/vars.yaml .
 
 > :warning: **NOTE**, currently this playbook assumes/is limited to a `/24` network
 
-See the `vars.yaml` [documentaion page](docs/vars-doc.md) for more info about what you can define. There are different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
+See the `vars.yaml` [documentation page](docs/vars-doc.md) for more info about what you can define. There are different options, depending on what you're doing. For example, if you're doing a static ip install vs a dhcp install.
 
 
 ## Run the playbook
