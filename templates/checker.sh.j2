@@ -31,6 +31,7 @@ echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.
 }
 ###
 dns-workers () {
+{% if workers is defined %}
 echo "======================"
 echo "DNS Config for Workers"
 echo "======================"
@@ -47,6 +48,11 @@ echo "-------------------------------------------------"
 echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
 echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
 {% endfor %}
+{% else %}
+echo "========================"
+echo "WORKERS WERE NOT DEFINED"
+echo "========================"
+{% endif %}
 }
 ###
 dns-etcd () {
@@ -106,6 +112,7 @@ This server should also be used to host the local-registry. Local Registry is ru
 While creating install-config.yaml
         - Use updated pull secret file with registry credentials located at ~/.openshift/pull-secret-updated
         - Use registry certificate file located at /opt/registry/certs/domain.crt
+        - Use the new mirrored repository, Refer to the file located at ocp4-helpernode/postrun-local-registry-info
 
 Note: Refer docs/examples/install-config-local-registry-example.yaml
 

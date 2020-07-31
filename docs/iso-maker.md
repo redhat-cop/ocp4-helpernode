@@ -4,6 +4,8 @@ You can create a custom ISO using [Chuckers' ISO Maker repo](https://github.com/
 
 Although very useful, with my opinionated playbook and his opinionated playbook; it makes it difficult to incorporate it within my playbook. Therefore, I've created this little "how to use the ISO maker with the helpernode".
 
+> :rotating_light: Although this should work with a "compact cluster", CoreOS-ISO-Maker was built with a "full cluster" in mind. YMMV
+
 ## Cloning The Repo
 
 I assume you've done all the steps up to (and including) [creating the ignition files](https://github.com/RedHatOfficial/ocp4-helpernode/blob/master/docs/quickstart-static.md#create-ignition-configs). After the ignition files have been created and copied over to your webserver, clone the ISO maker repo.
@@ -22,32 +24,26 @@ Onced cloned, you'll need to modify the `group_vars/all.yml` file to match your 
 ---
 gateway: 192.168.7.1
 netmask: 255.255.255.0
-# VMWare default ens192
-# KVM default ens3
-# Libvirt default enp1s0
 interface: ens3
 dns: 
   - 192.168.7.77
   - 192.168.7.1
 webserver_url: 192.168.7.77
 webserver_port: 8080
-
-# Drive to install RHCOS
-# Libvirt - can be vda
 install_drive: vda
 
-ocp_version: 4.4
-iso_checksum: dc1287165ff5b9d10e729c5541b616d466a9f0ed2e3380d59490503758a4cb24
-iso_name: rhcos-{{ ocp_version }}.3-x86_64-installer.x86_64.iso
+ocp_version: 4.5.2
+iso_checksum: 48e3cbbb632795f1cb4a5713d72c30b438a763468495db69c0a2ca7c7152856a
+iso_name: rhcos-{{ ocp_version }}-x86_64-installer.x86_64.iso
 rhcos_bios: bios.raw.gz
 ...
 ```
 
-Few things to note; I had to add the `.3` in the `iso_name` as well as the extra `x86_64`. This var (`iso_name`) is the name of the ISO at the [OpenShift Mirror](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/).
+Few things to note:
 
-The `iso_checksum` is another thing you need to change that can also be found on the [OpenShift Mirror](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/) in the `sha256sum.txt` file.
-
-Take note that `rhcos_bios` is the name of your bios file on the helpernode.
+* `iso_name` is found on the [mirror site](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/)
+* `iso_checksum` is another thing you need to change that can also be found on the [OpenShift Mirror](https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/) in the `sha256sum.txt` file.
+* `rhcos_bios` is the name of your bios file on the helpernode.
 
 You also need to edit the `inventory.yml` file based on your environment.
 
@@ -80,27 +76,6 @@ all:
           ipv4: 192.168.7.12
 ...
 ```
-
-## ISO Maker Hacking Required
-
-In the `playbook-single.yml` I had to modify the `get_url` task to the right `url`. I needed to add a `.3` in order to download the right URL. Here is a diff of the file...
-
-```
-diff --git a/playbook-single.yml b/playbook-single.yml
-index eb8e52a..679a6cc 100644
---- a/playbook-single.yml
-+++ b/playbook-single.yml
-@@ -16,7 +16,7 @@
-   - block:
-     - name: Get the original ISO
-       get_url:
--        url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_version }}/{{ ocp_version }}.0/{{ iso_name }}
-+        url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_version }}/{{ ocp_version }}.3/{{ iso_name }}
-         dest: /tmp
-         checksum: sha256:{{ iso_checksum }}
-```
-
-I basically changed `https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_version }}/{{ ocp_version }}.0/{{ iso_name }}` to `https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_version }}/{{ ocp_version }}.3/{{ iso_name }}`
 
 ## HelperNode Hacking Required
 

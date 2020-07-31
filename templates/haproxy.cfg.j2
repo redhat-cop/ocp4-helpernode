@@ -103,10 +103,16 @@ frontend ingress-http
 backend ingress-http
     balance leastconn
     mode http
+{% if workers is defined %}
 {% for w in workers %}
-    server {{ w.name | lower }} {{ w.ipaddr }}:80 check
+    server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
 {% endfor %}
-   
+{% else %}
+{% for m in masters %}
+    server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
+{% endfor %}
+{% endif %}
+
 frontend ingress-https
     bind *:443
     default_backend ingress-https
@@ -116,8 +122,14 @@ frontend ingress-https
 backend ingress-https
     balance leastconn
     mode tcp
+{% if workers is defined %}
 {% for w in workers %}
-    server {{ w.name | lower }} {{ w.ipaddr }}:443 check
+    server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
 {% endfor %}
+{% else %}
+{% for m in masters %}
+    server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
+{% endfor %}
+{% endif %}
 
 #---------------------------------------------------------------------

@@ -10,6 +10,24 @@
 
 - block:
   - set_fact:
+      registry:
+        - podman
+        - httpd-tools
+        - jq
+
+  - set_fact:
+      registry_services:
+        - named
+        - firewalld
+        - local-registry
+
+  - set_fact:
+      registry_host: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}"
+      local_registry: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}:5000"
+      release_image: "quay.io/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ setup_registry.release_tag }}"
+
+- block:
+  - set_fact:
       packages:
         - bind
         - bind-utils

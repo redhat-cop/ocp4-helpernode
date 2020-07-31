@@ -23,7 +23,7 @@ api-int			IN	A	{{ helper.ipaddr }}
 ;
 {%if setup_registry %}
 ; Create entry for the local registry
-{{ registry_host.split('.')[0] }}		IN	A	{{ helper.ipaddr }}
+registry        IN  A    {{ helper.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
@@ -35,9 +35,11 @@ api-int			IN	A	{{ helper.ipaddr }}
 {% endfor %}
 ;
 ; Create entries for the worker hosts
+{% if workers is defined %}
 {% for w in workers %}
 {{ w.name | lower }}		IN	A	{{ w.ipaddr }}
 {% endfor %}
+{% endif %}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
 {% for m in masters %}

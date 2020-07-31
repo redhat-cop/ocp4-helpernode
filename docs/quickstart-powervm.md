@@ -216,6 +216,8 @@ openshift-install create manifests
 
 Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
 
+> :rotating_light: Skip this step if you're installing a compact cluster
+
 ```shell
 $ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 ```
@@ -292,6 +294,15 @@ INFO It is now safe to remove the bootstrap resources
 
 ...you can continue....at this point you can delete the bootstrap server.
 
+**Note:**
+If the LPARs are using SEA (ibmveth driver), then the following settings need to be applied to all the OCP nodes
+to avoid install failures due to packet drop issues. SSH to the OCP nodes from helpernode and apply the settings.
+```
+sudo sysctl -w net.ipv4.route.min_pmtu=1450
+sudo sysctl -w net.ipv4.ip_no_pmtu_disc=1
+echo 'net.ipv4.route.min_pmtu = 1450' | sudo tee --append /etc/sysctl.d/88-sysctl.conf > /dev/null
+echo 'net.ipv4.ip_no_pmtu_disc = 1' | sudo tee --append /etc/sysctl.d/88-sysctl.conf > /dev/null
+```
 
 ## Finish Install
 
@@ -356,7 +367,7 @@ The OpenShift 4 web console will be running at `https://console-openshift-consol
 
 ## Upgrade
 
-If you didn't install the latest 4.3.Z release then just run the following.
+If you didn't install the latest release, then just run the following to upgrade.
 
 ```
 oc adm upgrade --to-latest
