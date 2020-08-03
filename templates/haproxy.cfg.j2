@@ -101,8 +101,8 @@ frontend ingress-http
     option httplog
 
 backend ingress-http
-    balance leastconn
-    mode http
+    balance source
+    mode tcp
 {% if workers is defined %}
 {% for w in workers %}
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
@@ -112,7 +112,7 @@ backend ingress-http
     server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
 {% endfor %}
 {% endif %}
-
+   
 frontend ingress-https
     bind *:443
     default_backend ingress-https

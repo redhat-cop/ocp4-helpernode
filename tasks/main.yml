@@ -505,7 +505,7 @@
       mode: '0755'
       remote_src: true
     when: not ppc64le
-
+    
   - name: Copy helm cli to bin directory for ppc64le
     copy:
       src: /usr/local/src/helm/linux-ppc64le/helm
