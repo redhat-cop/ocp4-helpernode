@@ -97,11 +97,11 @@ backend machine-config-server
 frontend ingress-http
     bind *:80
     default_backend ingress-http
-    mode http
+    mode tcp
     option httplog
 
 backend ingress-http
-    balance source
+    balance leastconn
     mode tcp
 {% if workers is defined %}
 {% for w in workers %}
