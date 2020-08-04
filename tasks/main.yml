@@ -236,7 +236,7 @@
     - name: Set the bootstrap specific tftp file
       template:
         src: ../templates/pxe-bootstrap.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | regex_replace (':', '-')}}"
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
         mode: 0555
       notify:
         - restart tftp
