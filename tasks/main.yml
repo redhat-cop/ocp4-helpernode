@@ -244,7 +244,7 @@
     - name: Set the master specific tftp files
       template:
         src: ../templates/pxe-master.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | lower | regex_replace (':', '-')}}"
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
       with_items: "{{ masters | lower }}"
       notify:
@@ -253,7 +253,7 @@
     - name: Set the worker specific tftp files
       template:
         src: ../templates/pxe-worker.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | lower | regex_replace (':', '-')}}"
+        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
       with_items: "{{ workers | lower }}"
       notify:
