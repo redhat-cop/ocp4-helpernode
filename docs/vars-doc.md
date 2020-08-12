@@ -35,8 +35,8 @@ helper:
 This is how it breaks down
 
 * `helper.name` - *REQUIRED*: This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion")
-* `helper.ipaddr` - *REQUIRED* Set this to the current IP address of the helper. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
-* `helper.networkifacename` - *OPTIONAL*: By default the playbook uses `{{ ansible_default_ipv4.interface }}` for the interface of the helper. This option can be set to override the interface used for the helper (if, for example, you're on a dual homed network or your helper has more than one interface).
+* `helper.ipaddr` - *REQUIRED* Set this to the current IP address of the helper. In case of high availability cluster, set this to the virtual IP address of the helpernodes. This is used to set up the [reverse dns definition](../templates/named.conf.j2#L65)
+* `helper.networkifacename` - *OPTIONAL*: By default the playbook uses `{{ ansible_default_ipv4.interface }}` for the interface of the helper or helpernodes (In case of high availability). This option can be set to override the interface used for the helper or helpernodes (if, for example, you're on a dual homed network or your helper has more than one interface).
 
 **NOTE**: The `helper.networkifacename` is the ACTUAL name of the interface, NOT the NetworkManager name (you should _NEVER_ need to set it to something like `System eth0`. Set it to what you see in `ip addr`)
 
@@ -259,6 +259,32 @@ other:
 ```
 
 You can omit `macaddr` if using `staticips=true`
+
+### High Availability section
+
+**OPTIONAL**
+
+This section sets up the configuration for installing a high availability cluster. Please note that `high_availability.helpernodes` is an array.
+
+```
+high_availability:
+  helpernodes:
+    - name: "helper-0"
+      ipaddr: "192.168.67.2"
+      state: MASTER
+      priority: 100
+    - name: "helper-1"
+      ipaddr: "192.168.67.3"
+      state: BACKUP
+      priority: 90
+```
+
+* `high_availability.helpernodes.name` - The hostname (**__WITHOUT__** the fqdn) of the helpernode you want to set
+* `high_availability.helpernodes.ipaddr` - The IP address that you want to set (this modifies the [dns zonefile](../templates/zonefile.j2#L20))
+* `high_availability.helpernodes.state` - The initial state of the helpernode that you want to set (MASTER|BACKUP)
+* `high_availability.helpernodes.priority` - The priority of the helpernode that you want to set (0-255), and the helpernodes configured as state MASTER should have a priority value greater than the helpernodes configured as state BACKUP.
+
+**NOTE**: Ensure you update `inventory` file appropriately to run the playbook on all the helpernodes. For more information refer [inventory doc](inventory-ha-doc.md).
 
 ### Local Registry
 

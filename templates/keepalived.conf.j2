@@ -1,0 +1,31 @@
+{% for h in high_availability.helpernodes %}
+{%if h.name == ansible_hostname %}
+global_defs {
+router_id ovp_vrrp
+}
+
+vrrp_script haproxy_check {
+script "killall -0 haproxy"
+interval 2
+weight 2
+}
+
+vrrp_instance OCP_LB {
+   state {{ h.state }}
+   interface {{ networkifacename }}
+   virtual_router_id {{ helper.ipaddr.split('.')[3] }}
+   priority {{ h.priority }}
+   virtual_ipaddress {
+     {{ helper.ipaddr }}
+   }
+   track_script {
+     haproxy_check
+   }
+authentication {
+      auth_type PASS
+      auth_pass {{ password.stdout }}
+   }
+}
+{% endif %}
+{% endfor %}
+

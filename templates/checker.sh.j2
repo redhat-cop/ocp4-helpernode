@@ -151,7 +151,7 @@ EOF
 services () {
 echo "Status of services:"
 echo "==================="
-for i in dhcpd named haproxy httpd tftp local-registry; do echo -e "Status of $i svc \t\t-> $(systemctl status --no-pager $i | grep --color Active)"; done
+for i in dhcpd named haproxy httpd tftp keepalived local-registry; do echo -e "Status of $i svc \t\t-> $(systemctl status --no-pager $i | grep --color Active)"; done
 }
 ###
 nfs-info () {
