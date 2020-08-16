@@ -28,8 +28,8 @@ max-lease-time 14400;
 		host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
 {% endfor %}
 {% endif %}
-		# this will not give out addresses to hosts not listed above
-		deny unknown-clients;
+		# uncomment below if you do not want to give out addresses to hosts not listed above
+		# deny unknown-clients;
 
 		# this is PXE specific  
 {% if ppc64le is sameas true %}
