@@ -1,30 +1,24 @@
 ---
 # Setup OCP4 Helper Node
-
-- hosts: all
-  vars_files:
-    - ../vars/main.yml
-  handlers:
-  - import_tasks: ../handlers/main.yml
-
   # According to RFC 952, and RFC 1123, also RFC about SRV records should be taken into account)
   # underscores in hostnames are illegal.
-  pre_tasks:
   - name: validate hostnames
     import_tasks: validate_host_names.yaml
+    tags: always
 
-  tasks:
+  - name: set setup facts
+    include: set_facts_.yaml
+    tags: always
+
   - name: generate ssh keys
     import_tasks: generate_ssh_keys.yaml
     when: ssh_gen_key
 
-  - name: set setup facts
-    include: set_facts_.yaml
-
   - name: Install needed packages
     package:
-      name: "{{ packages }}"
+      name: "{{ item }}"
       state: present
+    loop: "{{ packages }}"
 
   - name: Install packages for DHCP/PXE install
     package:
@@ -40,7 +34,7 @@
 
   - name: Write out dhcp file
     template:
-      src: ../templates/dhcpd.conf.j2
+      src: dhcpd.conf.j2
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
@@ -48,63 +42,75 @@
 
   - name: Write out named file
     template:
-      src: ../templates/named.conf.j2
+      src: named.conf.j2
       dest: /etc/named.conf
     notify:
       - restart bind
 
-  - name: Installing DNS Serialnumber generator
-    copy:
-      src: ../files/set-dns-serial.sh
-      dest: /usr/local/bin/set-dns-serial.sh
-      mode: '0555'
-
-  - name: Set zone serial number
-    shell: "/usr/local/bin/set-dns-serial.sh"
-    register: dymanicserialnumber
-
+        #  JTH: Removed,  generate serial from ansbile_date_time.epoch
+        #  - name: Installing DNS Serialnumber generator
+        #    template:
+        #      src: ../templates/set-dns-serial.sh.j2
+        #      dest: /usr/local/bin/set-dns-serial.sh
+        #      mode: '0555'
+        #
+        #  - name: Set zone serial number
+        #    shell: "/usr/local/bin/set-dns-serial.sh"
+        #    register: dymanicserialnumber
+        #
   - name: Setting serial number as a fact
     set_fact:
-      serialnumber: "{{ dymanicserialnumber.stdout }}"
+      serialnumber: "{{ ansible_date_time.epoch }}"
   
   - name: Write out "{{ dns.domain | lower }}" zone file
     template:
-      src: ../templates/zonefile.j2
-      dest: /var/named/zonefile.db
+      src: zonefile.j2
+      dest: "/var/named/{{ item.clusterid }}-zonefile.db"
       mode: '0644'
     notify:
       - restart bind
+    loop: "{{ dhcp }}"
   
   - name: Write out reverse zone file
     template:
-      src: ../templates/reverse.j2
-      dest: /var/named/reverse.db
+      src: reverse.j2
+      dest: "/var/named/{{ item.clusterid }}-reverse.db"
       mode: '0644'
     notify:
       - restart bind
+    loop: "{{ dhcp }}"
+
   
   - name: Write out haproxy config file
     template:
-      src: ../templates/haproxy.cfg.j2
+      src: haproxy.cfg.j2
       dest: /etc/haproxy/haproxy.cfg
     notify:
       - restart haproxy
-
+ # end block
+ 
   - name: Copy httpd conf file
     copy:
-      src: ../files/httpd.conf
+      src: httpd.conf
       dest: /etc/httpd/conf/httpd.conf
     notify:
       - restart httpd
+
+  - name: Create apache directories for ignition
+    file:
+      path: "/var/www/html/ignition/{{ item.clusterid }}"
+      state: directory
+      mode: 0755
+    loop: "{{ dhcp }}"
 
   - name: Create apache directories for installing
     file:
       path: "{{ item }}"
       state: directory
       mode: 0755
-    with_items:
-      - /var/www/html/install
-      - /var/www/html/ignition
+    loop:
+      - "/var/www/html/install"
+
 
   - name: Delete OCP4 files, if requested, to download again
     file:
@@ -173,7 +179,7 @@
 
   - name: Copy NFS export conf file
     copy:
-      src: ../files/nfs-exports
+      src: nfs-exports
       dest: /etc/exports
     notify:
       - restart nfs
@@ -226,43 +232,44 @@
 
   - name: Generate pxe config files
     block:
-    - name: Set the default tftp file
-      template:
-        src: ../templates/default.j2
-        dest: /var/lib/tftpboot/pxelinux.cfg/default
-        mode: 0555
-      when: "{{ pxe.generate_default | default(false) }}"
-      notify:
-        - restart tftp
+     - name: Set the default tftp file
+       template:
+         src: default.j2
+         dest: /var/lib/tftpboot/pxelinux.cfg/default
+         mode: 0555
+       when:  pxe.generate_default | default(false)
+       notify:
+         - restart tftp
 
-    - name: Set the bootstrap specific tftp file
-      template:
-        src: ../templates/pxe-bootstrap.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
-        mode: 0555
-      notify:
-        - restart tftp
+     - name: Set the bootstrap specific tftp file
+       template:
+         src: pxe-bootstrap.j2
+         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | lower | regex_replace (':', '-')}}"
+         mode: 0555
+       notify:
+         - restart tftp
+       loop: "{{ bootstrap }}"
 
-    - name: Set the master specific tftp files
-      template:
-        src: ../templates/pxe-master.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ masters | lower }}"
-      notify:
-        - restart tftp
+     - name: Set the master specific tftp files
+       template:
+         src: pxe-master.j2
+         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | lower | regex_replace (':', '-')}}"
+         mode: 0555
+       loop: "{{ masters }}"
+       notify:
+         - restart tftp
 
-    - name: Set the worker specific tftp files
-      template:
-        src: ../templates/pxe-worker.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ workers | lower }}"
-      notify:
-        - restart tftp
-      when:
-        - workers is defined
-        - workers | length > 0
+     - name: Set the worker specific tftp files
+       template:
+         src: pxe-worker.j2
+         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | lower | regex_replace (':', '-')}}"
+         mode: 0555
+       loop: "{{ workers }}"
+       notify:
+         - restart tftp
+       when:
+         - workers is defined
+         - workers | length > 0
     when: not staticips and not ppc64le
 
   - name: Generate grub2 config files
@@ -278,22 +285,23 @@
     - name: generate grub entry (bootstrap)
       vars:
         role: bootstrap
-        mac: "{{ bootstrap.macaddr }}"
+        mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
+      loop: "{{ bootstrap }}"
 
     - name: generate grub entry (masters)
       vars:
         role: master
         mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
-      with_items: "{{ masters }}"
+      loop: "{{ masters }}"
 
     - name: generate grub entry (workers)
       vars:
         role: worker
         mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
-      with_items: "{{ workers }}"
+      loop: "{{ workers }}"
       when:
         - workers is defined
         - workers | length > 0
@@ -302,14 +310,14 @@
 
   - name: Installing TFTP Systemd helper
     copy:
-      src: ../files/start-tftp.sh
+      src: start-tftp.sh
       dest: /usr/local/bin/start-tftp.sh
       mode: '0555'
     when: not staticips
 
   - name: Installing TFTP Systemd unit file
     copy:
-      src: ../files/helper-tftp.service
+      src: helper-tftp.service
       dest: /etc/systemd/system/helper-tftp.service
       mode: '0655'
     when: not staticips
@@ -349,12 +357,12 @@
 
   - name: Set the local resolv.conf file
     template:
-      src: ../templates/resolv.conf.j2
+      src: resolv.conf.j2
       dest: /etc/resolv.conf
 
   - name: Copy info script over
     template:
-      src: ../templates/checker.sh.j2
+      src: checker.sh.j2
       dest: /usr/local/bin/helpernodecheck
       owner: root
       group: root
@@ -362,7 +370,7 @@
 
   - name: Copying over nfs-provisioner rbac
     copy:
-      src: ../files/nfs-provisioner-rbac.yaml
+      src: nfs-provisioner-rbac.yaml
       dest: /usr/local/src/nfs-provisioner-rbac.yaml
       owner: root
       group: root
@@ -370,7 +378,7 @@
 
   - name: Copying over nfs-provisioner deployment
     template:
-      src: ../templates/nfs-provisioner-deployment.yaml.j2
+      src: nfs-provisioner-deployment.yaml.j2
       dest: /usr/local/src/nfs-provisioner-deployment.yaml
       owner: root
       group: root
@@ -378,7 +386,7 @@
 
   - name: Copying over nfs-provisioner storageclass
     copy:
-      src: ../files/nfs-provisioner-sc.yaml
+      src: nfs-provisioner-sc.yaml
       dest: /usr/local/src/nfs-provisioner-sc.yaml
       owner: root
       group: root
@@ -386,7 +394,7 @@
 
   - name: Copying over nfs-provisioner setup script
     copy:
-      src: ../files/nfs-provisioner-setup.sh
+      src: nfs-provisioner-setup.sh
       dest: /usr/local/bin/nfs-provisioner-setup.sh
       owner: root
       group: root
@@ -394,7 +402,7 @@
 
   - name: Copying over a sample PVC file for NFS
     copy:
-      src: ../files/registry-pvc.yaml
+      src: registry-pvc.yaml
       dest: /usr/local/src/registry-pvc.yaml
       mode: '0555'
 
@@ -407,7 +415,7 @@
 
     - name: Create temporary chrony.conf file
       template:
-        src: ../templates/chrony.conf.j2
+        src: chrony.conf.j2
         dest: /tmp/chrony.conf.tmp
 
     - name: slurp contents of temporary chrony.conf file
@@ -417,13 +425,14 @@
 
     - name: Generate Chrony machineconfig
       template:
-        src: ../templates/chrony-machineconfig.j2
+        src: chrony-machineconfig.j2
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
       loop: 
         - master
+
     - name: Generate Chrony machineconfig
       template:
-        src: ../templates/chrony-machineconfig.j2
+        src: chrony-machineconfig.j2
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
       loop: 
         - worker
@@ -510,7 +519,7 @@
 
   - name: Installing filetranspiler
     copy:
-      src: ../files/filetranspiler
+      src: filetranspiler
       dest: /usr/local/bin/filetranspiler
       mode: '0555'
     when: install_filetranspiler
@@ -524,20 +533,26 @@
       dsname: "{{ devicesystemname.stdout }}"
 
   - name: Setting DNS server ip on network interface "{{ dsname }}" to 127.0.0.1
-    shell: 'nmcli con mod "{{ dsname }}" ipv4.dns 127.0.0.1'
+    shell: "nmcli con mod {{ dsname }} ipv4.dns 127.0.0.1"
 
-  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns.clusterid }}.{{ dns.domain | lower }}"
-    shell: 'nmcli con mod  "{{ dsname }}" ipv4.dns-search {{ dns.clusterid }}.{{ dns.domain | lower }}'
+  - name: Setting DNS search path on network interface "{{ dsname }}" to "{{ dns_resolv | lower }}"
+    shell: "nmcli con mod  {{ dsname }} ipv4.dns-search {{ dns_resolv | lower }}"
 
-  - name: Restarting NetworkManager
-    service:
-      name: "{{ item }}"
-      state: restarted
-    with_items:
-      - NetworkManager
-
+    #  JTH: to have NetworkManager not overwrite resolv.conf
+    #       Add /etc/NetworkManager/NetworkManager.conf
+    # [main]
+    # dns=none
+    #
+    #  - name: Restarting NetworkManager
+    #    service:
+    #      name: "{{ item }}"
+    #      state: restarted
+    #    with_items:
+    #      - NetworkManager
+    #
   - name: Setup Local Registry
     when: setup_registry.deploy
+    tags: reg
     block:
     - name: Install registry packages
       package:

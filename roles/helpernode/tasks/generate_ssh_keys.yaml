@@ -15,13 +15,13 @@
     state: present
     backup: yes
     create: yes
-    marker: "# {mark} {{ item.name }} MANAGED BLOCK"
+    marker: "# {mark} {{ item.name }}-{{ item.clusterid }} MANAGED BLOCK"
     block: |
-      Host {{ item.name }}
-        HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}-{{ item.clusterid }}
+        HostName %h.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
-      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: "{{ masters }}"
@@ -31,13 +31,13 @@
     state: present
     backup: yes
     create: yes
-    marker: "# {mark} {{ item.name }} MANAGED BLOCK"
+    marker: "# {mark} {{ item.name }}-{{ item.clusterid }} MANAGED BLOCK"
     block: |
-      Host {{ item.name }}
-        HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}-{{ item.clusterid }}
+        HostName %h.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
-      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: "{{ workers }}"
@@ -50,14 +50,13 @@
     state: present
     backup: yes
     create: yes
-    marker: "# {mark} {{ item.name }} MANAGED BLOCK"
+    marker: "# {mark} {{ item.name }}-{{ item.clusterid }} MANAGED BLOCK"
     block: |
-      Host {{ item.name }}
-        HostName %h.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}-{{ item.clusterid }}
+        HostName %h.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
-      Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
+      Host {{ item.name }}.{{ item.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
-  loop: 
-    - name: "{{ bootstrap.name }}"
+  loop: "{{ bootstrap }}"

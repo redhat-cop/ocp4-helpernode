@@ -1,0 +1,44 @@
+$TTL 1W
+@	IN	SOA	ns1.{{ item.clusterid }}.{{ dns.domain | lower }}.	root (
+			{{ serialnumber	}} ; serial
+			3H		; refresh (3 hours)
+			30M		; retry (30 minutes)
+			2W		; expiry (2 weeks)
+			1W )		; minimum (1 week)
+	IN	NS	ns1.{{ item.clusterid }}.{{ dns.domain | lower }}.
+;
+; syntax is "last octet" and the host must have fqdn with trailing dot
+1       IN      PTR     helper.{{ item.clusterid }}.{{ dns.domain }}.
+
+{% for m in masters %}
+{% if m.clusterid == item.clusterid %}
+{{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ item.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
+{% endfor %}
+;
+{% for b in bootstrap %}
+{% if b.clusterid == item.clusterid %}
+{{ b.ipaddr.split('.')[3] }}	IN	PTR	{{ b.name | lower  }}.{{ item.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
+{% endfor %}
+;
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ item.clusterid }}.{{ dns.domain | lower }}.
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ item.clusterid }}.{{ dns.domain | lower }}.
+;
+{% if workers is defined %}
+{% for w in workers %}
+{% if w.clusterid == item.clusterid %}
+{{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.{{ item.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
+{% endfor %}
+{% endif %}
+;
+{% if other is defined %}
+{% for o in other %}
+{% if o.clusterid == item.clusterid %}
+{{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ item.clusterid }}.{{ dns.domain }}.
+{% endif %}
+{% endfor %}
+;
+{% endif %}
+;EOF

@@ -14,8 +14,8 @@ ExecStart=/usr/bin/podman run   --name local-registry -p 5000:5000 \
                                 -e "REGISTRY_AUTH_HTPASSWD_REALM=Realm" \
                                 -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
                                 -v /opt/registry/certs:/certs:z \
-                                -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
-                                -e REGISTRY_HTTP_TLS_KEY=/certs/domain.pem \
+                                -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/{{ dhcp[0].clusterid }}-domain.crt \
+                                -e REGISTRY_HTTP_TLS_KEY=/certs/{{ dhcp[0].clusterid }}-domain.pem \
                                 {{ setup_registry.registry_image }}
 
 ExecReload=-/usr/bin/podman stop "local-registry"

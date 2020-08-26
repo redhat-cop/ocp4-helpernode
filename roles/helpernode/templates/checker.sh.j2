@@ -12,96 +12,110 @@ echo ""
 }
 ##
 dns-masters () {
+{% for d in dhcp %}
 echo "======================"
-echo "DNS Config for Masters"
+echo "DNS Config for ( {{ d.clusterid }}.{{ dns.domain }} )  Masters"
 echo "======================"
 echo ""
-egrep --color=none -A {{ (masters | length) + 1 }} '^; Create entries for the master hosts' /var/named/zonefile.db
+egrep --color=none -A {{ (masters | length) + 1 }} '^; Create entries for the master hosts' /var/named/{{ d.clusterid }}-zonefile.db
 echo ""
 echo "======================"
-echo "DNS Lookup for Masters"
+echo "DNS Lookup for ( {{ d.clusterid }}.{{ dns.domain }} ) Masters"
 echo "======================"
 {% for m in masters %}
+{% if m.clusterid == d.clusterid %}
 echo ""
-echo "{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+echo "{{ m.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
+echo "IP: $(dig @localhost {{ m.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }} +short) +short)"
+{% endif %}
+{% endfor %}
 {% endfor %}
 }
 ###
 dns-workers () {
+{% for d in dhcp %}
 {% if workers is defined %}
 echo "======================"
-echo "DNS Config for Workers"
+echo "DNS Config for ( {{ d.clusterid }}.{{ dns.domain }} ) Workers"
 echo "======================"
 echo ""
-egrep --color=none -A {{ (workers | length) + 1 }} '^; Create entries for the worker' /var/named/zonefile.db
+egrep --color=none -A {{ (workers | length) + 1 }} '^; Create entries for the worker' /var/named/{{ d.clusterid }}-zonefile.db
 echo ""
 echo "======================"
-echo "DNS Lookup for Workers"
+echo "DNS Lookup for ( {{ d.clusterid }}.{{ dns.domain }} ) Workers"
 echo "======================"
 {% for w in workers %}
+{% if w.clusterid == d.clusterid %}
 echo ""
-echo "{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+echo "{{ w.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short) +short)"
+echo "IP: $(dig @localhost {{ w.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ w.name | lower }}.{{ d.clusterid }}.{{ dns.domain | lower }} +short) +short)"
+{% endif %}
 {% endfor %}
 {% else %}
 echo "========================"
-echo "WORKERS WERE NOT DEFINED"
+echo "WORKERS WERE NOT DEFINED for ( {{ d.clusterid }}.{{ dns.domain }} )"
 echo "========================"
 {% endif %}
+{% endfor %}
 }
 ###
 dns-etcd () {
+{% for d in dhcp %}
 echo "==================="
-echo "DNS Config for ETCD"
+echo "DNS Config for ( {{ d.clusterid }}.{{ dns.domain }} ) ETCD"
 echo "==================="
 echo ""
-egrep --color=none -A 4 '^; The ETCd cluster lives' /var/named/zonefile.db
+egrep --color=none -A 4 '^; The ETCd cluster lives' /var/named/{{ d.clusterid }}-zonefile.db
 echo ""
 echo "==================="
-echo "DNS lookup for ETCD"
+echo "DNS lookup for ( {{ d.clusterid }}.{{ dns.domain }} ) ETCD"
 echo "==================="
 for i in etcd-{0..2}
 do
-  dig @localhost ${i}.{{ dns.clusterid }}.{{ dns.domain | lower }} +short
+  dig @localhost ${i}.{{ d.clusterid }}.{{ dns.domain | lower }} +short
 done
 echo ""
 echo "==================="
-echo "SRV config for ETCD"
+echo "SRV config for ( {{ d.clusterid }}.{{ dns.domain }} ) ETCD"
 echo "==================="
 echo ""
-egrep --color=none -A 4 '^; The SRV' /var/named/zonefile.db
+egrep --color=none -A 4 '^; The SRV' /var/named/{{ d.clusterid }}-zonefile.db
 echo ""
 echo "==================="
-echo "SRV lookup for ETCD"
+echo "SRV lookup for ( {{ d.clusterid }}.{{ dns.domain }} ) ETCD"
 echo "==================="
-dig @localhost _etcd-server-ssl._tcp.{{ dns.clusterid }}.{{ dns.domain | lower }} SRV +short
+dig @localhost _etcd-server-ssl._tcp.{{ d.clusterid }}.{{ dns.domain | lower }} SRV +short
 echo ""
+{% endfor %}
 }
 ###
 dns-other () {
+{% for d in dhcp %}
 echo "======================"
-echo "DNS Config for Others"
+echo "DNS Config for ( {{ d.clusterid }}.{{ dns.domain }} ) Others"
 echo "======================"
 echo ""
-egrep --color=none -A {{ (other | default([]) | length) + 1 }} '^; Create entries for the other' /var/named/zonefile.db
+egrep --color=none -A {{ (other | default([]) | length) + 1 }} '^; Create entries for the other' /var/named/{{ d.clusterid }}-zonefile.db
 echo ""
 echo "======================"
-echo "DNS Lookup for Others"
+echo "DNS Lookup for ( {{ d.clusterid }}.{{ dns.domain }} ) Others"
 echo "======================"
 {% if other is defined %}
 {% for o in other %}
+{% if o.clusterid == d.clusterid %}
 echo ""
-echo "{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}"
+echo "{{ o.name }}.{{ d.clusterid }}.{{ dns.domain }}"
 echo "-------------------------------------------------"
-echo "IP: $(dig @localhost {{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short)"
-echo "Reverse: $(dig @localhost -x $(dig @localhost {{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }} +short) +short)"
+echo "IP: $(dig @localhost {{ o.name }}.{{ d.clusterid }}.{{ dns.domain }} +short)"
+echo "Reverse: $(dig @localhost -x $(dig @localhost {{ o.name }}.{{ d.clusterid }}.{{ dns.domain }} +short) +short)"
+{% endif %}
 {% endfor %}
 {% endif %}
+{% endfor %}
 }
 ###
 local-registry-info () {

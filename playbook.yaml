@@ -1,0 +1,11 @@
+---
+# Setup OCP4 Helper Node
+
+- hosts: all
+  # According to RFC 952, and RFC 1123, also RFC about SRV records should be taken into account)
+  # underscores in hostnames are illegal.
+  tasks:
+    - include_role:
+        name: helpernode
+      tags: always
+

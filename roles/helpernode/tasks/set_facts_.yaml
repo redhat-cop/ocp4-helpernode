@@ -8,6 +8,25 @@
     - set_fact:
         networkifacename: "{{ ansible_default_ipv4.interface }}"
 
+- name: Get network device system name
+  shell: "nmcli -t dev show {{ networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
+  register: devicesystemname
+
+- set_fact:
+    dns_resolv: ''
+
+- name: Setting network resolvers 
+  set_fact:
+    dns_resolv: "{{ item }}.{{ dns.domain }},{{ dns_resolv }}"
+  loop: "{{ dns.clusterid }}"
+
+- set_fact:
+    dns_resolv: "{{ dns_resolv | regex_replace('^(.+)(\\,)$', '\\1') }}"
+
+- name: Setting network device system name as a fact
+  set_fact:
+    dsname: "{{ devicesystemname.stdout }}"
+
 - block:
   - set_fact:
       registry:
@@ -101,7 +120,7 @@
 
   - set_fact:
       registry_host: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}"
-      local_registry: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}:5000"
+      local_registry: "registry.{{ dhcp[0].clusterid }}.{{ dns.domain | lower  }}:5000"
       release_image: "quay.io/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ setup_registry.release_tag }}"
 
   # See Fedora Wiki for changes:

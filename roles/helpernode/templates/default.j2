@@ -1,0 +1,23 @@
+default menu.c32   
+ prompt 0   
+ timeout 900
+ ONTIMEOUT   
+ menu title ######## PXE Boot Menu ########  
+{% set cnt = namespace(value=1) %} 
+{% for d in dhcp %}
+ label {{ cnt.value }}  
+ menu label ^{{ cnt.value }}) Install Bootstrap Node for {{ d.clusterid|upper }}.{{ dns.domain|upper }} Cluster
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip=dhcp coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ d.clusterid }}/bootstrap.ign
+{% set cnt.value = cnt.value + 1 %}
+ label {{ cnt.value }}
+ menu label ^{{ cnt.value }}) Install Master Node for {{ d.clusterid|upper }}.{{ dns.domain|upper }} Cluster
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip=dhcp coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ d.clusterid }}/master.ign
+{% set cnt.value = cnt.value + 1 %}
+ label {{ cnt.value }}
+ menu label ^{{ cnt.value }}) Install Worker Node for {{ d.clusterid|upper }}.{{ dns.domain|upper }} Cluster
+ kernel rhcos/kernel
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip=dhcp coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ d.clusterid }}/worker.ign
+{% set cnt.value = cnt.value + 1 %}
+{% endfor %}
