@@ -56,17 +56,19 @@ zone "." IN {
 	file "named.ca";
 };
 
+{% for c in dhcp %}
 ########### Add what's between these comments ###########
-zone "{{ dns.clusterid }}.{{ dns.domain }}" IN {
+zone "{{ c.clusterid }}.{{ dns.domain }}" IN {
 	type	master;
-	file	"zonefile.db";
+	file	"{{ c.clusterid }}-zonefile.db";
 };
 
-zone "{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ helper.ipaddr.split('.')[0] }}.in-addr.arpa" IN {
+zone "{{ c.ipaddr.split('.')[2] }}.{{ c.ipaddr.split('.')[1] }}.{{ c.ipaddr.split('.')[0] }}.in-addr.arpa" IN {
 	type	master;
-	file	"reverse.db";
+	file	"{{ c.clusterid }}-reverse.db";
 };
 ########################################################
+{% endfor %}
 
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";

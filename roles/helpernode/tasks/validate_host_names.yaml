@@ -2,9 +2,9 @@
   fail:
     msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
   when: item is search('{{ chars }}')
-  with_items:
+  loop:
   - "{{ dns.domain }}"
   - "{{ helper.name }}"
-  - "{{ bootstrap.name }}"
+  - "{{ bootstrap }}"
   - "{{ masters }}"
   - "{{ workers | default('') }}"

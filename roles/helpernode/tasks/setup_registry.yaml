@@ -12,39 +12,45 @@
 
 - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
   openssl_privatekey:
-    path: /opt/registry/certs/domain.pem
+    path: "/opt/registry/certs/{{ item.clusterid }}-domain.pem"
+  loop: "{{ dhcp }}"
 
 - name: Generate an OpenSSL Certificate Signing Request
   openssl_csr:
-    path: /opt/registry/certs/domain.csr
-    privatekey_path: /opt/registry/certs/domain.pem
+    path: "/opt/registry/certs/{{ item.clusterid }}-domain.csr"
+    privatekey_path: "/opt/registry/certs/{{ item.clusterid }}-domain.pem"
     basic_constraints:
       - CA:TRUE
     basic_constraints_critical: yes
-    common_name: "{{ registry_host }}"
+    #common_name: "{{ registry_host }}"
+    common_name: "registry.{{ item.clusterid }}.{{ dns.domain }}"
+  loop: "{{ dhcp }}"
 
 - name: Generate a Self Signed OpenSSL certificate
   openssl_certificate:
-    path: /opt/registry/certs/domain.crt
-    privatekey_path: /opt/registry/certs/domain.pem
-    csr_path: /opt/registry/certs/domain.csr
+    path: "/opt/registry/certs/{{ item.clusterid }}-domain.crt"
+    privatekey_path: "/opt/registry/certs/{{ item.clusterid }}-domain.pem"
+    csr_path: "/opt/registry/certs/{{ item.clusterid }}-domain.csr"
     provider: selfsigned
+  loop: "{{ dhcp }}"
 
 - name: Copy Self Signed OpenSSL certificate
   copy:
-    src: /opt/registry/certs/domain.crt
-    dest: /etc/pki/ca-trust/source/anchors/domain.crt
+    src: "/opt/registry/certs/{{ item.clusterid }}-domain.crt"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.clusterid }}-domain.crt"
     remote_src: yes
     force: yes
+  loop: "{{ dhcp }}"
 
 - name: Add the Self Signed OpenSSL certificate to your list of trusted certificates
   shell: |
     update-ca-trust || true
-    cat /etc/pki/tls/certs/ca-bundle.trust.crt | grep {{ registry_host }} | wc -l
+    cat /etc/pki/tls/certs/ca-bundle.trust.crt | grep registry.{{ item.clusterid }}.{{ dns.domain }} | wc -l
   register: cert_trust
   until: cert_trust.stdout|int == 1
   retries: 3
   delay: 10
+  loop: "{{ dhcp }}"
 
 - name: Create the user and password for local registry
   shell: htpasswd -bBc /opt/registry/auth/htpasswd admin admin
@@ -53,7 +59,7 @@
 
 - name: Generate local-registry service file
   template:
-    src: ../templates/local-registry.service.j2
+    src: local-registry.service.j2
     dest: /etc/systemd/system/local-registry.service
     mode: 0655
 
@@ -107,7 +113,7 @@
 
   - name: Mirror the registry
     when: setup_registry.autosync_registry
-    shell: oc adm -a ~/.openshift/pull-secret-updated release mirror \
+    shell: /usr/local/bin/oc adm -a ~/.openshift/pull-secret-updated release mirror \
       --from={{ release_image }} \
       --to={{ local_registry }}/{{ setup_registry.local_repo }} \
       --to-release-image={{ local_registry }}/{{ setup_registry.local_repo }}:{{ setup_registry.release_tag }}
@@ -124,8 +130,8 @@
   - name: Mirror NFS image (x86_64)
     when: setup_registry.autosync_registry
     shell: |
-      oc image mirror quay.io/external_storage/nfs-client-provisioner:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest -a ~/.openshift/pull-secret-updated
+      /usr/local/bin/oc image mirror quay.io/external_storage/nfs-client-provisioner:latest {{ local_registry}}/nfs-client-provisioner:latest -a ~/.openshift/pull-secret-updated
 
   - name: Mirror NFS image (ppc64le)
     when: ppc64le
-    shell: "oc image mirror docker.io/ibmcom/nfs-client-provisioner-ppc64le:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner-ppc64le:latest -a ~/.openshift/pull-secret-updated"
+    shell: "/usr/local/bin/oc image mirror docker.io/ibmcom/nfs-client-provisioner-ppc64le:latest {{ local_registry}}/nfs-client-provisioner-ppc64le:latest -a ~/.openshift/pull-secret-updated"

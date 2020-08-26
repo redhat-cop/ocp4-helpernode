@@ -67,70 +67,98 @@ listen stats
     monitor-uri /healthz
 
 
-frontend openshift-api-server
+{% for d in dhcp %}
+frontend openshift-api-server-{{ d.clusterid }}
     bind *:6443
-    default_backend openshift-api-server
+    default_backend openshift-api-server-{{ d.clusterid }}
     mode tcp
     option tcplog
 
-backend openshift-api-server
+backend openshift-api-server-{{ d.clusterid }}
     balance source
     mode tcp
-    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
-{% for m in masters %}
-    server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
+{% for b in bootstrap %}
+{% if b.clusterid == d.clusterid %}
+    server {{ b.name | lower }} {{ b.ipaddr }}:6443 check
+{% endif %}
 {% endfor %}
-    
-frontend machine-config-server
+{% for m in masters %}
+{% if m.clusterid == d.clusterid %}
+    server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% for d in dhcp %}
+frontend machine-config-server-{{ d.clusterid }}
     bind *:22623
-    default_backend machine-config-server
+    default_backend machine-config-server-{{ d.clusterid }}
     mode tcp
     option tcplog
 
-backend machine-config-server
+backend machine-config-server-{{ d.clusterid }}
     balance source
     mode tcp
-    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
+{% for b in bootstrap %}
+{% if b.clusterid == d.clusterid %}
+    server {{ b.name | lower }} {{ b.ipaddr }}:22623 check
+{% endif %}
+{% endfor %}
 {% for m in masters %}
+{% if m.clusterid == d.clusterid %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
+{% endif %}
+{% endfor %}
 {% endfor %}
   
-frontend ingress-http
+{% for d in dhcp %}
+frontend ingress-http-{{ d.clusterid }}
     bind *:80
-    default_backend ingress-http
+    default_backend ingress-http-{{ d.clusterid }}
     mode tcp
     option tcplog
 
-backend ingress-http
+backend ingress-http-{{ d.clusterid }}
     balance source
     mode tcp
 {% if workers is defined %}
 {% for w in workers %}
+{% if w.clusterid == d.clusterid %}
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
+{% endif %}
 {% endfor %}
 {% else %}
 {% for m in masters %}
+{% if m.clusterid == d.clusterid %}
     server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
+{% endif %}
 {% endfor %}
 {% endif %}
+{% endfor %}
    
-frontend ingress-https
+{% for d in dhcp %}
+frontend ingress-https-{{ d.clusterid }}
     bind *:443
-    default_backend ingress-https
+    default_backend ingress-https-{{ d.clusterid }}
     mode tcp
     option tcplog
 
-backend ingress-https
+backend ingress-https-{{ d.clusterid }}
     balance source
     mode tcp
 {% if workers is defined %}
 {% for w in workers %}
+{% if w.clusterid == d.clusterid %}
     server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
+{% endif %}
 {% endfor %}
 {% else %}
 {% for m in masters %}
+{% if m.clusterid == d.clusterid %}
     server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
+{% endif %}
 {% endfor %}
 {% endif %}
+{% endfor %}
 
 #---------------------------------------------------------------------

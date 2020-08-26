@@ -1,18 +1,18 @@
 $TTL 1W
-@	IN	SOA	ns1.{{ dns.clusterid }}.{{ dns.domain | lower }}.	root (
-			{{ serialnumber }}	; serial
+@	IN	SOA	ns1.{{ item.clusterid }}.{{ dns.domain | lower }}.	root (
+                       {{ serialnumber }} 	; serial
 			3H		; refresh (3 hours)
 			30M		; retry (30 minutes)
 			2W		; expiry (2 weeks)
 			1W )		; minimum (1 week)
-	IN	NS	ns1.{{ dns.clusterid }}.{{ dns.domain | lower }}.
-	IN	MX 10	smtp.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+	IN	NS	ns1.{{ item.clusterid }}.{{ dns.domain | lower }}.
+	IN	MX 10	smtp.{{ item.clusterid }}.{{ dns.domain | lower }}.
 ;
 ; 
-ns1	IN	A	{{ helper.ipaddr }}
-smtp	IN	A	{{ helper.ipaddr }}
+ns1	IN	A	{{ item.ipaddr }}
+smtp	IN	A	{{ item.ipaddr }}
 ;
-{{ helper.name | lower }}	IN	A	{{ helper.ipaddr }}
+{{ helper.name | lower }}	IN	A	{{ item.ipaddr }}
 ;
 {%if high_availability is defined %}
 ; Create entry for the bastion hosts
@@ -22,47 +22,61 @@ smtp	IN	A	{{ helper.ipaddr }}
 {% endif %}
 ;
 ; The api points to the IP of your load balancer
-api		IN	A	{{ helper.ipaddr }}
-api-int		IN	A	{{ helper.ipaddr }}
+api		IN	A	{{ item.ipaddr }}
+api-int		IN	A	{{ item.ipaddr }}
 ;
 ; The wildcard also points to the load balancer
-*.apps		IN	A	{{ helper.ipaddr }}
+*.apps		IN	A	{{ item.ipaddr }}
 ;
 {%if setup_registry %}
 ; Create entry for the local registry
-registry	IN	A	{{ helper.ipaddr }}
+registry	IN	A	{{ item.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
-{{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
+{% for b in bootstrap %}
+{% if b.clusterid == item.clusterid %}
+{{ b.name | lower }}	IN	A	{{ b.ipaddr }}
+{% endif %}
+{% endfor %}
 ;
 ; Create entries for the master hosts
 {% for m in masters %}
+{% if m.clusterid == item.clusterid %}
 {{ m.name | lower }}		IN	A	{{ m.ipaddr }}
+{% endif %}
 {% endfor %}
 ;
 ; Create entries for the worker hosts
 {% if workers is defined %}
 {% for w in workers %}
+{% if w.clusterid == item.clusterid %}
 {{ w.name | lower }}		IN	A	{{ w.ipaddr }}
+{% endif %}
 {% endfor %}
 {% endif %}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
 {% for m in masters %}
+{% if m.clusterid == item.clusterid %}
 etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
+{% endif %}
 {% endfor %}
 ;
 {% if other is defined %}
 ; Create entries for the other hosts
 {% for o in other %}
+{% if o.clusterid == item.clusterid %}
 {{ o.name }}		IN	A	{{ o.ipaddr }}
+{% endif %}
 {% endfor %}
 ;
 {% endif %}
 ; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
 {% for m in masters %}
-_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{% if m.clusterid == item.clusterid %}
+_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ item.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
 {% endfor %}
 ;
 ;EOF

@@ -1,0 +1,69 @@
+authoritative;
+ddns-update-style interim;
+default-lease-time 14400;
+max-lease-time 14400;
+
+{% if dhcp|length > 1 %}
+shared-network mynet {
+  interface {{ networkifacename }};
+{% endif %}
+
+{% for d in dhcp %}
+	subnet {{ d.ipid }} netmask {{ d.netmaskid }} {
+	option routers                  {{ d.router }};
+	option broadcast-address        {{ d.bcast }};
+	option subnet-mask              {{ d.netmask }};
+	option domain-name-servers      {{ helper.ipaddr }};
+	option domain-name              "{{ d.clusterid }}.{{ dns.domain | lower }}";
+	option domain-search            "{{ d.clusterid }}.{{ dns.domain | lower }}", "{{ dns.domain | lower }}";
+{% if dhcp|length < 1 %}
+        interface {{ networkifacename }};
+{% endif %}
+     	pool {
+        	range {{ d.poolstart }} {{ d.poolend }};
+		# Static entries
+{% for b in bootstrap %}
+{% if b.clusterid == d.clusterid %}
+		host {{ b.name | lower }}-{{ b.clusterid }} { hardware ethernet {{ b.macaddr }}; fixed-address {{ b.ipaddr }}; }
+{% endif %}
+{% endfor %}
+
+{% for m in masters %}
+{% if m.clusterid == d.clusterid %}
+		host {{ m.name | lower }}-{{ m.clusterid }}-{{ dns.domain }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
+{% endif %}
+{% endfor %}
+
+{% if workers is defined %}
+{% for w in workers %}
+{% if w.clusterid == d.clusterid %}
+		host {{ w.name | lower }}-{{ d.clusterid }}-{{ dns.domain }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if other is defined %}
+{% for o in other %}
+{% if o.clusterid == d.clusterid %}
+		host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
+{% endif %}
+{% endfor %}
+{% endif %}
+		# this will not give out addresses to hosts not listed above
+		deny unknown-clients;
+
+		# this is PXE specific  
+{% if ppc64le is sameas true %}
+		filename "boot/grub2/powerpc-ieee1275/core.elf";  
+{% else %}
+		filename "pxelinux.0";  
+{% endif %}
+
+		next-server {{ helper.ipaddr }};
+     	}
+      }
+
+{% endfor %}
+{% if dhcp|length > 1 %}
+}
+{% endif %}
