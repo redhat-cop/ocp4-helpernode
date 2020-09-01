@@ -71,6 +71,7 @@
     template:
       src: ../templates/zonefile.j2
       dest: /var/named/zonefile.db
+      mode: '0644'
     notify:
       - restart bind
   
@@ -78,6 +79,7 @@
     template:
       src: ../templates/reverse.j2
       dest: /var/named/reverse.db
+      mode: '0644'
     notify:
       - restart bind
   
