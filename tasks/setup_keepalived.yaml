@@ -1,0 +1,35 @@
+---
+# tasks file for setup-keepalived
+
+- name: Install keepalived packages
+  package:
+    name: keepalived
+    state: present
+
+- name: Generate a random external password for Keepalived’s AUTH_PASS
+  shell: uuidgen
+  register: password
+  run_once: true
+
+- name: Generate keepalived configuration file
+  template:
+    src: ../templates/keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    mode: 0644
+    
+- firewalld:
+    rich_rule: rule protocol value="vrrp" accept
+    permanent: yes
+    state: enabled
+    
+- name: Reload service firewalld
+  service:
+    name: firewalld
+    state: reloaded
+
+- name: Enable and start service keepalived
+  service:
+    name: keepalived
+    enabled: yes
+    state: restarted
+
