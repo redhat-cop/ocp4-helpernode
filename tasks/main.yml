@@ -347,11 +347,6 @@
       - tftp
     when: not staticips
 
-  - name: Set the local resolv.conf file
-    template:
-      src: ../templates/resolv.conf.j2
-      dest: /etc/resolv.conf
-
   - name: Copy info script over
     template:
       src: ../templates/checker.sh.j2
@@ -514,6 +509,11 @@
       dest: /usr/local/bin/filetranspiler
       mode: '0555'
     when: install_filetranspiler
+
+  - name: Set the local resolv.conf file
+    template:
+      src: ../templates/resolv.conf.j2
+      dest: /etc/resolv.conf
 
   - name: Get network device system name
     shell: "nmcli -t dev show {{ networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
