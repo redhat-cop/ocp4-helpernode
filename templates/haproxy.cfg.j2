@@ -40,7 +40,7 @@ global
 # use if not designated in their block
 #---------------------------------------------------------------------
 defaults
-    mode                    http
+    mode                    tcp
     log                     global
     option                  httplog
     option                  dontlognull
@@ -70,12 +70,10 @@ listen stats
 frontend openshift-api-server
     bind *:6443
     default_backend openshift-api-server
-    mode tcp
     option tcplog
 
 backend openshift-api-server
     balance source
-    mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
@@ -84,12 +82,10 @@ backend openshift-api-server
 frontend machine-config-server
     bind *:22623
     default_backend machine-config-server
-    mode tcp
     option tcplog
 
 backend machine-config-server
     balance source
-    mode tcp
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
@@ -98,12 +94,10 @@ backend machine-config-server
 frontend ingress-http
     bind *:80
     default_backend ingress-http
-    mode tcp
     option tcplog
 
 backend ingress-http
     balance source
-    mode tcp
 {% if workers is defined %}
 {% for w in workers %}
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
@@ -117,12 +111,10 @@ backend ingress-http
 frontend ingress-https
     bind *:443
     default_backend ingress-https
-    mode tcp
     option tcplog
 
 backend ingress-https
     balance source
-    mode tcp
 {% if workers is defined %}
 {% for w in workers %}
     server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
