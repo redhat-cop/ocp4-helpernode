@@ -39,7 +39,7 @@ virsh net-start openshift4
 
 ## Create a CentOS 7/8 VM
 
-Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](examples/helper-ks8.cfg) for the helper node.
 
 __EL 7__
 ```
