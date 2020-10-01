@@ -347,11 +347,6 @@
       - tftp
     when: not staticips
 
-  - name: Set the local resolv.conf file
-    template:
-      src: ../templates/resolv.conf.j2
-      dest: /etc/resolv.conf
-
   - name: Copy info script over
     template:
       src: ../templates/checker.sh.j2
@@ -515,6 +510,11 @@
       mode: '0555'
     when: install_filetranspiler
 
+  - name: Set the local resolv.conf file
+    template:
+      src: ../templates/resolv.conf.j2
+      dest: /etc/resolv.conf
+
   - name: Get network device system name
     shell: "nmcli -t dev show {{ networkifacename }} | grep GENERAL.CONNECTION | cut -d: -f2"
     register: devicesystemname
@@ -546,6 +546,10 @@
 
     - name: Setup Registry
       import_tasks: setup_registry.yaml
+
+  - name: Setup keepalived service
+    when: high_availability is defined
+    import_tasks: setup_keepalived.yaml
 
   - name:  Information about this install
     debug:
