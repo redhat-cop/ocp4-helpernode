@@ -14,6 +14,13 @@ smtp			IN	A	{{ helper.ipaddr }}
 ;
 {{ helper.name | lower }}			IN	A	{{ helper.ipaddr }}
 ;
+{%if high_availability is defined %}
+; Create entry for the bastion hosts
+{% for h in high_availability.helpernodes %}
+{{ h.name | lower }}		IN	A	{{ h.ipaddr }}
+{% endfor %}
+{% endif %}
+;
 ; The api points to the IP of your load balancer
 api			IN	A	{{ helper.ipaddr }}
 api-int			IN	A	{{ helper.ipaddr }}
