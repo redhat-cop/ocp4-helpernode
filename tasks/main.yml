@@ -125,14 +125,14 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
-    when: "metal" in ocp_bios
+    when: "'metal' in ocp_bios"
      
   - name: Downloading OCP4 installer Bios
     get_url:
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/rootfs.img
       mode: 0555
-    when: "rootfs" in ocp_bios
+    when: "'rootfs' in ocp_bios"
       
   - name: Start firewalld service
     systemd:
