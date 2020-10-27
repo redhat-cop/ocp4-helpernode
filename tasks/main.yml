@@ -115,15 +115,24 @@
       - "/usr/local/src/openshift-client-linux.tar.gz"
       - "/usr/local/src/openshift-install-linux.tar.gz"
       - "/var/www/html/install/bios.raw.gz"
+      - "/var/www/html/install/rootfs.img"
       - "/var/lib/tftpboot/rhcos/initramfs.img"
       - "/var/lib/tftpboot/rhcos/kernel"
     when: force_ocp_download
 
   - name: Downloading OCP4 installer Bios
     get_url:
-      url: "{{ ocp_bios}}"
+      url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
+    when: "metal" in ocp_bios
+     
+  - name: Downloading OCP4 installer Bios
+    get_url:
+      url: "{{ ocp_bios }}"
+      dest: /var/www/html/install/rootfs.img
+      mode: 0555
+    when: "rootfs" in ocp_bios
       
   - name: Start firewalld service
     systemd:

@@ -3,12 +3,12 @@ ssh_gen_key: true
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false
-ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-metal.x86_64.raw.gz"
-ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-installer-initramfs.x86_64.img"
-ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.5/4.5.2/rhcos-4.5.2-x86_64-installer-kernel-x86_64"
-ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.2/openshift-client-linux-4.5.2.tar.gz"
-ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.5.2/openshift-install-linux-4.5.2.tar.gz"
-helm_source: "https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz"
+ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-rootfs.x86_64.img"
+ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-initramfs.x86_64.img"
+ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-kernel-x86_64"
+ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.1/openshift-client-linux-4.6.1.tar.gz"
+ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.1/openshift-install-linux-4.6.1.tar.gz"
+helm_source: "https://get.helm.sh/helm-v3.4.0-linux-amd64.tar.gz"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
 chronyconfig:
@@ -20,4 +20,4 @@ setup_registry:
   local_repo: "ocp4/openshift4"
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
-  release_tag: "4.5.2-x86_64"
+  release_tag: "4.6.1-x86_64"
