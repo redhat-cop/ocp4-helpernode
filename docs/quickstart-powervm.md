@@ -125,7 +125,7 @@ done
 Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the LPARs.
 
 ```
-cp docs/examples/vars-pppc64le.yaml vars.yaml
+cp docs/examples/vars-ppc64le.yaml vars.yaml
 ```
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
@@ -254,7 +254,7 @@ chmod o+r /var/www/html/ignition/*.ign
 
 ## Install LPARs
 
-Boot up the LPARs using steps described in `Boot Up with Bootp` section.
+Boot up the LPARs using steps described in `Boot Up LPAR with Bootp` section.
 
 Boot/install the LPARs in the following order
 
