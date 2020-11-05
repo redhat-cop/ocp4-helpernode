@@ -181,6 +181,8 @@ This effectively disables DHCP, TFTP, and PXE on the helper. This implicitly mea
 
 You can have the helper deploy specific artifacts for a paticular version of OCP. Or, the nightly builds of OpenShift 4 or even OKD. Adding the following to your `vars.yaml` file will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly build:
 
+> :warning: note, you need to use the `ocp_bios` var for the rootfs image for 4.6+
+
 ```
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-metal-bios.raw.gz"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/pre-release/latest/rhcos-42.80.20190828.2-installer-initramfs.img"

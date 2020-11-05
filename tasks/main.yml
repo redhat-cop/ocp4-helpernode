@@ -4,6 +4,7 @@
 - hosts: all
   vars_files:
     - ../vars/main.yml
+    - ../vars/ports.yml
   handlers:
   - import_tasks: ../handlers/main.yml
 
@@ -38,6 +39,10 @@
       state: present
     when: not staticips and not ppc64le
 
+  - name: Remove existing config files
+    import_tasks: remove_old_config_files.yaml
+    when: remove_old_config_files
+
   - name: Write out dhcp file
     template:
       src: ../templates/dhcpd.conf.j2
@@ -66,7 +71,7 @@
   - name: Setting serial number as a fact
     set_fact:
       serialnumber: "{{ dymanicserialnumber.stdout }}"
-  
+
   - name: Write out "{{ dns.domain | lower }}" zone file
     template:
       src: ../templates/zonefile.j2
@@ -74,7 +79,7 @@
       mode: '0644'
     notify:
       - restart bind
-  
+
   - name: Write out reverse zone file
     template:
       src: ../templates/reverse.j2
@@ -82,7 +87,7 @@
       mode: '0644'
     notify:
       - restart bind
-  
+
   - name: Write out haproxy config file
     template:
       src: ../templates/haproxy.cfg.j2
@@ -114,46 +119,33 @@
       - "/usr/local/src/openshift-client-linux.tar.gz"
       - "/usr/local/src/openshift-install-linux.tar.gz"
       - "/var/www/html/install/bios.raw.gz"
+      - "/var/www/html/install/rootfs.img"
       - "/var/lib/tftpboot/rhcos/initramfs.img"
       - "/var/lib/tftpboot/rhcos/kernel"
     when: force_ocp_download
 
   - name: Downloading OCP4 installer Bios
     get_url:
-      url: "{{ ocp_bios}}"
+      url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
-      
   - name: Start firewalld service
     systemd:
       name: firewalld
       state: started
       enabled: yes
-      
+
   - name: Open up firewall ports
     firewalld:
       permanent: yes
       immediate: yes
       state: enabled
-      port: "{{ item }}"
-    with_items:
-      - 67/udp
-      - 53/tcp
-      - 53/udp
-      - 443/tcp
-      - 80/tcp
-      - 8080/tcp
-      - 6443/tcp
-      - 6443/udp
-      - 22623/tcp
-      - 22623/udp
-      - 9000/tcp
-      - 69/udp
-      - 111/tcp
-      - 2049/tcp
-      - 20048/tcp
-      - 50825/tcp
-      - 53248/tcp
+      port: "{{ item[0] }}"
+    delegate_to: "{{ item[1] }}"
+    run_once: true
+    with_nested:
+      - "{{ ports }}"
+      - "{{ ansible_play_batch }}"
 
   - name: Best effort SELinux repair - DNS
     shell: "restorecon -vR /var/named || true"
@@ -414,13 +406,13 @@
       template:
         src: ../templates/chrony-machineconfig.j2
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
-      loop: 
+      loop:
         - master
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
-      loop: 
+      loop:
         - worker
       when:
         - workers is defined
@@ -482,7 +474,7 @@
       mode: '0755'
       remote_src: true
     when: not ppc64le
-    
+
   - name: Copy helm cli to bin directory for ppc64le
     copy:
       src: /usr/local/src/helm/linux-ppc64le/helm

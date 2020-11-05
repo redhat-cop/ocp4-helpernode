@@ -39,7 +39,7 @@ virsh net-start openshift4
 
 ## Create a CentOS 7/8 VM
 
-Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](docs/examples/helper-ks8.cfg) for the helper node.
+Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](examples/helper-ks8.cfg) for the helper node.
 
 __EL 7__
 ```
@@ -267,11 +267,13 @@ Once booted; press `tab` on the boot menu
 
 Add your staticips and coreos options. Here is an example of what I used for my bootstrap node. (type this **ALL IN ONE LINE** ...I only used linebreaks here for ease of readability...but type it all in one line)
 
+> If installing 4.5 and earlier, you need `coreos.inst.image_url=http://192.168.7.77:8080/install/bios.raw.gz`
+
 ```
 ip=192.168.7.20::192.168.7.1:255.255.255.0:bootstrap.ocp4.example.com:enp1s0:none
 nameserver=192.168.7.77
 coreos.inst.install_dev=vda
-coreos.inst.image_url=http://192.168.7.77:8080/install/bios.raw.gz
+coreos.live.rootfs_url=http://192.168.7.77:8080/install/rootfs.img
 coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap.ign
 ```
 
