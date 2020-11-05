@@ -3,6 +3,7 @@ ssh_gen_key: true
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false
+remove_old_config_files: false
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-rootfs.x86_64.img"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-initramfs.x86_64.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.1/rhcos-4.6.1-x86_64-live-kernel-x86_64"

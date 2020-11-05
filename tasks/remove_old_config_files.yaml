@@ -1,0 +1,32 @@
+- name: Remove existing dhcp config
+  file:
+    path: /etc/dhcp/dhcpd.conf
+    state: absent
+
+- name: Remove existing named config
+  file:
+    path: /etc/named.conf
+    state: absent
+
+- name: Remove existing DNS zone files
+  file:
+    path: "/var/named/{{ item }}"
+    state: absent
+  with_items:
+    - "zonefile.db"
+    - "reverse.db"
+
+- name: Remove existing haproxy config
+  file:
+    path: /etc/haproxy/haproxy.cfg
+    state: absent
+
+- name: Remove existing TFTP config
+  file:
+    path: /var/lib/tftpboot/pxelinux.cfg
+    state: absent
+
+- name: Remove existing grub.cfg
+  file:
+    path: /var/lib/tftpboot/boot/grub2/grub.cfg
+    state: absent
