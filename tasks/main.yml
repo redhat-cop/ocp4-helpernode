@@ -129,6 +129,15 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
+    when: ("metal" in ocp_bios) 
+
+  - name: Downloading OCP4 installer rootfs
+    get_url:
+      url: "{{ ocp_bios }}"
+      dest: /var/www/html/install/rootfs.img
+      mode: 0555
+    when: ("rootfs" in ocp_bios) 
+
   - name: Start firewalld service
     systemd:
       name: firewalld
@@ -259,6 +268,14 @@
 
   - name: Generate grub2 config files
     block:
+    - set_fact:
+        coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
+      when: ("metal" in ocp_bios)
+
+    - set_fact:
+        coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
+      when: ("rootfs" in ocp_bios)    
+ 
     - name: create grub.cfg
       copy:
         dest: /var/lib/tftpboot/boot/grub2/grub.cfg
