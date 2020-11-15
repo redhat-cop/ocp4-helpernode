@@ -1,7 +1,7 @@
 ---
 ssh_gen_key: true
-control_schedulable: true # Security anti-pattern regardless of platform. Only enable for testing purposes in a lab.
-control_only: true
+control_schedulable: false # Security anti-pattern regardless of platform. Only enable for testing purposes in a lab.
+control_only: false
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false
