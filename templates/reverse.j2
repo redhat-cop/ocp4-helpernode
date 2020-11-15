@@ -10,16 +10,18 @@ $TTL 1W
 ; syntax is "last octet" and the host must have fqdn with trailing dot
 1       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
 
+{% if control_only or workers %}
 {% for m in masters %}
 {{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
+{% endif %}
 ;
 {{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 ;
-{% if workers is defined %}
+{% if (workers and not control_schedulable and not control_only) or (workers and control_schedulable and not control_only) %}
 {% for w in workers %}
 {{ w.ipaddr.split('.')[3] }}	IN	PTR	{{ w.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
@@ -29,6 +31,5 @@ $TTL 1W
 {% for o in other %}
 {{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
 {% endfor %}
-;
 {% endif %}
 ;EOF

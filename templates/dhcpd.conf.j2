@@ -16,10 +16,14 @@ max-lease-time 14400;
         	range {{ dhcp.poolstart }} {{ dhcp.poolend }};
 		# Static entries
 		host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
+{% if control_only %}
 {% for m in masters %}
 		host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
 {% endfor %}
-{% if workers is defined %}
+{% elif (workers and not control_schedulable) or (workers and control_schedulable) %}
+{% for m in masters %}
+		host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
+{% endfor %}
 {% for w in workers %}
 		host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
 {% endfor %}
