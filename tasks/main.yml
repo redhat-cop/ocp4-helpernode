@@ -250,6 +250,7 @@
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
       with_items: "{{ masters | lower }}"
+      when: control_only or workers
       notify:
         - restart tftp
 
@@ -261,9 +262,8 @@
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
-      when:
-        - workers is defined
-        - workers | length > 0
+      when: (workers and not control_schedulable and not control_only) or
+            (workers and control_schedulable and not control_only)
     when: not staticips and not ppc64le
 
   - name: Generate grub2 config files
@@ -564,4 +564,3 @@
     debug:
       msg:
         - "Please run /usr/local/bin/helpernodecheck for information"
-
