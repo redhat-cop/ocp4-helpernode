@@ -2,44 +2,40 @@
 
 This quickstart will get you up and running on PowerVM server managed using [HMC](https://www.ibm.com/support/knowledgecenter/en/9009-22A/p9eh6/p9eh6_kickoff.htm).
 
+This playbook will set up an "all-in-one" node (called ocp4-helpernode), that has all the infrastructure/services in order to install OpenShift 4. 
+This playbook will also install an OpenShift 4 cluster with 3 master nodes and 2 worker nodes.
+After you run the playbook, you'll be ready to logon to the OpenShift cluster.
 
+A lot of OpenShift 4 specific jargon is used throughout this doc, so please visit the [official documentation page](https://docs.openshift.com/container-platform/latest) to get familiar with OpenShift 4.
+
+This playbook assumes the following:
+
+1. You're on a Network that has access to the internet.
+2. The network you're on does NOT have DHCP (or you can block your existing DHCP from responding to the MAC addresses used for the OpenShift LPARs).
+3. The ocp4-helpernode will be your Load Balancer/DHCP/TFTP/DNS/HTTP and NFS server for the OpenShift cluster.
+
+![OpenShift-Cluster](https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/images/hn.png)
+
+It's important to note that you can delegate DNS to the ocp4-helpernode if you don't want to use it as your main DNS server. You will have to delegate `$CLUSTERID.$DOMAIN` to this helper node.
+
+For example; if you want a `$CLUSTERID` of **ocp4**, and you have a `$DOMAIN` of **example.com**. Then you will delegate `ocp4.example.com` to this ocp4-helpernode.
+
+## Create the Helper Node (ocp4-helpernode)
+
+Create helper LPAR using the HMC GUI or HMC mksyscfg command.
 To start, ssh to your HMC host to use the CLI. You can also use the HMC GUI. The steps in these guide are specific to CLI.
 
-## Create the LPAR (VM)
-
-The following steps describe in brief the LPAR creation process on PowerVM using HMC.
-
-__Create LPAR__
-
-Here are the commands to create the LPAR when using CLI:
-```
-mksyscfg -r lpar -m <managed_system> -i name=<lpar_name>, profile_name=<profile_name>, lpar_env=aixlinux,shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=16384, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
-```
-
-__Add Network__
+* 2 vCPUs (desired_procs)
+* 32 GB of RAM (desired_mem)
+* 120 GB HD (OS) + 880 GB HD (NFS)
 
 ```
-chsyscfg -m <managed_system> -i 'name=<lpar_name>, profile_name=<profile_name>,"virtual_eth_adapters+=<virtual_ethernet_adapter_details>"'
+$ mksyscfg -r lpar -m <managed_system> -i name=ocp4-helper, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=32768, max_mem=32768, proc_mode=shared, min_proc_units=0.2, desired_proc_units=0.4, max_proc_units=4.0, min_procs=1, desired_procs=2, max_procs=2, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1
 ```
 
-__Add Storage__
+> **NOTE** Make sure you attach the LPAR to the appropriate network and add storage (HMC GUI or chsyscfg command) after successful LPAR creation.
 
-```
-chsyscfg -m <managed_system> -i 'name=<lpar_name>, profile_name=<profile_name>,"virtual_scsi_adapters=<virtual_scsi_details>"'
-```
-
-## Boot Up LPAR with Bootp
-
-After the LPAR is created and configured, now it is time to boot it up. The following command can be used to boot the LPAR using the HMC CLI:
-
-```
-lpar_netboot  -t ent -m <macaddr> -s auto -d auto <lpar_name> <profile_name> <managed_system>
-```
-> **NOTE** The `<macaddr>` format is `fad38e3ca520`, which does not contain `:`.
-
-## Create the Helper Node
-
-Create helper LPAR using the steps described in `Create the LPAR` section with proper processor and memory configuration.
+Install [RHEL 8 in this PowerVM LPAR](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_a_standard_rhel_installation).
 
 After helper is up and running, configure it with correct network configurations based on your network:
 * IP - <helper_ip>
@@ -50,83 +46,162 @@ After helper is up and running, configure it with correct network configurations
 
 ## Create Cluster Nodes
 
-Create 6 LPARs using the same steps as described in the `Create the LPAR` section. Please follow the [minimum requirements](https://docs.openshift.com/container-platform/4.3/installing/installing_ibm_power/installing-ibm-power.html#minimum-resource-requirements_installing-ibm-power) for these LPARs.
+Create 6 LPARs using the HMC GUI or HMC mksyscfg command. 
 
 __Bootstrap__
 
-Create bootstrap LPAR
+Create one bootstrap LPAR.
+
+* 2 vCPUs (desired_procs)
+* 32 GB of RAM (desired_mem)
+* 120 GB HD (OS)
 
 ```
-mksyscfg -r lpar -m <managed_system> -i name=ocp4-bootstrap, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=16384, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+$ mksyscfg -r lpar -m <managed_system> -i name=ocp4-bootstrap, profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=32768, max_mem=32768, proc_mode=shared, min_proc_units=0.2, desired_proc_units=0.4, max_proc_units=4.0, min_procs=1, desired_procs=2, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1
 ```
+
+> **NOTE** Make sure you attach the LPAR to the appropriate network and add storage (HMC GUI or HMC chsyscfg command) after successful LPAR creation.
+> **NOTE** No OS installation is needed at this point.
 
 __Masters__
 
-Create the master LPARs
+Create the three master LPARs.
+
+* 2 vCPUs (desired_procs)
+* 32 GB of RAM (desired_mem)
+* 120 GB HD (OS)
 
 ```
-for i in master{0..2}
+$ for i in master{0..2}
 do
-  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux,shared_proc_pool_util_auth=1,min_mem=4096, desired_mem=8192, max_mem=8192, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64,boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=32768, desired_mem=32768, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=0.2, max_proc_units=4.0, min_procs=2, desired_procs=2, max_procs=2, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1
 done
 ```
+
+> **NOTE** Make sure you attach the LPARs to the appropriate network and add storage (HMC GUI or HMC chsyscfg command) after successful LPAR creation.
+> **NOTE** No OS installation is needed at this point.
 
 __Workers__
 
-Create the worker LPARs
+Create the two worker LPARs.
+
+* 4 vCPUs (desired_procs), more depending on the workload
+* 32 GB of RAM (desired_mem), more depending on the workload
+* 120 GB HD (OS), more depending on the workload
 
 ```
-for i in worker{0..1}
+$ for i in worker{0..1}
 do
-  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=8192, desired_mem=8192, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=2.0,max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=4, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1, shared_proc_pool_util_auth=1
+  mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=16384, desired_mem=32768, max_mem=262144, proc_mode=shared, min_proc_units=0.2, desired_proc_units=0.8, max_proc_units=4.0, min_procs=1, desired_procs=4, max_procs=16, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1
 done
 ```
-> **NOTE** Make sure you attach the LPARs to the appropriate network and add storage after successful LPAR creation.
 
-## Prepare the Helper Node
+> **NOTE** Make sure you attach the LPARs to the appropriate network and add storage (HMC GUI or HMC chsyscfg command) after successful LPAR creation.
+> **NOTE** No OS installation is needed at this point.
 
-After the helper node is installed; login to it
 
-```
-ssh <helper_user>@<helper_ip>
-```
-
-> **NOTE** If using RHEL 7 - you need to enable the `rhel-7-server-rpms` and the `rhel-7-server-extras-rpms` repos. If you're using RHEL 8 you will need to enable `rhel-8-for-ppc64le-baseos-rpms`, `rhel-8-for-ppc64le-appstream-rpms`, and `ansible-2.9-for-rhel-8-ppc64le-rpms`
-
-Install EPEL
+## Get the Mac addresses of the LPAR from the HMC by running the following command:
 
 ```
-yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
-```
-
-Install `ansible` and `git` and clone this repo
-
-```
-yum -y install ansible git
-git clone https://github.com/RedHatOfficial/ocp4-helpernode
-cd ocp4-helpernode
-```
-
-Get the Mac addresses of the LPAR from the HMC by running the following command:
-
-```
-for i in <managed_systems>
+$ for i in <managed_systems>
 do
   lshwres -m $i -r virtualio --rsubtype eth --level lpar -F lpar_name,mac_addr
 done
 ```
+
 Or if using SRIOV's then run the following command:
 ```
-for i in <managed_systems>
+$ for i in <managed_systems>
 do
   lshwres -m $i -r sriov --rsubtype logport --level eth -F lpar_name,mac_addr
 done
 ```
-Edit the [vars.yaml](examples/vars-ppc64le.yaml) file with the mac addresses of the LPARs.
+
+## Prepare the Helper Node
+
+After the helper node OS is installed; login to it
 
 ```
+$ ssh root@<helper_ip>
+```
+
+> **NOTE** For RHEL 8 you will need to enable `rhel-8-for-ppc64le-baseos-rpms`, `rhel-8-for-ppc64le-appstream-rpms`, and `ansible-2.9-for-rhel-8-ppc64le-rpms`
+
+Install EPEL
+
+```
+$ yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm
+```
+
+Install `ansible` and `git` 
+
+```
+$ yum -y install ansible git
+```
+
+Install `firefox` and X11 forwarding libs
+
+```
+$ yum -y install firefox xorg-x11-xauth dbus-x11
+```
+
+## Set SELinux to permissive (If SELinux=disabled)
+
+Change SELinux to permissive. The OpenShift installation fails if SELinux is disabled.
+
+```shell
+$ vi /etc/selinux/config # change "SELINUX=disabled" to "SELINUX=permissive"
+$ setenforce Permissive
+$ vi /etc/default/grub  # change "selinux=0" to "selinux=1"
+$ grub2-mkconfig
+$ reboot
+$ getenforce
+```
+
+## Download OpenShift pull secret
+
+Create a place to store your pull-secret
+
+```
+$ mkdir -p ~/.openshift
+```
+
+Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Run on Power". Download your pull secret and save it under `~/.openshift/pull-secret`
+
+```shell
+$ ls -1 ~/.openshift/pull-secret
+/root/.openshift/pull-secret
+```
+> **NOTE** Do not manual download the OpenShift client or installer packages from this Web Page, The required packages are downloaded automatically later by the playbook.
+
+## Create helper node user ssh public key
+
+You can use ssh-keygen to create the users ssh public key (change "user@sample.com" to the users eMail address).
+
+```shell
+$ ssh-keygen -t rsa -b 4096 -N '' -C "<user@sample.com>"
+$ eval "$(ssh-agent -s)"
+$ ssh-add ~/.ssh/id_rsa
+$ ls -1 ~/.ssh/id_rsa
+/root/.ssh/id_rsa
+```
+
+## Download ocp4-helpernode playbook
+
+```shell
+git clone https://github.com/RedHatOfficial/ocp4-helpernode
+cd ocp4-helpernode
+```
+
+## Create installation variable file `vars.yaml` in `ocp4-helpernode` directory
+
+```shell
 cp docs/examples/vars-ppc64le.yaml vars.yaml
 ```
+Edit the `vars.yaml`:
+- Update `helper` section for your helper node info
+- Update `dns` and `dhcp` based on your network setup
+- Update `bootstrap`, `masters` and `workers` with IP and MAC address of the LPARs.
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
@@ -154,29 +229,7 @@ mkdir ~/ocp4
 cd ~/ocp4
 ```
 
-Create a place to store your pull-secret
-
-```
-mkdir -p ~/.openshift
-```
-
-Visit [try.openshift.com](https://cloud.redhat.com/openshift/install) and select "Bare Metal". Download your pull secret and save it under `~/.openshift/pull-secret`
-
-```shell
-# ls -1 ~/.openshift/pull-secret
-/root/.openshift/pull-secret
-```
-
-This playbook creates an sshkey for you; it's under `~/.ssh/helper_rsa`. You can use this key or create/user another one if you wish.
-
-```shell
-# ls -1 ~/.ssh/helper_rsa
-/root/.ssh/helper_rsa
-```
-
-> :warning: If you want you use your own sshkey, please modify `~/.ssh/config` to reference your key instead of the one deployed by the playbook
-
-Next, create an `install-config.yaml` file.
+### Create an `install-config.yaml` file
 
 > :warning: Make sure you update if your filenames or paths are different.
 
@@ -207,8 +260,9 @@ pullSecret: '$(< ~/.openshift/pull-secret)'
 sshKey: '$(< ~/.ssh/helper_rsa.pub)'
 EOF
 ```
+> **NOTE** The baseDomain and metadata.name have to be the same as defined in `dns` section of `vars.yaml`. 
 
-Create the installation manifests
+### Create the installation manifests
 
 ```
 openshift-install create manifests
@@ -237,8 +291,9 @@ spec:
     name: ""
 status: {}
 ```
+> **NOTE** This is only apply to the cluster with worker nodes, don't make above change if the cluster setup is the minimum 3 nodes.
 
-Next, generate the ignition configs
+### Generate the ignition files
 
 ```
 openshift-install create ignition-configs
@@ -252,11 +307,16 @@ restorecon -vR /var/www/html/
 chmod o+r /var/www/html/ignition/*.ign
 ```
 
-## Install LPARs
+## Install RHCOS to all LPARs
 
-Boot up the LPARs using steps described in `Boot Up LPAR with Bootp` section.
+After helper node is setup with all the services for OCP, now it is time to boot it up to install RHCOS on to LPAR's disk and complete the OCP installation. The following command HMC CLI can be used to boot the LPAR with bootp, it need to be run on HMC system:
 
-Boot/install the LPARs in the following order
+lpar_netboot  -f -t ent -m <macaddr> -s auto -d auto <lpar_name> <profile_name> <managed_system>
+
+> **NOTE**  The <macaddr> format is fad38e3ca520, which does not contain `:`.
+
+
+Boot the LPARs in the following order
 
 * Bootstrap
 * Masters
@@ -390,4 +450,4 @@ oc patch --namespace=openshift-ingress-operator --patch='{"spec": {"replicas": 3
 
 ## DONE
 
-Your install should be done! You're a UPI master!
+Your install should be done! You're a OCP master!
