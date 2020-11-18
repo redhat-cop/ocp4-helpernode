@@ -9,7 +9,7 @@
       timeout=1
       menuentry "CoreOS (BIOS)" {
          echo "Loading kernel"
-         linux "/rhcos/kernel" ip=dhcp console=tty0 console=ttyS0 console=hvc0,115200n8 rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ role }}.ign
+         linux "/rhcos/kernel" ip=dhcp console=tty0 console=ttyS0 console=hvc0,115200n8 rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} {{ coreos_inst_url }} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/{{ role }}.ign
 
          echo "Loading initrd"
          initrd  "/rhcos/initramfs.img"
