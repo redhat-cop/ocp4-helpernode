@@ -11,6 +11,24 @@
   register: password
   run_once: true
 
+- name: Set high_priority fact
+  set_fact:
+    high_priority: "{{ item.priority }}"
+  with_items:
+    - "{{ high_availability.helpernodes }}"
+  when: item.state == "MASTER"
+
+- name: Set low_priority fact
+  set_fact:
+    low_priority: "{{ low_priority | default([]) }} + [ {{ item.priority }} ]"
+  with_items:
+    - "{{ high_availability.helpernodes }}"
+  when: item.state == "BACKUP"
+
+- name: Set calibrated_priority fact
+  set_fact:
+    calibrated_priority: "{{ high_priority|int - low_priority|min + 10 }}"
+
 - name: Generate keepalived configuration file
   template:
     src: ../templates/keepalived.conf.j2

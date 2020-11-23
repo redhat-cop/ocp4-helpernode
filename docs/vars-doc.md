@@ -283,8 +283,8 @@ high_availability:
 
 * `high_availability.helpernodes.name` - The hostname (**__WITHOUT__** the fqdn) of the helpernode you want to set
 * `high_availability.helpernodes.ipaddr` - The IP address that you want to set (this modifies the [dns zonefile](../templates/zonefile.j2#L20))
-* `high_availability.helpernodes.state` - The initial state of the helpernode that you want to set (MASTER|BACKUP)
-* `high_availability.helpernodes.priority` - The priority of the helpernode that you want to set (0-255), and the helpernodes configured as state MASTER should have a priority value greater than the helpernodes configured as state BACKUP.
+* `high_availability.helpernodes.state` - The initial state of the helpernode that you want to set (MASTER|BACKUP). There must be exactly 1 helpernode with initial state as MASTER and atleast 1 helpernode with initial state as BACKUP.
+* `high_availability.helpernodes.priority` - The priority of the helpernode that you want to set must be unique within range (0-100), and the helpernodes configured as state MASTER should have a priority value greater than the helpernodes configured as state BACKUP.
 
 **NOTE**: Ensure you update `inventory` file appropriately to run the playbook on all the helpernodes. For more information refer [inventory doc](inventory-ha-doc.md).
 
