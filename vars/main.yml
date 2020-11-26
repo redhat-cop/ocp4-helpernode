@@ -1,5 +1,8 @@
 ---
 ssh_gen_key: true
+control_only: true
+control_schedulable: true
+workers_schedulable: false
 install_filetranspiler: false
 staticips: false
 force_ocp_download: false

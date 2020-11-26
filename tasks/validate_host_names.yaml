@@ -1,10 +1,25 @@
-- name: Validate values for DNS compatibility
-  fail:
-    msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
-  when: item is search('{{ chars }}')
-  with_items:
-  - "{{ dns.domain }}"
-  - "{{ helper.name }}"
-  - "{{ bootstrap.name }}"
-  - "{{ masters }}"
-  - "{{ workers | default('') }}"
+- name: "Validate values for DNS compatibility"
+  block:
+  - name: "Check all inventory"
+    fail:
+      msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
+    when: item is search('{{ chars }}')
+    with_items:
+    - "{{ dns.domain }}"
+    - "{{ helper.name }}"
+    - "{{ bootstrap.name }}"
+    - "{{ masters }}"
+    - "{{ workers | default('') }}"
+  when: workers_schedulable
+- name: "Validate values for DNS compatibility"
+  block:
+  - name: "Check all inventory"
+    fail:
+      msg: "Please revise your vars.yaml file. Invalid characters found in hostnames"
+    when: item is search('{{ chars }}')
+    with_items:
+    - "{{ dns.domain }}"
+    - "{{ helper.name }}"
+    - "{{ bootstrap.name }}"
+    - "{{ masters }}"
+  when: control_only

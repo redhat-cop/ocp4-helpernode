@@ -250,6 +250,7 @@
         dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
         mode: 0555
       with_items: "{{ masters | lower }}"
+      when: (control_only) or (workers_schedulable)
       notify:
         - restart tftp
 
@@ -261,9 +262,7 @@
       with_items: "{{ workers | lower }}"
       notify:
         - restart tftp
-      when:
-        - workers is defined
-        - workers | length > 0
+      when: workers_schedulable
     when: not staticips and not ppc64le
 
   - name: Generate grub2 config files
@@ -303,11 +302,8 @@
         mac: "{{ item.macaddr }}"
       include_tasks: generate_grub.yml
       with_items: "{{ workers }}"
-      when:
-        - workers is defined
-        - workers | length > 0
+      when: workers_schedulable
     when: not staticips and ppc64le
-
 
   - name: Installing TFTP Systemd helper
     copy:
@@ -431,9 +427,7 @@
         dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
       loop:
         - worker
-      when:
-        - workers is defined
-        - workers | length > 0
+      when: workers_schedulable
     when: chronyconfig.enabled
 
   - name: Downloading OCP4 client
@@ -564,4 +558,3 @@
     debug:
       msg:
         - "Please run /usr/local/bin/helpernodecheck for information"
-

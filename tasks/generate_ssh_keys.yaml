@@ -41,9 +41,7 @@
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: "{{ workers }}"
-  when:
-    - workers is defined
-    - workers | length > 0
+  when: workers_schedulable
 
 - blockinfile:
     path: "{{ ansible_env.HOME }}/.ssh/config"

@@ -66,7 +66,6 @@ listen stats
     stats uri /
     monitor-uri /healthz
 
-
 frontend openshift-api-server
     bind *:6443
     default_backend openshift-api-server
@@ -98,13 +97,14 @@ frontend ingress-http
 
 backend ingress-http
     balance source
-{% if workers is defined %}
-{% for w in workers %}
-    server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
-{% endfor %}
-{% else %}
+{% if control_only or control_schedulable %}
 {% for m in masters %}
     server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
+{% endfor %}
+{% endif %}
+{% if workers_schedulable %}
+{% for w in workers %}
+    server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
 {% endfor %}
 {% endif %}
    
@@ -115,14 +115,14 @@ frontend ingress-https
 
 backend ingress-https
     balance source
-{% if workers is defined %}
-{% for w in workers %}
-    server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
-{% endfor %}
-{% else %}
+{% if control_only or control_schedulable %}
 {% for m in masters %}
     server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
 {% endfor %}
 {% endif %}
-
+{% if workers_schedulable %}
+{% for w in workers %}
+    server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
+{% endfor %}
+{% endif %}
 #---------------------------------------------------------------------
