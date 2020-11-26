@@ -31,7 +31,7 @@ echo "Reverse: $(dig @localhost -x $(dig @localhost {{ m.name | lower }}.{{ dns.
 }
 ###
 dns-workers () {
-{% if workers is defined %}
+{% if workers_schedulable %}
 echo "======================"
 echo "DNS Config for Workers"
 echo "======================"
