@@ -306,7 +306,7 @@
       when:
         - workers is defined
         - workers | length > 0
-    when: not staticips and ppc64le
+    when: not staticips and ppc64le and (("metal" in ocp_bios) or ("rootfs" in ocp_bios))
 
 
   - name: Installing TFTP Systemd helper
