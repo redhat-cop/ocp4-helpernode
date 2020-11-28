@@ -1,0 +1,37 @@
+# How to test this image
+
+Build it
+
+```shell
+podman build -t test-dhcp .
+```
+
+Get sample `vars.yaml` file.
+
+```shell
+wget https://raw.githubusercontent.com/RedHatWorkshops/ocp4-helpernode/helperpod/vars.yaml -O /tmp/vars.yaml
+```
+
+Run it
+
+```shell
+podman run -id -e=HELPERPOD_CONFIG_YAML=$(base64 -w0 < /tmp/vars.yaml) --net host --name=test-dhcp test-dhcp
+```
+
+Check the yaml
+
+```shell
+podman exec -it test-dhcp cat /usr/local/src/helperpod.yaml
+```
+
+Check the config
+
+```shell
+podman exec -it test-dhcp cat /etc/dhcp/dhcpd.conf
+```
+
+Have a look around
+
+```shell
+podman exec -it test-dhcp bash
+```

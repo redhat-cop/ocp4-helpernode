@@ -1,0 +1,20 @@
+FROM centos:centos8
+
+ENV OCPVERSION="4.6.1"
+
+ENV OCPRHCOSVERSION="4.6.1"
+
+ENV HELPERPODVERSION="2.4.6.0"
+
+RUN dnf -y install bind bind-utils jq python3-pip && \
+    pip3 install ansible
+
+COPY files/named.conf.j2 /usr/local/src/
+COPY files/reverse.j2 /usr/local/src/
+COPY files/zonefile.j2 /usr/local/src/
+
+COPY scripts/startup.sh /usr/local/bin/
+
+EXPOSE 53/tcp 53/udp
+
+ENTRYPOINT ["/usr/local/bin/startup.sh"]

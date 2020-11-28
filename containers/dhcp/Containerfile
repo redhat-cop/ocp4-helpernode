@@ -1,0 +1,18 @@
+FROM centos:centos8
+
+ENV OCPVERSION="4.6.1"
+
+ENV OCPRHCOSVERSION="4.6.1"
+
+ENV HELPERPODVERSION="2.4.6.0"
+
+RUN dnf -y install dhcp-server jq python3-pip && \
+    pip3 install ansible
+
+COPY files/dhcpd.conf.j2 /usr/local/src/
+
+COPY scripts/startup.sh /usr/local/bin/
+
+EXPOSE 67/udp
+
+ENTRYPOINT ["/usr/local/bin/startup.sh"]

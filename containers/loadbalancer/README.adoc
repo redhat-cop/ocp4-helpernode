@@ -1,0 +1,45 @@
+# How to test this image
+
+Build it
+
+```shell
+podman build -t test-lb .
+```
+
+Get sample `vars.yaml` file.
+
+```shell
+wget https://raw.githubusercontent.com/RedHatWorkshops/ocp4-helpernode/helperpod/vars.yaml -O /tmp/vars.yaml
+```
+
+Run it
+
+```shell
+podman run -id -e=HELPERPOD_CONFIG_YAML=$(base64 -w0 < /tmp/vars.yaml) --net host --name=test-lb test-lb
+```
+
+Check the yaml
+
+```shell
+podman exec -it test-lb cat /usr/local/src/helperpod.yaml
+```
+
+Check the config
+
+```shell
+podman exec -it test-lb cat /etc/haproxy/haproxy.cfg
+```
+
+You can see the lb status
+
+> Make sure port 9000 is open using `firewall-cmd`
+
+```shell
+firefox localhost:9000
+```
+
+Have a look around
+
+```shell
+podman exec -it test-lb bash
+```

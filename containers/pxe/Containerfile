@@ -1,0 +1,29 @@
+FROM centos:centos8
+
+ENV OCPVERSION="4.6.1"
+
+ENV OCPRHCOSVERSION="4.6.1"
+
+ENV HELPERPODVERSION="2.4.6.0"
+
+
+RUN dnf -y install tftp-server syslinux wget jq python3-pip && \
+    pip3 install ansible yq
+
+COPY files/pxe-bootstrap.j2 /usr/local/src/
+COPY files/pxe-master.j2 /usr/local/src/
+COPY files/pxe-worker.j2 /usr/local/src/
+
+RUN export OCPRHCOSURL="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/${OCPVERSION%.*}/${OCPRHCOSVERSION}" && \
+    mkdir -m 0755 -p /var/lib/tftpboot/{pxelinux.cfg,rhcos} && \
+    cp -a /usr/share/syslinux/* /var/lib/tftpboot/ && \
+    wget ${OCPRHCOSURL}/rhcos-${OCPRHCOSVERSION}-x86_64-live-initramfs.x86_64.img -O /var/lib/tftpboot/rhcos/initramfs.img && \
+    wget ${OCPRHCOSURL}/rhcos-${OCPRHCOSVERSION}-x86_64-live-kernel-x86_64 -O /var/lib/tftpboot/rhcos/kernel && \
+    chmod 0555 /var/lib/tftpboot/rhcos/{initramfs.img,kernel}
+
+
+COPY scripts/startup.sh /usr/local/bin/
+
+EXPOSE 69/udp 69/tcp 65500-65515/tcp 65500-65515/udp 4011/tcp 4011/udp 111/tcp 111/udp
+
+ENTRYPOINT ["/usr/local/bin/startup.sh"]

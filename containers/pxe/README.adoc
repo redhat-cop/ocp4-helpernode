@@ -1,0 +1,38 @@
+# How to test this image
+
+Build it
+
+```shell
+podman build -t test-pxe .
+```
+
+Get sample `vars.yaml` file.
+
+```shell
+wget https://raw.githubusercontent.com/RedHatWorkshops/ocp4-helpernode/helperpod/vars.yaml -O /tmp/vars.yaml
+```
+
+Run it
+
+```shell
+podman run -id -e=HELPERPOD_CONFIG_YAML=$(base64 -w0 < /tmp/vars.yaml) --net host --name=test-pxe test-pxe
+```
+
+Check the yaml
+
+```shell
+podman exec -it test-pxe ls -l /var/lib/tftpboot/pxelinux.cfg/*
+podman exec -it test-pxe cat /var/lib/tftpboot/pxelinux.cfg/*
+```
+
+Check the config
+
+```shell
+podman exec -it test-pxe cat /var/lib/tftpboot/rhcos
+```
+
+Have a look around
+
+```shell
+podman exec -it test-pxe bash
+```

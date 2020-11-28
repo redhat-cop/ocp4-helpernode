@@ -1,0 +1,60 @@
+# How to test this image
+
+> You need to run this as `root` because of the port
+
+Build it
+
+```shell
+podman build -t test-dns .
+```
+
+Get sample `vars.yaml` file.
+
+```shell
+wget https://raw.githubusercontent.com/RedHatWorkshops/ocp4-helpernode/helperpod/vars.yaml -O /tmp/vars.yaml
+```
+Run it
+
+
+```shell
+podman run -id -e=HELPERPOD_CONFIG_YAML=$(base64 -w0 < /tmp/vars.yaml) --net host --name=test-dns test-dns
+```
+
+Check the yaml
+
+```shell
+podman exec -it test-dns cat /usr/local/src/helperpod.yaml
+```
+
+Check the config(s)
+
+```shell
+podman exec -it test-dns cat /etc/named.conf
+podman exec -it test-dns cat /var/named/zonefile.db
+podman exec -it test-dns cat /var/named/reverse.db
+```
+
+You can check the entries
+
+> Make sure port 53/udp is open using `firewall-cmd`
+
+```shell
+dig @localhost master0.ocp4.example.com +short
+```
+
+Have a look around
+
+```shell
+podman exec -it test-dns bash
+```
+
+## Troubleshooting
+
+You may need to run this if you're testing on Fedora Desktop (other services that may listen on 53)
+
+```shell
+systemctl stop dnsmasq
+pkill dnsmasq
+systemctl stop systemd-resolved
+```
+

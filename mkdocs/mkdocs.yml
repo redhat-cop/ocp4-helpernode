@@ -1,0 +1,20 @@
+site_name: Helpernode v2
+
+theme: 
+    name: material
+    include_homepage_in_sidebar: true
+    include_search_page: false
+    features:
+      - navigation.sections
+
+nav:
+- Home: 'index.md'
+- Head Placeholder 1:
+    - 'Head 1 Placeholder 1': 'h1p1.md'
+    - 'Head 1 Placeholder 2': 'h1p2.md'
+- Head Placeholder 2:
+    - 'Head 2 Placeholder 1': 'h2p1.md'
+    - 'Head 2 Placeholder 2': 'h2p2.md'
+- Head Placeholder 3:
+    - 'Head 3 Placeholder 1': 'h3p1.md'
+    - 'Head 3 Placeholder 2': 'h3p2.md'
