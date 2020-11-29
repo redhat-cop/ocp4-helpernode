@@ -1,6 +1,6 @@
 # HelperNode v2
 
-The HelperNode is a way to satisfy all the prerequisites needed in order to install OpenShift 4. In version 2 of the HelperNode, all prerequisites/services need are run in containers.
+The HelperNode is a way to satisfy all the prerequisites needed in order to install OpenShift 4. In version 2 of the HelperNode, all prerequisites/services need are run in containers and Ansible is no longer used.
 
 For more information about the prerequisites. Please see the [official OpenShift documentation site](https://docs.openshift.com/container-platform/latest)
 
