@@ -1,46 +1,14 @@
-# HelperNode 2.0
+# HelperNode v2
 
-This is the fork where work is being done on refactoring the HelperNode to use only containers. The following are the guiding principals:
+HelperNode v2 is built on all services running in a container and the end user interacts with them via a CLI utility (`helpernodectl`).
 
-* Declarative approach to all services
-  * The `vars.yaml` (which will be renamed to `helpernode.yaml`) will be the "source of truth"
-  * ALL services will be based on what is in this file.
-  * Changes are to be made to the manifest file directly if a change is needed.
-* All services will be independet of each other
-  * All services will be self contained
-  * No dependecies between services where possible (exceptions only when absolutley needed)
-  * The user can use all or just a subset of services
-  * oc/openshift-install/helm utilites are stored in a container but can be pulled into the node
-* All logic for each containerized service will be in the `startup.sh` file
-* Client utility (`helpernodectl`) should be used to interact with services/utilites
-* No dependency to local storage
-  * Containers should NOT rely on storage on the Host system (i.e. **no** mounting/binding like `-v /hostdir:/containerdir`)
-  * Host using artifacts in containers is okay
-  * `helpernode.yaml` is/should-be the only dependency on disk (besides the utility)
-* Garbage in/Garbage out
-* Users should not have to deal with contianers directly
-* "HelperPod" should be versioned all the way through
-  * it is also tied to the version of OpenShift
-  * Ability to specify other OpenShift versions will be made availbe, but will NOT be supported by this project
-    * i.e. if you fill out a github issue about this, it will be "closed/won't fix"
+The basic principals are
 
-# Development
-
-"HelperPod" should be considered pre-alpha and every change should be considered a "breaking change" until the official 2.0 release.
+* Declarative approach to running the services (Known as `helpernode.yaml`)
+* All services are ephemeral and should not require binding to storage
+* All or only a subset of services can be used at the user's descretion.
 
 
-# HelperPod
+# Alpha Build
 
-You may be asking
-
-> Why do I see "HelperPod" everywhere.
-
-It's just a codename. Originally, the plan was to run the helpernode with `podman play kube` and that's where the name comes from. This refactor is still evolving so stay tuned for more info.
-
-# Maintainers
-
-Current Active Maintainers
-
-- Christian Hernandez (https://github.com/christianh814)
-- Robert Sandoval (https://github.com/robertsandoval)
-
+This is an alpha and things are constantly changing. Please see our official documentation page for full details
