@@ -12,6 +12,16 @@ nav:
 - Using The helpernodectl CLI:
     - 'Obtaining The Binary': 'binary.md'
     - 'Shell Completion': 'shell-completion.md'
+    - 'Copy Ignition Configs': 'copy-ign.md'
+    - 'Get Clients': 'get-clients.md'
+    - 'Install Bootstrapping': 'install-yaml.md'
+    - 'Preflight': 'preflight.md'
+    - 'Pull': 'pull.md'
+    - 'Saving YAML Config': 'saving-yaml.md'
+    - 'Modifying helpernodectl Behavior': 'set.md'
+    - 'Starting the HelperNode Services': 'start.md'
+    - 'Displaying Status': 'status.md'
+    - 'Stopping the HelperNode Services': 'stop.md'
 - Documentation for helpernode.yaml:
     - 'Head 2 Placeholder 1': 'h2p1.md'
     - 'Head 2 Placeholder 2': 'h2p2.md'
