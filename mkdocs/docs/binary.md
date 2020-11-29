@@ -14,3 +14,13 @@ Copy the binary into your `$PATH`, and make it executable.
 sudo cp helpernodectl /usr/local/bin/
 sudo chmod +x /usr/local/bin/helpernodectl
 ```
+
+# Global Flags
+
+Currently there are two global flags: `--config` and `--log-level`
+
+```shell
+Global Flags:
+  -c, --config string      config file (default is $HOME/.helpernodectl.yaml)
+      --log-level string   log level (e.g. "debug | info | warn | error") (default "info")
+```
