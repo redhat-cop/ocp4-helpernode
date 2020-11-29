@@ -11,7 +11,7 @@ nav:
 - Home: 'index.md'
 - Using The helpernodectl CLI:
     - 'Obtaining The Binary': 'binary.md'
-    - 'Head 1 Placeholder 2': 'h1p2.md'
+    - 'Shell Completion': 'shell-completion.md'
 - Documentation for helpernode.yaml:
     - 'Head 2 Placeholder 1': 'h2p1.md'
     - 'Head 2 Placeholder 2': 'h2p2.md'
