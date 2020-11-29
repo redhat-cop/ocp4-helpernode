@@ -4,8 +4,8 @@ HelperNode v2 is built on all services running in a container and the end user i
 
 The basic principals are
 
-* Declarative approach to running the services (Known as `helpernode.yaml`)
-* All services are ephemeral and should not require binding to storage
+* Declarative approach to running the services (configuration used as `helpernode.yaml`)
+* All services are ephemeral and should not require binding to local storage
 * All or only a subset of services can be used at the user's descretion.
 
 
