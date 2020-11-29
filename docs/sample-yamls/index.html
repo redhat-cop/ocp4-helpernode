@@ -14,7 +14,7 @@
     
     
       
-        <title>Head 2 Placeholder 1 - Helpernode v2</title>
+        <title>Sample YAML Configurations - Helpernode v2</title>
       
     
     
@@ -57,7 +57,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#holder-2-page-1" class="md-skip">
+        <a href="#sample-yaml-configurations" class="md-skip">
           Skip to content
         </a>
       
@@ -87,7 +87,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Head 2 Placeholder 1
+              Sample YAML Configurations
             
           </span>
         </div>
@@ -362,6 +362,102 @@
           
           
 
+
+  <li class="md-nav__item">
+    <a href="../yaml-file-forward/" class="md-nav__link">
+      The helpernode.yaml File
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../helper-section/" class="md-nav__link">
+      Helper Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../dns-section/" class="md-nav__link">
+      DNS Server Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../dhcp-section/" class="md-nav__link">
+      DHCP Server Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../bootstrap-section/" class="md-nav__link">
+      Bootstrap Node Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../master-section/" class="md-nav__link">
+      Master Nodes Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../worker-section/" class="md-nav__link">
+      Worker Nodes Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../disabled-section/" class="md-nav__link">
+      Disabled Services Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
   
 
 
@@ -373,21 +469,9 @@
     
     
     <a href="./" class="md-nav__link md-nav__link--active">
-      Head 2 Placeholder 1
+      Sample YAML Configurations
     </a>
     
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../h2p2/" class="md-nav__link">
-      Head 2 Placeholder 2
-    </a>
   </li>
 
         
@@ -473,16 +557,91 @@
               
                 
                 
-                <h1 id="holder-2-page-1">Holder 2 Page 1</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-<pre><code class="shell">pwd
+                <h1 id="sample-yaml-configurations">Sample YAML Configurations</h1>
+<p>Sample configuration files can be found here. These are samples of most
+common use cases.</p>
+<h1 id="full-stack">Full Stack</h1>
+<p>A "fullstack" install of the HelperNode services.</p>
+<pre><code class="yaml">version: v2
+arch: &quot;x86_64&quot;
+helper:
+  name: &quot;helper&quot;
+  ipaddr: &quot;192.168.7.77&quot;
+  networkifacename: &quot;ens3&quot;
+dns:
+  domain: &quot;example.com&quot;
+  clusterid: &quot;ocp4&quot;
+  forwarder1: &quot;8.8.8.8&quot;
+  forwarder2: &quot;8.8.4.4&quot;
+dhcp:
+  router: &quot;192.168.7.1&quot;
+  bcast: &quot;192.168.7.255&quot;
+  netmask: &quot;255.255.255.0&quot;
+  poolstart: &quot;192.168.7.10&quot;
+  poolend: &quot;192.168.7.30&quot;
+  ipid: &quot;192.168.7.0&quot;
+  netmaskid: &quot;255.255.255.0&quot;
+bootstrap:
+  name: &quot;bootstrap&quot;
+  ipaddr: &quot;192.168.7.20&quot;
+  macaddr: &quot;52:54:00:60:72:67&quot;
+  disk: vda
+masters:
+  - name: &quot;master0&quot;
+    ipaddr: &quot;192.168.7.21&quot;
+    macaddr: &quot;52:54:00:e7:9d:67&quot;
+    disk: vda
+  - name: &quot;master1&quot;
+    ipaddr: &quot;192.168.7.22&quot;
+    macaddr: &quot;52:54:00:80:16:23&quot;
+    disk: vda
+  - name: &quot;master2&quot;
+    ipaddr: &quot;192.168.7.23&quot;
+    macaddr: &quot;52:54:00:d5:1c:39&quot;
+    disk: vda
+workers:
+  - name: &quot;worker0&quot;
+    ipaddr: &quot;192.168.7.11&quot;
+    macaddr: &quot;52:54:00:f4:26:a1&quot;
+    disk: vda
+  - name: &quot;worker1&quot;
+    ipaddr: &quot;192.168.7.12&quot;
+    macaddr: &quot;52:54:00:82:90:00&quot;
+    disk: vda
 </code></pre>
 
-<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-<pre><code class="yaml">some:
-  yaml:
-    - goes
-    - here
+<h1 id="static-ips">Static IPs</h1>
+<p>Here is an example if you're doing a "static ip" install and don't need
+all the services.</p>
+<pre><code class="yaml">version: v2
+arch: &quot;x86_64&quot;
+helper:
+  name: &quot;helper&quot;
+  ipaddr: &quot;192.168.7.77&quot;
+  networkifacename: &quot;ens3&quot;
+disabledServices:
+  - dhcp
+  - pxe
+dns:
+  domain: &quot;example.com&quot;
+  clusterid: &quot;ocp4&quot;
+  forwarder1: &quot;8.8.8.8&quot;
+  forwarder2: &quot;8.8.4.4&quot;
+bootstrap:
+  name: &quot;bootstrap&quot;
+  ipaddr: &quot;192.168.7.20&quot;
+masters:
+  - name: &quot;master0&quot;
+    ipaddr: &quot;192.168.7.21&quot;
+  - name: &quot;master1&quot;
+    ipaddr: &quot;192.168.7.22&quot;
+  - name: &quot;master2&quot;
+    ipaddr: &quot;192.168.7.23&quot;
+workers:
+  - name: &quot;worker0&quot;
+    ipaddr: &quot;192.168.7.11&quot;
+  - name: &quot;worker1&quot;
+    ipaddr: &quot;192.168.7.12&quot;
 </code></pre>
                 
               
@@ -502,7 +661,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../stop/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../disabled-section/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -511,19 +670,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Stopping the HelperNode Services
+                Disabled Services Section
               </div>
             </div>
           </a>
         
         
-          <a href="../h2p2/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../h3p1/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Head 2 Placeholder 2
+                Head 3 Placeholder 1
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">

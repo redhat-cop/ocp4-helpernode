@@ -14,7 +14,7 @@
     
     
       
-        <title>Head 2 Placeholder 2 - Helpernode v2</title>
+        <title>Helper Section - Helpernode v2</title>
       
     
     
@@ -57,7 +57,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#holder-2-page-2" class="md-skip">
+        <a href="#helper-section" class="md-skip">
           Skip to content
         </a>
       
@@ -87,7 +87,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Head 2 Placeholder 2
+              Helper Section
             
           </span>
         </div>
@@ -364,8 +364,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../h2p1/" class="md-nav__link">
-      Head 2 Placeholder 1
+    <a href="../yaml-file-forward/" class="md-nav__link">
+      The helpernode.yaml File
     </a>
   </li>
 
@@ -385,9 +385,93 @@
     
     
     <a href="./" class="md-nav__link md-nav__link--active">
-      Head 2 Placeholder 2
+      Helper Section
     </a>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../dns-section/" class="md-nav__link">
+      DNS Server Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../dhcp-section/" class="md-nav__link">
+      DHCP Server Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../bootstrap-section/" class="md-nav__link">
+      Bootstrap Node Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../master-section/" class="md-nav__link">
+      Master Nodes Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../worker-section/" class="md-nav__link">
+      Worker Nodes Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../disabled-section/" class="md-nav__link">
+      Disabled Services Section
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../sample-yamls/" class="md-nav__link">
+      Sample YAML Configurations
+    </a>
   </li>
 
         
@@ -473,17 +557,23 @@
               
                 
                 
-                <h1 id="holder-2-page-2">Holder 2 Page 2</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-<pre><code class="shell">pwd
+                <h1 id="helper-section">Helper Section</h1>
+<p>This section sets up the variables for the server/vm/node where the HelperNode services will run.</p>
+<pre><code class="yaml">helper:
+  name: &quot;helper&quot;
+  ipaddr: &quot;192.168.7.77&quot;
+  networkifacename: &quot;ens3&quot;
 </code></pre>
 
-<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-<pre><code class="yaml">some:
-  yaml:
-    - goes
-    - here
-</code></pre>
+<p>This is how it breaks down</p>
+<ul>
+<li><code>helper.name</code> - REQUIRED: This needs to be set to the hostname you want your helper to be (some people leave it as "helper" others change it to "bastion"). This will create an entry in the DNS service.</li>
+<li><code>helper.ipaddr</code> - REQUIRED Set this to the current IP address of the helper. This is used to set up the reverse dns definition of not only the HelperNode itself, but also the in-addr.arpa  configuration in DNS.</li>
+<li><code>helper.networkifacename</code> - REQUIRED: This is set to the interface that has the <code>helper.ipaddr</code> ip address.</li>
+</ul>
+<blockquote>
+<p>NOTE: The <code>helper.networkifacename</code> is the ACTUAL name of the interface, NOT the NetworkManager name (you should NEVER need to set it to something like <code>System eth0</code>. Set it to what you see when you run the <code>ip addr</code> command)</p>
+</blockquote>
                 
               
               
@@ -502,7 +592,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../h2p1/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../yaml-file-forward/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -511,19 +601,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Head 2 Placeholder 1
+                The helpernode.yaml File
               </div>
             </div>
           </a>
         
         
-          <a href="../h3p1/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../dns-section/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Head 3 Placeholder 1
+                DNS Server Section
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">

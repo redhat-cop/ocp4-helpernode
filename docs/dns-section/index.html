@@ -14,7 +14,7 @@
     
     
       
-        <title>Stopping the HelperNode Services - Helpernode v2</title>
+        <title>DNS Server Section - Helpernode v2</title>
       
     
     
@@ -57,7 +57,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#stopping-the-helpernode-services" class="md-skip">
+        <a href="#dns-service-section" class="md-skip">
           Skip to content
         </a>
       
@@ -87,7 +87,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Stopping the HelperNode Services
+              DNS Server Section
             
           </span>
         </div>
@@ -171,12 +171,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
     <label class="md-nav__link" for="nav-2">
       Using The helpernodectl CLI
       <span class="md-nav__icon md-icon"></span>
@@ -325,20 +323,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../stop/" class="md-nav__link">
       Stopping the HelperNode Services
     </a>
-    
   </li>
 
         
@@ -351,10 +340,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
     <label class="md-nav__link" for="nav-3">
       Documentation for helpernode.yaml
       <span class="md-nav__icon md-icon"></span>
@@ -395,11 +386,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../dns-section/" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       DNS Server Section
     </a>
+    
   </li>
 
         
@@ -557,25 +557,27 @@
               
                 
                 
-                <h1 id="stopping-the-helpernode-services">Stopping the HelperNode Services</h1>
-<p>The <code>stop</code> subcommand  will stop the HelperNode containers currently
-running.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop
+                <h1 id="dns-service-section">DNS Service Section</h1>
+<p>This section sets up your DNS server.</p>
+<pre><code class="yaml">dns:
+  domain: &quot;example.com&quot;
+  clusterid: &quot;ocp4&quot;
+  forwarder1: &quot;8.8.8.8&quot;
+  forwarder2: &quot;8.8.4.4&quot;
 </code></pre>
 
-<h1 id="stopping-individual-services">Stopping Individual Services</h1>
-<p>By default, <code>stop</code> will stop all "core" services. You can stop
-individual services if, for example, you want the  <code>http</code> container to
-be shutdown since you don't need it post install.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop http
-</code></pre>
-
-<p>You can stop multiple services by using a comma (<code>,</code>) as a delimiter.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop dhcp,pxe
-</code></pre>
+<p>Explanation of the DNS variables:</p>
+<ul>
+<li><code>dns.domain</code> - This is what domain the installed DNS server will have. This needs to match what you will put for the <code>baseDomain</code> inside the <code>install-config.yaml</code> OpenShift installer configuration file.</li>
+<li><code>dns.clusterid</code> - This is what your <code>clusterid</code> will be named and needs to match what is in <code>metadata.name</code> inside the <code>install-config.yaml</code> file.</li>
+<li><code>dns.forwarder1</code> - This will be set up as the DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.</li>
+<li><code>dns.forwarder2</code> - This will be set up as the second DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.</li>
+</ul>
+<p>The DNS server will be set up using <code>dns.clusterid</code> + <code>dns.domain</code> as the domain it's serving. In the above example, the helper will be setup to be the SOA for <code>ocp4.example.com</code>.</p>
+<blockquote>
+<p>NOTE: Although you CAN use the helper as your dns server. It's best to have your DNS server delegate the <code>dns.clusterid + dns.domain domain to</code> the helper (i.e. Delegate <code>ocp4.example.com</code> to the helper)</p>
+</blockquote>
+<p>The DNS section is optional, and only needed if you need to run the DNS server.</p>
                 
               
               
@@ -594,7 +596,7 @@ be shutdown since you don't need it post install.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../status/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../helper-section/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -603,19 +605,19 @@ be shutdown since you don't need it post install.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Displaying Status
+                Helper Section
               </div>
             </div>
           </a>
         
         
-          <a href="../yaml-file-forward/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../dhcp-section/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                The helpernode.yaml File
+                DHCP Server Section
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">

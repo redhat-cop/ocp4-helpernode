@@ -14,7 +14,7 @@
     
     
       
-        <title>Stopping the HelperNode Services - Helpernode v2</title>
+        <title>Bootstrap Node Section - Helpernode v2</title>
       
     
     
@@ -57,7 +57,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#stopping-the-helpernode-services" class="md-skip">
+        <a href="#bootstrap-node-section" class="md-skip">
           Skip to content
         </a>
       
@@ -87,7 +87,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Stopping the HelperNode Services
+              Bootstrap Node Section
             
           </span>
         </div>
@@ -171,12 +171,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
     <label class="md-nav__link" for="nav-2">
       Using The helpernodectl CLI
       <span class="md-nav__icon md-icon"></span>
@@ -325,20 +323,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../stop/" class="md-nav__link">
       Stopping the HelperNode Services
     </a>
-    
   </li>
 
         
@@ -351,10 +340,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
     <label class="md-nav__link" for="nav-3">
       Documentation for helpernode.yaml
       <span class="md-nav__icon md-icon"></span>
@@ -419,11 +410,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../bootstrap-section/" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       Bootstrap Node Section
     </a>
+    
   </li>
 
         
@@ -557,25 +557,22 @@
               
                 
                 
-                <h1 id="stopping-the-helpernode-services">Stopping the HelperNode Services</h1>
-<p>The <code>stop</code> subcommand  will stop the HelperNode containers currently
-running.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop
+                <h1 id="bootstrap-node-section">Bootstrap Node Section</h1>
+<p>This section defines the bootstrap node configuration.</p>
+<pre><code class="yaml">bootstrap:
+  name: &quot;bootstrap&quot;
+  ipaddr: &quot;192.168.7.20&quot;
+  macaddr: &quot;52:54:00:60:72:67&quot;
+  disk: vda
 </code></pre>
 
-<h1 id="stopping-individual-services">Stopping Individual Services</h1>
-<p>By default, <code>stop</code> will stop all "core" services. You can stop
-individual services if, for example, you want the  <code>http</code> container to
-be shutdown since you don't need it post install.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop http
-</code></pre>
-
-<p>You can stop multiple services by using a comma (<code>,</code>) as a delimiter.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl stop dhcp,pxe
-</code></pre>
+<p>The options are:</p>
+<ul>
+<li><code>bootstrap.name</code> - The hostname (WITHOUT the fqdn) of the bootstrap node you want to set</li>
+<li><code>bootstrap.ipaddr</code> - The IP address that you want set (this modifies the dhcp config file, the dns zonefile, and the reverse dns zonefile)</li>
+<li><code>bootstrap.macaddr</code> - The mac address for dhcp reservation. This option is not needed if you're doing static ips.</li>
+<li><code>bootstrap.disk</code> - The disk that will be used to install RHCOS onto.</li>
+</ul>
                 
               
               
@@ -594,7 +591,7 @@ be shutdown since you don't need it post install.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../status/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../dhcp-section/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -603,19 +600,19 @@ be shutdown since you don't need it post install.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Displaying Status
+                DHCP Server Section
               </div>
             </div>
           </a>
         
         
-          <a href="../yaml-file-forward/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../master-section/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                The helpernode.yaml File
+                Master Nodes Section
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
