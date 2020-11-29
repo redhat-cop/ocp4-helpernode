@@ -14,7 +14,7 @@
     
     
       
-        <title>Head 1 Placeholder 1 - Helpernode v2</title>
+        <title>Obtaining The Binary - Helpernode v2</title>
       
     
     
@@ -57,7 +57,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#holder-1-page-1" class="md-skip">
+        <a href="#obtaining-the-binary" class="md-skip">
           Skip to content
         </a>
       
@@ -87,7 +87,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Head 1 Placeholder 1
+              Obtaining The Binary
             
           </span>
         </div>
@@ -204,7 +204,7 @@
     
     
     <a href="./" class="md-nav__link md-nav__link--active">
-      Head 1 Placeholder 1
+      Obtaining The Binary
     </a>
     
   </li>
@@ -353,16 +353,15 @@
               
                 
                 
-                <h1 id="holder-1-page-1">Holder 1 Page 1</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-<pre><code class="shell">pwd
+                <h1 id="obtaining-the-binary">Obtaining The Binary</h1>
+<p>In order to install/use the HelperNode, you'll need to obtain the binary by visiting the <a href="https://github.com/RedHatOfficial/ocp4-helpernode/releases">releases page</a> on GitHub.</p>
+<p>Current release is <code>v2alpha1</code></p>
+<pre><code class="shell">wget https://github.com/RedHatOfficial/ocp4-helpernode/releases/download/v2alpha1/helpernodectl
 </code></pre>
 
-<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-<pre><code class="yaml">some:
-  yaml:
-    - goes
-    - here
+<p>Copy the binary into your <code>$PATH</code>, and make it executable.</p>
+<pre><code class="shell">sudo cp helpernodectl /usr/local/bin/
+sudo chmod +x /usr/local/bin/helpernodectl
 </code></pre>
                 
               

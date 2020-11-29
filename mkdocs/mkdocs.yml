@@ -10,7 +10,7 @@ theme:
 nav:
 - Home: 'index.md'
 - Using The helpernodectl CLI:
-    - 'Head 1 Placeholder 1': 'h1p1.md'
+    - 'Obtaining The Binary': 'binary.md'
     - 'Head 1 Placeholder 2': 'h1p2.md'
 - Documentation for helpernode.yaml:
     - 'Head 2 Placeholder 1': 'h2p1.md'
