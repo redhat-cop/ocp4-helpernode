@@ -20,4 +20,4 @@ The `helpernodectl` utility is only supported/tested with the following:
 * Podman 1.6.4
 * Firewalld 0.8.0
 
-The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.1
+The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.4
