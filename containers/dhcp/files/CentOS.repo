@@ -4,3 +4,4 @@ mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo
 #baseurl=http://mirror.centos.org/$contentdir/$releasever/BaseOS/$basearch/os/
 gpgcheck=0
 enabled=0
+##
