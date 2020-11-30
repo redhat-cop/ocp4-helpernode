@@ -1,10 +1,10 @@
 FROM centos:centos8
 
-ENV OCPVERSION="4.6.1"
+ENV OCPVERSION="4.6.4"
 
 ENV OCPRHCOSVERSION="4.6.1"
 
-ENV HELPERPODVERSION="2.4.6.0"
+ENV HELPERNODEVERSION="v2alpha1"
 
 RUN dnf -y install dhcp-server jq python3-pip && \
     pip3 install ansible

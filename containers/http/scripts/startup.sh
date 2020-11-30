@@ -19,7 +19,7 @@ echo ${HELPERPOD_CONFIG_YAML} | base64 -d > ${helperPodYaml}
 
 #
 ## Create httpd.conf based on the template and yaml passed in.
-ansible localhost -c local -e @${helperPodYaml} -e "http_port=${HELPERPOD_HTTP_PORT}" -m template -a "src=${httpConfigTemplate} dest=${httpConfig}" > ${ansibleLog} 2>&1
+ansible localhost -c local -e @${helperPodYaml} -e "http_port=${HELPERNODE_HTTP_PORT}" -m template -a "src=${httpConfigTemplate} dest=${httpConfig}" > ${ansibleLog} 2>&1
 
 #
 ## Test for the validity of the config file. Run the HTTPD process if it passes
