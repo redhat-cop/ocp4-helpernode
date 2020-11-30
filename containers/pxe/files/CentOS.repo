@@ -1,0 +1,7 @@
+[CentOS-AppStream]
+name=CentOS-$releasever - AppStream
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=AppStream&infra=$infra
+#baseurl=http://mirror.centos.org/$contentdir/$releasever/AppStream/$basearch/os/
+gpgcheck=0
+enabled=0
+priority=1

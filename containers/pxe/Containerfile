@@ -1,4 +1,4 @@
-FROM centos:centos8
+FROM registry.access.redhat.com/ubi8/ubi:latest
 
 ENV OCPVERSION="4.6.4"
 
@@ -6,8 +6,12 @@ ENV OCPRHCOSVERSION="4.6.1"
 
 ENV HELPERNODEVERSION="v2alpha1"
 
+COPY files/CentOS.repo /etc/yum.repos.d/
+COPY files/CentOS-bo.repo /etc/yum.repos.d/
 
-RUN dnf -y install tftp-server syslinux wget jq python3-pip && \
+RUN chmod 0644 /etc/yum.repos.d/CentOS.repo && \
+    dnf -y install --enablerepo CentOS-AppStream --enablerepo CentOS-BaseOS tftp-server syslinux && \
+    dnf -y install wget jq python3-pip && \
     pip3 install ansible yq
 
 COPY files/pxe-bootstrap.j2 /usr/local/src/
@@ -23,6 +27,8 @@ RUN export OCPRHCOSURL="https://mirror.openshift.com/pub/openshift-v4/dependenci
 
 
 COPY scripts/startup.sh /usr/local/bin/
+
+RUN rm -f /etc/yum.repos.d/CentOS.repo
 
 EXPOSE 69/udp 69/tcp 65500-65515/tcp 65500-65515/udp 4011/tcp 4011/udp 111/tcp 111/udp
 
