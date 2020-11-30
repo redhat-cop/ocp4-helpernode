@@ -19,4 +19,6 @@ COPY scripts/startup.sh /usr/local/bin/
 
 EXPOSE 67/udp
 
+RUN rm -f /etc/yum.repos.d/CentOS.repo
+
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
