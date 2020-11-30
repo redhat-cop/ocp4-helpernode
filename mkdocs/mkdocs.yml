@@ -14,7 +14,6 @@ nav:
     - 'Shell Completion': 'shell-completion.md'
     - 'Copy Ignition Configs': 'copy-ign.md'
     - 'Get Clients': 'get-clients.md'
-    - 'Install Bootstrapping': 'install-yaml.md'
     - 'Preflight Checks': 'preflight.md'
     - 'Pulling Images': 'pull.md'
     - 'Saving YAML Config': 'saving-yaml.md'

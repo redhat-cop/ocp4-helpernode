@@ -1,4 +1,4 @@
-FROM centos:centos8
+FROM registry.access.redhat.com/ubi8/ubi:latest
 
 ENV OCPVERSION="4.6.4"
 
@@ -6,7 +6,11 @@ ENV OCPRHCOSVERSION="4.6.1"
 
 ENV HELPERNODEVERSION="v2alpha1"
 
-RUN dnf -y install dhcp-server jq python3-pip && \
+COPY files/CentOS.repo /etc/yum.repos.d/CentOS.repo
+
+RUN chmod 0644 /etc/yum.repos.d/CentOS.repo && \
+    dnf -y install --enablerepo CentOS-BaseOS dhcp-server && \
+    dnf -y install jq python3-pip && \
     pip3 install ansible
 
 COPY files/dhcpd.conf.j2 /usr/local/src/
