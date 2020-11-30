@@ -16,4 +16,5 @@ COPY scripts/startup.sh /usr/local/bin/
 EXPOSE 9000/tcp 9000/udp 6443/tcp 6443/udp 22623/tcp 22623/udp 80/tcp 80/udp 443/tcp 443/udp
 
 RUN setcap 'cap_net_bind_service=+ep' /usr/sbin/haproxy
+
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
