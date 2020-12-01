@@ -4,6 +4,9 @@ theme:
     name: material
     include_homepage_in_sidebar: true
     include_search_page: false
+    palette:
+      primary: white
+    logo: assets/images/hn2-logo.png
     features:
       - navigation.sections
 
