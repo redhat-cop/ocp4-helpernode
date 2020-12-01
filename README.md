@@ -1,3 +1,4 @@
+<p align="center"><img alt="helpernode" src="./mkdocs/docs/assets/images/hn2-logo.png" width="300px" /></p>
 # HelperNode v2
 
 HelperNode v2 is built on all services running in a container and the end user interacts with them via a CLI utility (`helpernodectl`).
