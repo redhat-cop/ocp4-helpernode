@@ -621,6 +621,34 @@ workers:
   - name: &quot;worker1&quot;
     ipaddr: &quot;192.168.7.12&quot;
 </code></pre>
+
+<h1 id="compact-static">Compact Static</h1>
+<p>Here is an example of setting up a "compact" cluster (where you have 3 nodes that act as a master and a worker), not using <code>pxe</code> or <code>dhcp</code> since a static ip install will be performed.</p>
+<pre><code class="yaml">version: v2
+arch: &quot;x86_64&quot;
+helper:
+  name: &quot;helper&quot;
+  ipaddr: &quot;192.168.7.77&quot;
+  networkifacename: &quot;ens3&quot;
+disabledServices:
+  - dhcp
+  - pxe
+dns:
+  domain: &quot;example.com&quot;
+  clusterid: &quot;ocp4&quot;
+  forwarder1: &quot;8.8.8.8&quot;
+  forwarder2: &quot;8.8.4.4&quot;
+bootstrap:
+  name: &quot;bootstrap&quot;
+  ipaddr: &quot;192.168.7.20&quot;
+masters:
+  - name: &quot;master0&quot;
+    ipaddr: &quot;192.168.7.21&quot;
+  - name: &quot;master1&quot;
+    ipaddr: &quot;192.168.7.22&quot;
+  - name: &quot;master2&quot;
+    ipaddr: &quot;192.168.7.23&quot;
+</code></pre>
                 
               
               
