@@ -32,5 +32,5 @@ nav:
     - 'Disabled Services Section': 'disabled-section.md'
     - 'Sample YAML Configurations': 'sample-yamls.md'
 - Quickstarts:
-    - 'Head 3 Placeholder 1': 'h3p1.md'
-    - 'Head 3 Placeholder 2': 'h3p2.md'
+    - 'Full Stack Quickstart': 'fullstack-quickstart.md'
+    - 'Disconnected Installation': 'disconnected.md'
