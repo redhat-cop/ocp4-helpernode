@@ -548,7 +548,123 @@
                 
                 
                 <h1 id="disconnected-install">Disconnected Install</h1>
-<p>COMING SOON!</p>
+<p>This quickstart will get the HelperNode running in a disconnected environment. All the HelperNode services are ran in prebuilt image containers, so getting it running disconnected can be broken down into the following steps.</p>
+<ul>
+<li>Pull the images</li>
+<li>Save the images into a tarball</li>
+<li>Sneakernet this tarball over to disconnected network.</li>
+<li>Load the tarball into a host.</li>
+<li>Push these images into your hosted registry.</li>
+<li>Start the HelperNode Services using the internal registry</li>
+</ul>
+<blockquote>
+<p>Note: Setting up a regsitry is beyond the scope of this document. Please
+see <a href="https://www.projectquay.io/">Quay</a> or <a href="https://goharbor.io/">Harbor</a>
+if you need a registry.</p>
+</blockquote>
+<p>You can use the images hosted on your registry for the HelperNode</p>
+<h1 id="pull-the-images">Pull The Images</h1>
+<p>On your laptop, or a system with access to the internet, pull the
+images. Make sure you're pulling the right tag for the version
+you want.</p>
+<blockquote>
+<p>For the alpha build, we are using <code>latest</code>, but this will change to
+specific versioning in the future.</p>
+</blockquote>
+<pre><code class="shell">export TAG=latest
+for hni in dns dhcp http loadbalancer pxe
+do
+  podman pull quay.io/helpernode/${hni}:${TAG}
+done
+</code></pre>
+
+<h1 id="save-the-images">Save The Images</h1>
+<p>After you've pulled the images locally, save them into tarballs,
+compressing them if you'd like.</p>
+<pre><code class="shell">export TAG=latest
+for hni in dns dhcp http loadbalancer pxe
+do
+  podman pull quay.io/helpernode/${hni}:${TAG}
+  podman save --compress -o helpernode-${hni}.tar.gz quay.io/helpernode/${hni}:${TAG} 
+done
+</code></pre>
+
+<p>You can now "sneakernet" these <code>helpernode-${hni}.tar.gz</code> files to you
+Disconnected environment and load it up to a host with access to your
+image registry.</p>
+<h1 id="loading-tarball">Loading Tarball</h1>
+<p>Load the tarballs into a host on your network with the
+ability to push into your image registry.</p>
+<pre><code class="shell">for hni in dns dhcp http loadbalancer pxe
+do
+  podman load -i helpernode-${hni}.tar.gz
+done
+</code></pre>
+
+<p>You should now have the HelperNode service images on your host.</p>
+<pre><code class="shell"># podman images |grep helper
+quay.io/helpernode/pxe            latest   26e2169c7c62   5 hours ago    696 MB
+quay.io/helpernode/loadbalancer   latest   600c36a4cdc3   5 hours ago    588 MB
+quay.io/helpernode/http           latest   a04dcc414ca6   5 hours ago    1.53 GB
+quay.io/helpernode/dns            latest   1727361b9dfa   5 hours ago    666 MB
+quay.io/helpernode/dhcp           latest   b651c044b62e   5 hours ago    592 MB
+</code></pre>
+
+<h1 id="pushing-images-to-registry">Pushing Images To Registry</h1>
+<p>Now that you have your images locally, you can load them into your images
+registry. You may need to login first, please consult with your image
+registry admin.</p>
+<p>In my example, my registry is <code>registry.example.com</code> on port <code>5000</code></p>
+<pre><code class="shell"># podman login registry.example.com:5000
+Username: reguser
+Password: *********
+Login Succeeded!
+</code></pre>
+
+<p>Now I can tag and push my local images to the registry.</p>
+<blockquote>
+<p>Note that I'm using a namespace called <code>alpha</code>. You may or maynot have
+a workspace, if you do; it will probably differ in name.</p>
+</blockquote>
+<pre><code class="shell">export TAG=latest
+for hni in dns dhcp http loadbalancer pxe
+do
+  podman tag quay.io/helpernode/${hni}:${TAG}  registry.example.com:5000/alpha/helpernode/${hni}:${TAG}
+  podman push registry.example.com:5000/alpha/helpernode/${hni}:${TAG}
+done
+</code></pre>
+
+<h1 id="starting-helpernode-disconnected">Starting HelperNode Disconnected</h1>
+<p>Once your images are uploaded, you can now start the HelperNode services
+by first exporting the <code>HELPERNODE_IMAGE_PREFIX</code> environment variable
+on the HelperNode.</p>
+<pre><code class="shell">export HELPERNODE_IMAGE_PREFIX=registry.example.com:5000/alpha
+</code></pre>
+
+<p>Next, you may need to login to your registry.</p>
+<pre><code class="shell"># podman login registry.example.com:5000
+Username: reguser
+Password: *********
+Login Succeeded!
+</code></pre>
+
+<p>Now you can start the service, using a <a href="../yaml-file-forward/">valid YAML config file</a> for
+your environment.</p>
+<pre><code class="shell">helpernodectl start --config helpernode.yaml
+</code></pre>
+
+<p>You should now be running the images from your local registry.</p>
+<pre><code class="shell"># helpernodectl status
+Names                     Status                  Image
+helpernode-http           Up About a minute ago   registry.example.com:5000/alpha/helpernode/http:latest
+helpernode-dhcp           Up About a minute ago   registry.example.com:5000/alpha/helpernode/dhcp:latest
+helpernode-dns            Up About a minute ago   registry.example.com:5000/alpha/helpernode/dns:latest
+helpernode-pxe            Up 2 minutes ago        registry.example.com:5000/alpha/helpernode/pxe:latest
+helpernode-loadbalancer   Up 2 minutes ago        registry.example.com:5000/alpha/helpernode/loadbalancer:latest
+</code></pre>
+
+<h1 id="openshift-installation">OpenShift Installation</h1>
+<p>You can now use the HelperNode to install <a href="https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal/installing-restricted-networks-bare-metal.html">OpenShift disconnected</a></p>
                 
               
               
