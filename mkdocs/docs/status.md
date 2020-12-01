@@ -1,4 +1,4 @@
-# 'Displaying Status'
+# Displaying Status
 
 The `status` subcommand shows the status of the running containers on
 the host.

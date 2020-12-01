@@ -21,7 +21,6 @@ nav:
     - 'Preflight Checks': 'preflight.md'
     - 'Pulling Images': 'pull.md'
     - 'Saving YAML Config': 'saving-yaml.md'
-    - 'Modifying helpernodectl Behavior': 'set.md'
     - 'Starting the HelperNode Services': 'start.md'
     - 'Displaying Status': 'status.md'
     - 'Stopping the HelperNode Services': 'stop.md'
