@@ -21,3 +21,7 @@ Doing this, you'll no longer need the `loadbalancer` service. You can disable th
 disabledServices:
   - loadbalancer
 ```
+
+> You can also disable `pxe` as most IPI installers don't need it. This
+> depends on the IPI implementation. Again, please consult the official
+> documentation.
