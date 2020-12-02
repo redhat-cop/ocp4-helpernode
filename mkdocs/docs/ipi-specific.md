@@ -11,7 +11,7 @@ ipiip:
   apps: "192.168.7.201"
 ```
 
-> NOTE: These IPs must **NOT** exist, as they'll
+> NOTE: These IPs must **NOT** be in use, as they'll
 > be assigned by the OpenShift installer itself. Please see the [official documentation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-prerequisites.html#network-requirements_ipi-install-prerequisites) for more details.
 
 
