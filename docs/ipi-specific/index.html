@@ -14,7 +14,7 @@
     
     
       
-        <title>Modifying helpernodectl Behavior - Helpernode v2</title>
+        <title>IPI Installation Section - Helpernode v2</title>
       
     
     
@@ -61,7 +61,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#modifying-helpernodectl-behavior" class="md-skip">
+        <a href="#disabled-services-section" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +90,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Modifying helpernodectl Behavior
+              IPI Installation Section
             
           </span>
         </div>
@@ -318,10 +318,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
     <label class="md-nav__link" for="nav-3">
       Documentation for helpernode.yaml
       <span class="md-nav__icon md-icon"></span>
@@ -434,6 +436,27 @@
           
           
 
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      IPI Installation Section
+    </a>
+    
+  </li>
+
+        
+          
+          
+          
+
 
   <li class="md-nav__item">
     <a href="../sample-yamls/" class="md-nav__link">
@@ -524,17 +547,24 @@
               
                 
                 
-                <h1 id="modifying-helpernodectl-behavior">Modifying helpernodectl Behavior</h1>
-<blockquote>
-<p>NOTE: Currently <code>set</code> isn't fully functional</p>
-</blockquote>
-<p>The <code>set</code> subcommand is used to set configurations in the <code>~/.helpernodectl.yaml</code> file.</p>
-<p>Example:</p>
-<pre><code class="shell">helpernodectl set key=value
+                <h1 id="disabled-services-section">Disabled Services Section</h1>
+<p>By default, the HelperNode services assumes you will use the Load Balancer
+functionality. In the case of BareMetal IPI, vSphere IPI, OpenStack IPI,
+and RHV IPI; the load balancing is done on the platform itself. You can
+flag this in the YAML file.</p>
+<pre><code class="yaml">ipiip: 
+  api: &quot;192.168.7.200&quot;
+  apps: &quot;192.168.7.201&quot;
 </code></pre>
 
-<p>The <code>~/.helpernodectl.yaml</code> sets <code>helpernodectl</code> specific configurations,
-applicable only to the CLI tool.</p>
+<blockquote>
+<p>NOTE: These IPs must <strong>NOT</strong> exist, as they'll
+be assigned by the OpenShift installer itself. Please see the <a href="https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-prerequisites.html#network-requirements_ipi-install-prerequisites">official documentation</a> &gt; for more details.</p>
+</blockquote>
+<p>Doing this, you'll no longer need the <code>loadbalancer</code> service. You can disable this in the YAML as well.</p>
+<pre><code class="yaml">disabledServices:
+  - loadbalancer
+</code></pre>
                 
               
               
@@ -549,6 +579,41 @@ applicable only to the CLI tool.</p>
       
         
 <footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../disabled-section/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Disabled Services Section
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../sample-yamls/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Sample YAML Configurations
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
