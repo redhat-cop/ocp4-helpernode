@@ -12,7 +12,7 @@ ipiip:
 ```
 
 > NOTE: These IPs must **NOT** exist, as they'll
-> be assigned by the OpenShift installer itself. Please see the [official documentation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-prerequisites.html#network-requirements_ipi-install-prerequisites) > for more details.
+> be assigned by the OpenShift installer itself. Please see the [official documentation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-prerequisites.html#network-requirements_ipi-install-prerequisites) for more details.
 
 
 Doing this, you'll no longer need the `loadbalancer` service. You can disable this in the YAML as well.
