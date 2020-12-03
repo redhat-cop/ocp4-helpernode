@@ -547,7 +547,7 @@
                 
                 <h1 id="helpernode-v2">HelperNode v2</h1>
 <p>The HelperNode is a way to satisfy all the prerequisites needed in order to install OpenShift 4. In version 2 of the HelperNode, all prerequisites/services are run in containers and Ansible is no longer used.</p>
-<p>For more information about the prerequisites. Please see the <a href="https://docs.openshift.com/container-platform/latest">official OpenShift documentation site</a></p>
+<p>For more information about the OpenShift prerequisites. Please see the <a href="https://docs.openshift.com/container-platform/latest">official OpenShift documentation site</a></p>
 <p>The HelperNode is a node/vm/server that sits on your network running all the services needed in an "all-in-one" way. The following diagram shows a highlevel view of where the HelperNode sits on your network.</p>
 <blockquote>
 <p>NOTE: You can, and is recommended, delegate a subdomain to the HelperNode if you have a working DNS server in your environment. For example; if you want a <code>$CLUSTERID</code> of <em>ocp4</em>, and you have a <code>$DOMAIN</code> of <em>example.com</em>. Then you will delegate <code>ocp4.example.com</code> to the HelperNode.</p>
@@ -562,6 +562,12 @@
 <li>Firewalld 0.8.0</li>
 </ul>
 <p>The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.4</p>
+<h1 id="quickstarts">Quickstarts</h1>
+<p>Please take a look at one of our quickstarts to get up and running.</p>
+<ul>
+<li><a href="fullstack-quickstart/">Full Stack</a></li>
+<li><a href="disconnected/">Disconnected</a></li>
+</ul>
                 
               
               

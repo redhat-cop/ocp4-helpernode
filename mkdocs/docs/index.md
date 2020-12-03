@@ -2,7 +2,7 @@
 
 The HelperNode is a way to satisfy all the prerequisites needed in order to install OpenShift 4. In version 2 of the HelperNode, all prerequisites/services are run in containers and Ansible is no longer used.
 
-For more information about the prerequisites. Please see the [official OpenShift documentation site](https://docs.openshift.com/container-platform/latest)
+For more information about the OpenShift prerequisites. Please see the [official OpenShift documentation site](https://docs.openshift.com/container-platform/latest)
 
 The HelperNode is a node/vm/server that sits on your network running all the services needed in an "all-in-one" way. The following diagram shows a highlevel view of where the HelperNode sits on your network.
 
@@ -21,3 +21,10 @@ The [`helpernodectl`](https://github.com/RedHatOfficial/ocp4-helpernode/releases
 * Firewalld 0.8.0
 
 The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.4
+
+# Quickstarts
+
+Please take a look at one of our quickstarts to get up and running.
+
+* [Full Stack](fullstack-quickstart.md)
+* [Disconnected](disconnected.md)
