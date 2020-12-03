@@ -3,7 +3,7 @@
 > :heavy_exclamation_mark: *Red Hat support cannot assist with problems with this Repo*. For issues please open a GitHub issue
 
 
-#### [HelperNode v2 Alpha Now Available!}(https://redhatofficial.github.io/ocp4-helpernode/)
+#### [HelperNode v2 Alpha Now Available!](https://redhatofficial.github.io/ocp4-helpernode/)
 
 This playbook helps set up an "all-in-one" node, that has all the infrastructure/services in order to install OpenShift 4. After you run the playbook, you'll be ready to begin the installation process.
 
