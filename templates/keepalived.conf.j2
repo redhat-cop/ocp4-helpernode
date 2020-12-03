@@ -7,7 +7,7 @@ router_id ovp_vrrp
 vrrp_script haproxy_check {
 script "killall -0 haproxy"
 interval 2
-weight 2
+weight {{ calibrated_priority }}
 }
 
 vrrp_instance OCP_LB {
