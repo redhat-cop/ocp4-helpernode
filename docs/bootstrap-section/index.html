@@ -563,6 +563,21 @@
 <li><code>bootstrap.macaddr</code> - The mac address for dhcp reservation. This option is not needed if you're doing static ips.</li>
 <li><code>bootstrap.disk</code> - The disk that will be used to install RHCOS onto.</li>
 </ul>
+<p>After an install, you probably want to remove the bootstrap from the
+loadbalancer. To do this, add <code>bootstrap.inlb</code> and set it to <code>false</code>.</p>
+<p>For example:</p>
+<pre><code class="yaml">bootstrap:
+  name: &quot;bootstrap&quot;
+  ipaddr: &quot;192.168.7.20&quot;
+  macaddr: &quot;52:54:00:60:72:67&quot;
+  disk: vda
+  inlb: false
+</code></pre>
+
+<blockquote>
+<p><em>NOTE</em> You need to <code>stop</code> then <code>start</code> the service after this change
+has been made.</p>
+</blockquote>
                 
               
               

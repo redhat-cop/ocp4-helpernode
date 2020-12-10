@@ -858,7 +858,7 @@ INFO Manifests created in: manifests and openshift
 <blockquote>
 <p>Skip this step if you're installing a compact cluster!</p>
 </blockquote>
-<pre><code class="shell"># sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+<pre><code class="shell">sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 </code></pre>
 
 <p>It should look something like this after you edit it.</p>

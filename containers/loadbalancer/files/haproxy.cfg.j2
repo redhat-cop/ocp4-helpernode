@@ -74,7 +74,9 @@ frontend openshift-api-server
 
 backend openshift-api-server
     balance source
+{% if bootstrap.inlb|default(true) %}
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
+{% endif %}
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
 {% endfor %}
@@ -86,7 +88,9 @@ frontend machine-config-server
 
 backend machine-config-server
     balance source
+{% if bootstrap.inlb|default(true) %}
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
+{% endif %}
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
 {% endfor %}

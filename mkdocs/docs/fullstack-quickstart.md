@@ -365,7 +365,7 @@ Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to
 > Skip this step if you're installing a compact cluster!
 
 ```shell
-# sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 ```
 
 It should look something like this after you edit it.
