@@ -33,9 +33,11 @@ api-int		IN	A	{{ helper.ipaddr }}
 registry	IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
+{% if bootstrap is defined %}
 ; Create entry for the bootstrap host
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
 ;
+{% endif %}
 ; Create entries for the master hosts
 {% for m in masters %}
 {{ m.name | lower }}		IN	A	{{ m.ipaddr }}

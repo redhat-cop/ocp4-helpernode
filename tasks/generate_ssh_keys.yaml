@@ -61,3 +61,5 @@
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
   loop: 
     - name: "{{ bootstrap.name }}"
+  when:
+    - bootstrap is defined

@@ -243,6 +243,7 @@
         mode: 0555
       notify:
         - restart tftp
+      when: bootstrap is defined
 
     - name: Set the master specific tftp files
       template:
@@ -289,6 +290,7 @@
         role: bootstrap
         mac: "{{ bootstrap.macaddr }}"
       include_tasks: generate_grub.yml
+      when: bootstrap is defined
 
     - name: generate grub entry (masters)
       vars:
