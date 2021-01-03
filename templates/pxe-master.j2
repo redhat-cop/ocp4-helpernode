@@ -1,11 +1,20 @@
-default menu.c32   
+{% if item.ipaddr is defined and item.networkifacename is defined %}
+  {% set ipconfig = item.ipaddr + "::" + dhcp.router + ":" + dhcp.netmask + ":" + item.name + ":" + item.networkifacename + ":none" %}
+  {% set ipconfig = ipconfig + " nameserver=" + dns.forwarder1 %}
+  {% if dns.forwarder2 is defined %}
+    {% set ipconfig = ipconfig + " nameserver=" + dns.forwarder2 %}
+  {% endif %}
+{% else %}
+  {% set ipconfig = "dhcp" %}
+{% endif %}
+
+default menu.c32
  prompt 1
  timeout 9
  ONTIMEOUT 1
- menu title ######## PXE Boot Menu ########  
+ menu title ######## PXE Boot Menu ########
  label 1
  menu label ^1) Install Master Node
  menu default
  kernel rhcos/kernel
- append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip=dhcp coreos.inst=yes coreos.inst.install_dev={{ disk }} {% if "metal" in ocp_bios %} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz {% elif "rootfs" in ocp_bios %} coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img {% else %} coreos.UNKNOWN.CONFIG=you_messed_up {% endif %} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/master.ign
-
+ append initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip={{ ipconfig }} coreos.inst=yes coreos.inst.install_dev={{ disk }} {% if "metal" in ocp_bios %} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz {% elif "rootfs" in ocp_bios %} coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img {% else %} coreos.UNKNOWN.CONFIG=you_messed_up {% endif %} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/master.ign
