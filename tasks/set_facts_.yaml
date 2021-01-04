@@ -39,6 +39,8 @@
         - libselinux-python
         - podman
         - nfs-utils
+        - shim-x64
+        - grub2-efi-x64
   
   - set_fact:
       dhcppkgs:

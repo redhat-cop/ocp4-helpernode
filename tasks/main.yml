@@ -267,6 +267,58 @@
         - workers | length > 0
     when: not staticips and not ppc64le
 
+  - name: Prepare UEFI netboot configuration
+    block:
+    - name: Create tftp grub2 directory
+      file:
+        path: /var/lib/tftpboot/grub2
+        state: directory
+        mode: '0755'
+
+    - name: copy UEFI shim to grub2 tftpboot/grub2 directory
+      copy:
+        src: /boot/efi/EFI/redhat/shimx64.efi
+        dest: /var/lib/tftpboot/grub2/shimx64.efi
+        mode: '0555'
+        remote_src: yes
+
+    - name: copy grub2 EFI file to tftpboot/grub2 directory
+      copy:
+        src: /boot/efi/EFI/redhat/grubx64.efi
+        dest: /var/lib/tftpboot/grub2/grubx64.efi
+        mode: '0555'
+        remote_src: yes
+
+    - name: Create the bootstrap specific grub2 file
+      template:
+        src: ../templates/grub2-bootstrap.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+        mode: 0555
+      notify:
+        - restart tftp
+
+    - name: Set the master specific tftp files
+      template:
+        src: ../templates/grub2-master.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ masters | lower }}"
+      notify:
+        - restart tftp
+
+    - name: Set the worker specific tftp files
+      template:
+        src: ../templates/grub2-worker.j2
+        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ workers | lower }}"
+      notify:
+        - restart tftp
+      when:
+        - workers is defined
+        - workers | length > 0
+    when: not staticips and not ppc64le
+
   - name: Generate grub2 config files
     block:
     - set_fact:
