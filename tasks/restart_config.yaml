@@ -1,0 +1,19 @@
+---
+# Add restart always configurations to the services
+- name: Create dropin directory for services
+  file:
+    path: /etc/systemd/system/{{item}}.service.d
+    state: directory
+    mode: 0755
+
+- name: Copy restart conf file to the services dropin directory
+  copy:
+    src: ../files/restart.conf
+    dest: /etc/systemd/system/{{item}}.service.d/restart.conf
+
+- name: restart services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+

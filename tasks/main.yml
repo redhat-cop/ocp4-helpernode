@@ -614,6 +614,10 @@
     when: high_availability is defined
     import_tasks: setup_keepalived.yaml
 
+  - name: Enable restart always for critical services
+    include_tasks: restart_config.yaml
+    loop: "{{ critical_services }}"
+
   - name:  Information about this install
     debug:
       msg:
