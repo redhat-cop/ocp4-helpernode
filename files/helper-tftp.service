@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 ExecStart=/usr/local/bin/start-tftp.sh
 TimeoutStartSec=0
+Restart=always
+RestartSec=30
 
 [Install]
 WantedBy=default.target
