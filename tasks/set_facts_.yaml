@@ -56,8 +56,6 @@
         - libselinux-python
         - podman
         - nfs-utils
-        - shim-x64
-        - grub2-efi-x64
   
   - set_fact:
       dhcppkgs:
@@ -67,6 +65,11 @@
   - set_fact:
       syslinuxpkgs:
         - syslinux
+
+  - set_fact:
+      uefipkgs:
+        - shim-x64
+        - grub2-efi-x64
   
   - set_fact:
       owner: nfsnobody
@@ -96,8 +99,6 @@
         - python3-libselinux
         - podman
         - nfs-utils
-        - shim-x64
-        - grub2-efi-x64
   
   - set_fact:
       dhcppkgs:
@@ -107,6 +108,11 @@
   - set_fact:
       syslinuxpkgs:
         - syslinux
+
+  - set_fact:
+      uefipkgs:
+        - shim-x64
+        - grub2-efi-x64
 
   # See Fedora Wiki for changes:
   # https://fedoraproject.org/wiki/Changes/RenameNobodyUser
