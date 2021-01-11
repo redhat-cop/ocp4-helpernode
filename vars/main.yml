@@ -12,6 +12,7 @@ ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.6.1/
 helm_source: "https://get.helm.sh/helm-v3.4.0-linux-amd64.tar.gz"
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
 ppc64le: false
+uefi: false
 chronyconfig:
   enabled: false
 setup_registry:

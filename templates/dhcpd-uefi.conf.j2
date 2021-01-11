@@ -1,0 +1,63 @@
+authoritative;
+ddns-update-style interim;
+default-lease-time 14400;
+max-lease-time 14400;
+
+option routers                  {{ dhcp.router }};
+option broadcast-address        {{ dhcp.bcast }};
+option subnet-mask              {{ dhcp.netmask }};
+option domain-name-servers      {{ helper.ipaddr }};
+option domain-name              "{{ dns.clusterid }}.{{ dns.domain | lower }}";
+option domain-search            "{{ dns.clusterid }}.{{ dns.domain | lower }}", "{{ dns.domain | lower }}";
+
+# required for UEFI support
+option space pxelinux;
+option pxelinux.magic code 208 = string;
+option pxelinux.configfile code 209 = text;
+option pxelinux.pathprefix code 210 = text;
+option pxelinux.reboottime code 211 = unsigned integer 32;
+option architecture-type code 93 = unsigned integer 16;
+
+subnet {{ dhcp.ipid }} netmask {{ dhcp.netmaskid }} {
+  interface {{ networkifacename }};
+
+  class "pxeclients" {
+    match if substring (option vendor-class-identifier, 0, 9) = "PXEClient";
+    next-server {{ helper.ipaddr }};
+
+    if option architecture-type = 00:07 {
+      filename "grub2/shimx64.efi";
+    } else {
+      # this is PXE specific
+{% if ppc64le is sameas true %}
+      filename "boot/grub2/powerpc-ieee1275/core.elf";
+{% else %}
+      filename "pxelinux.0";
+{% endif %}
+    }
+  }
+
+  pool {
+    range {{ dhcp.poolstart }} {{ dhcp.poolend }};
+    # Static entries
+{% if bootstrap is defined %}
+    host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
+{% endif %}
+{% for m in masters %}
+    host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
+{% endfor %}
+{% if workers is defined %}
+{% for w in workers %}
+    host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
+{% endfor %}
+{% endif %}
+{% if other is defined %}
+{% for o in other %}
+    host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
+{% endfor %}
+{% endif %}
+
+    # this will not give out addresses to hosts not listed above
+    deny unknown-clients;
+  }
+}
