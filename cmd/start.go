@@ -55,7 +55,7 @@ func runContainers() {
 		if isImageRunning("helpernode-" + name) {
 			logrus.Info("SKIPPING: Container helpernode-" + name + " already running.")
 		} else {
-			startImage(image, VERSION, getEncodedConfuration(), name)
+			startImage(image, getEncodedConfuration(), name)
 		}
 	}
 }
