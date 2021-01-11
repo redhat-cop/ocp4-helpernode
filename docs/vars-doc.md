@@ -247,6 +247,18 @@ Default is false to prevent unexpected issues booting hosts in the "other" secti
 * `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options 
 `templates/default.j2` -> `/var/lib/tftpboot/pxelinux.cfg/default`
 
+### UEFI default config
+
+**OPTIONAL**  
+
+This section influences the creation of uefi artifacts for tftp boot.
+
+```
+uefi: false
+```
+
+Default is false to prevent unexpected issues.
+
 ### Other Nodes
 
 **OPTIONAL**

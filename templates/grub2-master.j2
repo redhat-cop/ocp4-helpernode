@@ -1,0 +1,17 @@
+{% if item.ipaddr is defined and item.networkifacename is defined %}
+  {% set ipconfig = item.ipaddr + "::" + dhcp.router + ":" + dhcp.netmask + ":" + item.name + ":" + item.networkifacename + ":none" %}
+  {% set ipconfig = ipconfig + " nameserver=" + dns.forwarder1 %}
+  {% if dns.forwarder2 is defined %}
+    {% set ipconfig = ipconfig + " nameserver=" + dns.forwarder2 %}
+  {% endif %}
+{% else %}
+  {% set ipconfig = "dhcp" %}
+{% endif %}
+
+set default=0
+set timeout=10
+
+menuentry 'Install Master Node' {
+  linuxefi rhcos/kernel initrd=rhcos/initramfs.img nomodeset rd.neednet=1 ip={{ ipconfig }} coreos.inst=yes coreos.inst.install_dev={{ disk }} {% if "metal" in ocp_bios %} coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz {% elif "rootfs" in ocp_bios %} coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img {% else %} coreos.UNKNOWN.CONFIG=you_messed_up {% endif %} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/master.ign
+  initrdefi rhcos/initramfs.img
+}

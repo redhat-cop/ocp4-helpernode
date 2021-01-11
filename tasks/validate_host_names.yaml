@@ -5,6 +5,6 @@
   with_items:
   - "{{ dns.domain }}"
   - "{{ helper.name }}"
-  - "{{ bootstrap.name }}"
+  - "{{ bootstrap.name | default('') }}"
   - "{{ masters }}"
   - "{{ workers | default('') }}"

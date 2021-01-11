@@ -10,6 +10,23 @@
 
 - block:
   - set_fact:
+      critical_services:
+        - httpd
+        - named
+        - haproxy
+
+- block:
+  - set_fact:
+      critical_services: "{{ critical_services }} + [ 'dhcpd' ]"
+  when: not staticips
+
+- block:
+  - set_fact:
+      critical_services: "{{ critical_services }} + [ 'keepalived' ]"
+  when: high_availability is defined
+
+- block:
+  - set_fact:
       registry:
         - podman
         - httpd-tools
@@ -48,6 +65,11 @@
   - set_fact:
       syslinuxpkgs:
         - syslinux
+
+  - set_fact:
+      uefipkgs:
+        - shim-x64
+        - grub2-efi-x64
   
   - set_fact:
       owner: nfsnobody
@@ -88,21 +110,9 @@
         - syslinux
 
   - set_fact:
-      registry:
-        - podman
-        - httpd-tools
-        - jq
-
-  - set_fact:
-      registry_services:
-        - named
-        - firewalld
-        - local-registry
-
-  - set_fact:
-      registry_host: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}"
-      local_registry: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}:5000"
-      release_image: "quay.io/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ setup_registry.release_tag }}"
+      uefipkgs:
+        - shim-x64
+        - grub2-efi-x64
 
   # See Fedora Wiki for changes:
   # https://fedoraproject.org/wiki/Changes/RenameNobodyUser
