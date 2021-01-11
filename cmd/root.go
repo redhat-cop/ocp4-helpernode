@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -176,6 +177,12 @@ func createImageList() {
 		images[name] = registry + "/" + repository + "/" + name
 	}
 	//TODO Add pluggable images here
+	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
+	for i,_ := range pluggableServices {
+		//      fmt.Printf("%s  has value of %s\n", i, k)
+		fmt.Printf("image value is %s\n", helperConfig.GetString("pluggableServices." + i + ".image"))
+
+	}
 
 	//Just some logic to print if in debug
 	if logrus.GetLevel().String() == "debug" {
