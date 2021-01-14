@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -9,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"runtime"
+	"strings"
 )
 
 var cfgFile string
@@ -184,14 +184,10 @@ func createImageList() {
 
 		//lets get ports
 		ports := helperConfig.GetStringSlice("pluggableServices." + pluggableImageName + ".ports")
-		for i, v := range ports {
-
+		for _, v := range ports {
+			portvalue := strings.Split(v, "/")
+			portlist[portvalue[0]] = append(portlist[portvalue[0]], portvalue[1])
 		}
-	}
-	//Add port definitions
-	//first lets add port/protocol to fwports
-	for i, v := range fwrule {
-		fmt.Printf("value at %d is %v\n", i, v)
 	}
 
 	//Just some logic to print if in debug
