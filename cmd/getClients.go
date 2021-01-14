@@ -47,7 +47,7 @@ func getTheClients(image string) {
 		TODO: Start the container with `sleep infinity`. Maybe build it into the startup.sh file?
 		*/
 		logrus.Info("Image helpernode-" + image + " is NOT running...starting temporarily")
-		startImage(images[image], VERSION, "bm90OiAidXNlZCIK", "http")
+		startImage(images[image], "bm90OiAidXNlZCIK", "http")
 		for _, v := range clients {
 			logrus.Info("Getting file " + v)
 			// get the artifact - should probably make a put/get function later
