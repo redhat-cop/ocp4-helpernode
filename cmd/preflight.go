@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"net"
@@ -38,9 +37,9 @@ passing the --fix-all option (EXPERIMENTAL).`,
 		//		firewallRulesCheck(fixall)
 
 		logrus.WithFields(logrus.Fields{
-			"FWRules":      firewallRulesCheck(fixall),
-			"PortCheck":    portCheck(),
 			"SystemdCheck": systemdCheck(fixall),
+			"PortCheck":    portCheck(),
+			"FWRules":      firewallRulesCheck(fixall),
 		}).Info("Preflight Summary")
 		if preflightErrorCount == 0 {
 			logrus.Infof("No preflight errors found")
@@ -147,7 +146,6 @@ func firewallRulesCheck(fix bool) int {
 
 	// get the current firewall rules on the host and set it to "s"
 	s := getCurrentFirewallRules()
-	fmt.Println(s)
 	// loop through each firewall rule:
 	// If there's a match, that means the rule is there and nothing needs to be done.
 	// If it's NOT there, it needs to be enabled (if requested)
