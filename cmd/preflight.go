@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"net"
@@ -132,23 +133,23 @@ func firewallRulesCheck(fix bool) int {
 
 	// get the current firewall rules on the host and set it to "s"
 	s := getCurrentFirewallRules()
-
+	fmt.Println(s)
 	// loop through each firewall rule:
 	// If there's a match, that means the rule is there and nothing needs to be done.
 	// If it's NOT there, it needs to be enabled (if requested)
 	for port, protocolArray := range portlist {
 		for _, protocol := range protocolArray {
-			_, found := find(s, protocol+"/"+port)
+			_, found := find(s, port+"/"+protocol)
 			if !found {
 				if logrus.GetLevel().String() == "debug" {
 					//this is a bit weird but only want to log these in debug mode.
 					//BUT using WARN so they show up yellow
-					logrus.Warnf("Firewall rule %s not found", protocol+"/"+port)
+					logrus.Warnf("Firewall rule %s not found", port+"/"+protocol)
 				}
 				fwerrorcount += 1
 				if fix {
-					logrus.Info("OPENING PORT: " + protocol + "/" + port)
-					openPort(protocol + "/" + port)
+					logrus.Info("OPENING PORT: " + port + "/" + protocol)
+					openPort(port + "/" + protocol)
 					fwfixCount++
 				}
 			}
