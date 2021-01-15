@@ -73,7 +73,6 @@ func portCheck() int {
 					// If this returns an error, then something else is listening on this port
 					if err != nil {
 						if logrus.GetLevel().String() == "debug" {
-							fmt.Println(err)
 							logrus.Warnf("Port check  %s/%s is in use", port, protocol)
 						}
 						porterrorcount += 1
@@ -86,7 +85,6 @@ func portCheck() int {
 						// If this returns an error, then something else is listening on this port
 						if err != nil {
 							if logrus.GetLevel().String() == "debug" {
-								fmt.Println(err)
 								logrus.Warnf("Port check  %s/%s is in use", port, protocol)
 							}
 							porterrorcount += 1
