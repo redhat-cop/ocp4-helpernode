@@ -13,7 +13,6 @@ var logLevel string
 var imageList []string //this is used in start/stop
 
 var portlist = map[string][]string{
-	"22":    []string{"tcp"},
 	"53":    []string{"udp", "tcp"},
 	"67":    []string{"udp"},
 	"69":    []string{"udp"},
