@@ -13,17 +13,17 @@ var logLevel string
 var imageList []string //this is used in start/stop
 
 var portlist = map[string][]string{
-	"53":    []string{"udp", "tcp"},
-	"67":    []string{"udp"},
-	"69":    []string{"udp"},
-	"80":    []string{"tcp"},
-	"443":   []string{"tcp"},
-	"546":   []string{"udp"},
-	"6443":  []string{"tcp"},
-	"8080":  []string{"tcp"},
-	"9000":  []string{"tcp"},
-	"9090":  []string{"tcp"},
-	"22623": []string{"tcp"},
+	"53": {"udp", "tcp"},
+	"67": {"udp"},
+	"69": {"udp"},
+	"80": {"tcp"},
+	"443": {"tcp"},
+	"546": {"udp"},
+	"6443": {"tcp"},
+	"8080": {"tcp"},
+	"9000": {"tcp"},
+	"9090": {"tcp"},
+	"22623": {"tcp"},
 }
 
 // Define ports needed for preflight check
