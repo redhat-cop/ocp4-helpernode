@@ -173,7 +173,7 @@ func createImageList() {
 	registry = helpernodectlConfig.GetString("image_prefix")
 
 	for _, name := range coreImageNames {
-		images[name] = registry + "/" + repository + "/" + name + VERSION
+		images[name] = registry + "/" + repository + "/" + name + ":" + VERSION
 	}
 	//TODO Add pluggable images here
 	pluggableServices := helperConfig.GetStringMapString("pluggableServices")

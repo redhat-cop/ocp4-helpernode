@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"os/exec"
 	"strings"
@@ -28,8 +27,7 @@ func runCmd(cmd *exec.Cmd) {
 //going to covert this to use the podman module in the future
 func pullImage(image string, version string) {
 
-	fmt.Println("Pulling: " + image + ":" + version)
-	cmd := exec.Command(containerRuntime, "pull", image+":"+version)
+	cmd := exec.Command(containerRuntime, "pull", image)
 	runCmd(cmd)
 }
 
