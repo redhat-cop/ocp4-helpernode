@@ -68,30 +68,30 @@ func portCheck() int {
 			logrus.Debugf("Testing port %s on protocol %s", port, protocol)
 			//check if you can listen on this port on TCP
 			if protocol == "tcp" {
-				if t, err := net.Listen(protocol, ":"+port) ; err != nil {
+				if t, err := net.Listen(protocol, ":"+port); err == nil {
 					// If this returns an error, then something else is listening on this port
 					if err != nil {
 						if logrus.GetLevel().String() == "debug" {
 							logrus.Warnf("Port check  %s/%s is in use", port, protocol)
 						}
 						porterrorcount += 1
-					} else {
-						t.Close()
 					}
+					t.Close()
+
 				}
 			} else if protocol == "udp" {
-					if u, err := net.ListenPacket(protocol, ":"+port) ; err != nil {
-						// If this returns an error, then something else is listening on this port
-						if err != nil {
-							if logrus.GetLevel().String() == "debug" {
-								logrus.Warnf("Port check  %s/%s is in use", port, protocol)
-							}
-							porterrorcount += 1
-						} else {
-							u.Close()
+				if u, err := net.ListenPacket(protocol, ":"+port); err == nil {
+					// If this returns an error, then something else is listening on this port
+					if err != nil {
+						if logrus.GetLevel().String() == "debug" {
+							logrus.Warnf("Port check  %s/%s is in use", port, protocol)
 						}
+						porterrorcount += 1
 					}
+					u.Close()
+
 				}
+			}
 		}
 	}
 
