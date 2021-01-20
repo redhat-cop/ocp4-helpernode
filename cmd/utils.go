@@ -182,22 +182,19 @@ func getCurrentFirewallRules() []string {
 func 	openPort(port string) {
 
 	// Open Ports using the port number
-	cmd, err := exec.Command("firewall-cmd", "--add-port", port, "--permanent", "-q").Output()
+	cmd := exec.Command("firewall-cmd", "--add-port", port, "--permanent", "-q")
+	runCmd(cmd)
+
 
 	// check for error of command
-	if err != nil {
+/*	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error running add-port command %s: %s\n", cmd, err)
 		os.Exit(253)
-	}
+	}*/
 
 	// Reload the firewall to get the most up to date table
-	rcmd, err := exec.Command("firewall-cmd", "--reload").Output()
-
-	// check for error of command
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error running reload command %s: %s\n", rcmd, err)
-		os.Exit(253)
-	}
+	cmd = exec.Command("firewall-cmd", "--reload")
+	runCmd(cmd)
 }
 
 func verifyContainerRuntime() {

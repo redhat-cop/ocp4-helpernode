@@ -8,12 +8,13 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"runtime"
+	"strings"
 )
 
 var cfgFile string
 
 //This is the configuration passed into each container
-var	helperConfig = viper.New()
+var helperConfig = viper.New()
 
 //Used to store tool related configurations like what services to start/stop by default
 //most importantly it stores the location of the helpernodeConfig file if set
@@ -34,7 +35,7 @@ helpernodectl start --config=helpernode.yaml`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-//	setUpLogging()
+	//	setUpLogging()
 	if err := rootCmd.Execute(); err != nil {
 		logrus.Fatal(err)
 	}
@@ -67,7 +68,7 @@ func initConfig() {
 
 }
 
-func setupCtlConfig(){
+func setupCtlConfig() {
 	//Used to store tool related configurations like what services to start/stop by default
 	//most importantly it stores the location of the helpernodeConfig file if set
 
@@ -79,8 +80,8 @@ func setupCtlConfig(){
 	helpernodectlConfig.SetConfigName(".helpernodectl")
 	helpernodectlConfig.SetConfigType("yaml")
 
-	helpernodectlConfig.SetDefault("services",map[string]bool{"dns" : true, "dhcp": true, "http": true, "loadbalancer": true, "pxe":true}  )
-//	helpernodectlConfig.SetDefault("configFile", home + "/.helpernodectl.yaml")
+	helpernodectlConfig.SetDefault("services", map[string]bool{"dns": true, "dhcp": true, "http": true, "loadbalancer": true, "pxe": true})
+	//	helpernodectlConfig.SetDefault("configFile", home + "/.helpernodectl.yaml")
 	if err := helpernodectlConfig.ReadInConfig(); err != nil {
 		//we got an error trying to read the config
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -107,7 +108,7 @@ func setupCtlConfig(){
 		logrus.Trace("Writing to: $HOME/.helpernodectl.yaml")
 	}
 }
-func setupHelperConfig(){
+func setupHelperConfig() {
 	//steps that need to happen
 	//if passed via command line use it
 	//if not use what is defined in ~/.helpernodectl.yaml "configFile" field
@@ -167,15 +168,27 @@ func createImageList() {
 		logrus.Debug("Using quay.io as the registry")
 	}
 
-
 	helpernodectlConfig.AutomaticEnv() // read in environment variables that match
 
 	registry = helpernodectlConfig.GetString("image_prefix")
 
 	for _, name := range coreImageNames {
-		images[name] = registry + "/" + repository + "/" + name
+		images[name] = registry + "/" + repository + "/" + name + ":" + VERSION
 	}
 	//TODO Add pluggable images here
+	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
+	for pluggableImageName, _ := range pluggableServices {
+		pImageName := helperConfig.GetString("pluggableServices." + pluggableImageName + ".image")
+		logrus.Debugf("image value is %s\n", pImageName)
+		images[pluggableImageName] = pImageName
+
+		//lets get ports
+		ports := helperConfig.GetStringSlice("pluggableServices." + pluggableImageName + ".ports")
+		for _, v := range ports {
+			portvalue := strings.Split(v, "/")
+			portlist[portvalue[0]] = append(portlist[portvalue[0]], portvalue[1])
+		}
+	}
 
 	//Just some logic to print if in debug
 	if logrus.GetLevel().String() == "debug" {
@@ -185,4 +198,3 @@ func createImageList() {
 		}
 	}
 }
-

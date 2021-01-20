@@ -28,19 +28,18 @@ passing the --fix-all option (EXPERIMENTAL).`,
 
 		fixall, _ := cmd.Flags().GetBool("fix-all")
 		logrus.Info("RUNNING PREFLIGHT TASKS")
-		if(fixall) {
+		if fixall {
 			logrus.Info("==========================BESTEFFORT IN FIXING ERRORS============================\n")
 		}
 		//fix-all defaults to false unless passed on the command line
-//		systemdCheck(fixall)
-//		portCheck()
-//		firewallRulesCheck(fixall)
-
+		//		systemdCheck(fixall)
+		//		portCheck()
+		//		firewallRulesCheck(fixall)
 
 		logrus.WithFields(logrus.Fields{
-			"FWRules":firewallRulesCheck(fixall),
-			"PortCheck":portCheck(),
-			"SystemdCheck":systemdCheck(fixall),
+			"SystemdCheck": systemdCheck(fixall),
+			"PortCheck":    portCheck(),
+			"FWRules":      firewallRulesCheck(fixall),
 		}).Info("Preflight Summary")
 		if preflightErrorCount == 0 {
 			logrus.Infof("No preflight errors found")
@@ -63,41 +62,44 @@ func portCheck() int {
 	logrus.Info("Starting Port Checks")
 	// set the error count to 0
 	porterrorcount := 0
-	// check each port
-	for _, p := range ports {
-		//check if you can listen on this port on TCP
-		t, err := net.Listen("tcp", ":" + p)
 
-		// If this returns an error, then something else is listening on this port
-		if err != nil {
-			if logrus.GetLevel().String() == "debug" {
-				logrus.Warnf("Port check  %s/tcp is in use", p)
+	for port, protocolArray := range portlist {
+		for _, protocol := range protocolArray {
+			logrus.Debugf("Testing port %s on protocol %s", port, protocol)
+			//check if you can listen on this port on TCP
+			if protocol == "tcp" {
+				if t, err := net.Listen(protocol, ":"+port); err == nil {
+					// If this returns an error, then something else is listening on this port
+					if err != nil {
+						if logrus.GetLevel().String() == "debug" {
+							logrus.Warnf("Port check  %s/%s is in use", port, protocol)
+						}
+						porterrorcount += 1
+					}
+					t.Close()
+
+				}
+			} else if protocol == "udp" {
+				if u, err := net.ListenPacket(protocol, ":"+port); err == nil {
+					// If this returns an error, then something else is listening on this port
+					if err != nil {
+						if logrus.GetLevel().String() == "debug" {
+							logrus.Warnf("Port check  %s/%s is in use", port, protocol)
+						}
+						porterrorcount += 1
+					}
+					u.Close()
+
+				}
 			}
-			porterrorcount += 1
-		} else {
-			t.Close()
 		}
-
-		//now check if you can listen on this port on UDP
-		u, err := net.ListenPacket("udp", ":" + p)
-
-		// If this returns an error, then something else is listening on this port
-		if err != nil {
-			if logrus.GetLevel().String() == "debug" {
-				logrus.Warnf("Port check %s/udp is in use", p)
-			}
-			porterrorcount += 1
-		} else {
-			u.Close()
-		}
-
 	}
 
 	// Display that no errors were found
 	if porterrorcount > 0 {
 		preflightErrorCount += 1
 	}
-	logrus.WithFields(logrus.Fields{"Port Issues":porterrorcount,}).Info("Preflight checks for Ports")
+	logrus.WithFields(logrus.Fields{"Port Issues": porterrorcount}).Info("Preflight checks for Ports")
 	return porterrorcount
 }
 
@@ -121,7 +123,7 @@ func systemdCheck(fix bool) int {
 	if svcerrorcount > 0 {
 		preflightErrorCount += 1
 	}
-	logrus.WithFields(logrus.Fields{"Systemd Issues":svcerrorcount,}).Info("Preflight checks for Systemd")
+	logrus.WithFields(logrus.Fields{"Systemd Issues": svcerrorcount}).Info("Preflight checks for Systemd")
 	return svcerrorcount
 
 }
@@ -134,7 +136,7 @@ func firewallRulesCheck(fix bool) int {
 	logrus.Info("Running firewall checks")
 	// Check if firewalld service is running
 	if !isServiceRunning("firewalld.service") {
-//		fwerrorcount += 1
+		//		fwerrorcount += 1
 		logrus.Debug("Service firewalld.service is NOT running")
 		if fix {
 			startService("firewalld.service")
@@ -144,23 +146,24 @@ func firewallRulesCheck(fix bool) int {
 
 	// get the current firewall rules on the host and set it to "s"
 	s := getCurrentFirewallRules()
-
 	// loop through each firewall rule:
 	// If there's a match, that means the rule is there and nothing needs to be done.
 	// If it's NOT there, it needs to be enabled (if requested)
-	for _, f := range fwrule {
-		_, found := find(s, f)
-		if !found {
-			if logrus.GetLevel().String() == "debug" {
-				//this is a bit weird but only want to log these in debug mode.
-				//BUT using WARN so they show up yellow
-				logrus.Warnf("Firewall rule %s not found", f)
-			}
-			fwerrorcount += 1
-			if fix {
-				logrus.Info("OPENING PORT: " + f)
-				openPort(f)
-				fwfixCount++
+	for port, protocolArray := range portlist {
+		for _, protocol := range protocolArray {
+			_, found := find(s, port+"/"+protocol)
+			if !found {
+				if logrus.GetLevel().String() == "debug" {
+					//this is a bit weird but only want to log these in debug mode.
+					//BUT using WARN so they show up yellow
+					logrus.Warnf("Firewall rule %s not found", port+"/"+protocol)
+				}
+				fwerrorcount += 1
+				if fix {
+					logrus.Info("OPENING PORT: " + port + "/" + protocol)
+					openPort(port + "/" + protocol)
+					fwfixCount++
+				}
 			}
 		}
 	}
@@ -170,9 +173,9 @@ func firewallRulesCheck(fix bool) int {
 		preflightErrorCount += 1
 	}
 	if fix {
-		logrus.WithFields(logrus.Fields{"Firewall Issues": fwerrorcount,"Firewall rules added":fwfixCount}).Info("Preflight checks for Firewall")
+		logrus.WithFields(logrus.Fields{"Firewall Issues": fwerrorcount, "Firewall rules added": fwfixCount}).Info("Preflight checks for Firewall")
 	} else {
-		logrus.WithFields(logrus.Fields{"Firewall Issues": fwerrorcount,}).Info("Preflight checks for Firewall")
+		logrus.WithFields(logrus.Fields{"Firewall Issues": fwerrorcount}).Info("Preflight checks for Firewall")
 	}
 	return fwerrorcount
 }

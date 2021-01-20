@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"os/exec"
 	"strings"
@@ -28,8 +27,7 @@ func runCmd(cmd *exec.Cmd) {
 //going to covert this to use the podman module in the future
 func pullImage(image string, version string) {
 
-	fmt.Println("Pulling: " + image + ":" + version)
-	cmd := exec.Command(containerRuntime, "pull", image+":"+version)
+	cmd := exec.Command(containerRuntime, "pull", image)
 	runCmd(cmd)
 }
 
@@ -37,9 +35,9 @@ func pullImage(image string, version string) {
 //TODO clean up this to just take one string. build the string elsewhere
 //TODO we need to adjust startImage to account for pluggable container that won't take the encoded file or need --net-host
 //TODO lets add a generic label to make stop all easier.  filter on helpernode=true or something similar
-func startImage(image string, version string, encodedyaml string, containername string) {
+func startImage(image string, encodedyaml string, containername string) {
 	logrus.Info("Starting helpernode-" + containername)
-	cmd := exec.Command(containerRuntime, "run", "--rm", "-d", "--env=HELPERPOD_CONFIG_YAML="+encodedyaml, "--label=helpernode-"+containername+"="+VERSION, "--net=host", "--name=helpernode-"+containername, image+":"+version)
+	cmd := exec.Command(containerRuntime, "run", "--rm", "-d", "--env=HELPERPOD_CONFIG_YAML="+encodedyaml, "--label=helpernode-"+containername+"="+VERSION, "--net=host", "--name=helpernode-"+containername, image)
 	runCmd(cmd)
 
 }
