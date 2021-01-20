@@ -65,7 +65,12 @@ done
 You should now have the HelperNode service images on your host.
 
 ```shell
-# podman images |grep helper
+podman images |grep helper
+```
+
+The output should look something like this.
+
+```
 quay.io/helpernode/pxe            latest   26e2169c7c62   5 hours ago    696 MB
 quay.io/helpernode/loadbalancer   latest   600c36a4cdc3   5 hours ago    588 MB
 quay.io/helpernode/http           latest   a04dcc414ca6   5 hours ago    1.53 GB
@@ -124,14 +129,27 @@ Login Succeeded!
 Now you can start the service, using a [valid YAML config file](yaml-file-forward.md) for
 your environment.
 
+First save the file
+
 ```shell
-helpernodectl start --config helpernode.yaml
+helpernodectl save -f helpernode.yaml
+```
+
+Then start your service
+
+```shell
+helpernodectl start
 ```
 
 You should now be running the images from your local registry.
 
 ```shell
-# helpernodectl status
+helpernodectl status
+```
+
+The output should look something like this.
+
+```shell
 Names                     Status                  Image
 helpernode-http           Up About a minute ago   registry.example.com:5000/alpha/helpernode/http:latest
 helpernode-dhcp           Up About a minute ago   registry.example.com:5000/alpha/helpernode/dhcp:latest

@@ -46,9 +46,11 @@ registry	IN	A	{{ helper.ipaddr }}
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
 ;
 ; Create entries for the master hosts
+{% if masters is defined %}
 {% for m in masters %}
 {{ m.name | lower }}		IN	A	{{ m.ipaddr }}
 {% endfor %}
+{% endif %}
 ;
 ; Create entries for the worker hosts
 {% if workers is defined %}
@@ -58,9 +60,11 @@ registry	IN	A	{{ helper.ipaddr }}
 {% endif %}
 ;
 ; The ETCd cluster lives on the masters...so point these to the IP of the masters
+{% if masters is defined %}
 {% for m in masters %}
 etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
+{% endif %}
 ;
 {% if other is defined %}
 ; Create entries for the other hosts
@@ -70,8 +74,10 @@ etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 ;
 {% endif %}
 ; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
+{% if masters is defined %}
 {% for m in masters %}
 _etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
+{% endif %}
 ;
 ;EOF

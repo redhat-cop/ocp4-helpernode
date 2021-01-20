@@ -16,9 +16,11 @@ max-lease-time 14400;
         	range {{ dhcp.poolstart }} {{ dhcp.poolend }};
 		# Static entries
 		host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
+{% if masters is defined %}
 {% for m in masters %}
 		host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
 {% endfor %}
+{% endif %}
 {% if workers is defined %}
 {% for w in workers %}
 		host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }

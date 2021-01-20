@@ -34,6 +34,7 @@ nav:
     - 'Worker Nodes Section': 'worker-section.md'
     - 'Disabled Services Section': 'disabled-section.md'
     - 'IPI Installation Section': 'ipi-specific.md'
+    - 'Pluggable Services': 'pluggable-services.md'
     - 'Sample YAML Configurations': 'sample-yamls.md'
 - Quickstarts:
     - 'Full Stack Quickstart': 'fullstack-quickstart.md'

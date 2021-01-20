@@ -448,6 +448,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../pluggable-services/" class="md-nav__link">
+      Pluggable Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../sample-yamls/" class="md-nav__link">
       Sample YAML Configurations
     </a>
@@ -602,8 +614,11 @@ done
 </code></pre>
 
 <p>You should now have the HelperNode service images on your host.</p>
-<pre><code class="shell"># podman images |grep helper
-quay.io/helpernode/pxe            latest   26e2169c7c62   5 hours ago    696 MB
+<pre><code class="shell">podman images |grep helper
+</code></pre>
+
+<p>The output should look something like this.</p>
+<pre><code>quay.io/helpernode/pxe            latest   26e2169c7c62   5 hours ago    696 MB
 quay.io/helpernode/loadbalancer   latest   600c36a4cdc3   5 hours ago    588 MB
 quay.io/helpernode/http           latest   a04dcc414ca6   5 hours ago    1.53 GB
 quay.io/helpernode/dns            latest   1727361b9dfa   5 hours ago    666 MB
@@ -650,12 +665,20 @@ Login Succeeded!
 
 <p>Now you can start the service, using a <a href="../yaml-file-forward/">valid YAML config file</a> for
 your environment.</p>
-<pre><code class="shell">helpernodectl start --config helpernode.yaml
+<p>First save the file</p>
+<pre><code class="shell">helpernodectl save -f helpernode.yaml
+</code></pre>
+
+<p>Then start your service</p>
+<pre><code class="shell">helpernodectl start
 </code></pre>
 
 <p>You should now be running the images from your local registry.</p>
-<pre><code class="shell"># helpernodectl status
-Names                     Status                  Image
+<pre><code class="shell">helpernodectl status
+</code></pre>
+
+<p>The output should look something like this.</p>
+<pre><code class="shell">Names                     Status                  Image
 helpernode-http           Up About a minute ago   registry.example.com:5000/alpha/helpernode/http:latest
 helpernode-dhcp           Up About a minute ago   registry.example.com:5000/alpha/helpernode/dhcp:latest
 helpernode-dns            Up About a minute ago   registry.example.com:5000/alpha/helpernode/dns:latest

@@ -448,6 +448,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../pluggable-services/" class="md-nav__link">
+      Pluggable Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../sample-yamls/" class="md-nav__link">
       Sample YAML Configurations
     </a>
@@ -554,7 +566,7 @@ using the Platform Agnostic UPI install method.</p>
 <h1 id="prerequisites">Prerequisites</h1>
 <p>I will be using the following for my HelperNode:</p>
 <ul>
-<li>CentOS 8</li>
+<li>CentOS Stream 8</li>
 <li>50GB HD</li>
 <li>4 vCPUs</li>
 <li>8 GB RAM</li>
@@ -579,74 +591,24 @@ the HelperNode.</p>
 
 <p>Next, install the <code>helpernodectl</code> CLI utility binary and put it somehwere
 in your <code>$PATH</code>, in my example I'm installing it in <code>/usr/local/bin</code></p>
-<pre><code class="shell">curl -LO https://github.com/RedHatOfficial/ocp4-helpernode/releases/download/v2alpha1/helpernodectl
+<pre><code class="shell">curl -LO https://github.com/RedHatOfficial/ocp4-helpernode/releases/download/v2alpha2/helpernodectl
 mv helpernodectl /usr/local/bin/
 chmod +x /usr/local/bin/helpernodectl
+</code></pre>
+
+<p>If you don't have <code>/usr/local/bin</code> in your <code>$PATH</code>, you can export it
+with the following command.</p>
+<pre><code class="shell">export PATH=/usr/local/bin:$PATH
 </code></pre>
 
 <p>Enable bash completion</p>
 <pre><code class="shell">source &lt;(helpernodectl completion bash)
 </code></pre>
 
-<h1 id="preflight-checks">Preflight Checks</h1>
-<p>Now that you have the binary, perform preflight checks to see if there
-are any potential issues.</p>
-<pre><code class="shell"># helpernodectl preflight 
-INFO[0000] RUNNING PREFLIGHT TASKS                      
-INFO[0000] Running firewall checks                      
-INFO[0001] Preflight checks for Firewall                 Firewall Issues=10
-INFO[0001] Starting Port Checks                         
-INFO[0001] Preflight checks for Ports                    Port Issues=0
-INFO[0001] Starting Systemd Checks                      
-INFO[0001] Preflight checks for Systemd                  Systemd Issues=0
-INFO[0001] Preflight Summary                             FWRules=10 PortCheck=0 SystemdCheck=0
-FATA[0001] Cannot Start, preflight errors found 
-</code></pre>
-
-<p>This shows that I have 10 potential firewall rules that are not in place. Preflight also checks for port conflicts (in case you're running other services, <em>NOT</em> recomended btw) and Systemd conflicts as well.</p>
-<p>At this point we recommend the users to handle these manually. For more information about what ports are needed, consult the <a href="../preflight/">preflight cli documentation.</a></p>
-<p>There is an <em>experimental</em> flag <code>--fix-all</code> that tries to add firewall rules and disable conflicting systemd service.</p>
-<pre><code class="shell"># helpernodectl preflight  --fix-all 
-INFO[0000] RUNNING PREFLIGHT TASKS                      
-INFO[0000] ==========================BESTEFFORT IN FIXING ERRORS============================ 
-INFO[0000] Running firewall checks                      
-INFO[0001] OPENING PORT: 6443/tcp                       
-INFO[0002] OPENING PORT: 22623/tcp                      
-INFO[0003] OPENING PORT: 8080/tcp                       
-INFO[0004] OPENING PORT: 9000/tcp                       
-INFO[0005] OPENING PORT: 67/udp                         
-INFO[0006] OPENING PORT: 53/tcp                         
-INFO[0007] OPENING PORT: 53/udp                         
-INFO[0008] OPENING PORT: 80/tcp                         
-INFO[0009] OPENING PORT: 443/tcp                        
-INFO[0010] OPENING PORT: 69/udp                         
-INFO[0011] Preflight checks for Firewall                 Firewall Issues=10 Firewall rules added=10
-INFO[0011] Starting Port Checks                         
-INFO[0011] Preflight checks for Ports                    Port Issues=0
-INFO[0011] Starting Systemd Checks                      
-INFO[0011] Preflight checks for Systemd                  Systemd Issues=0
-INFO[0011] Preflight Summary                             FWRules=10 PortCheck=0 SystemdCheck=0
-</code></pre>
-
-<blockquote>
-<p>Note, use with caution.</p>
-</blockquote>
-<p>Once the cli reports <code>No preflight errors found</code>, you can proceed.</p>
-<pre><code class="shell"># helpernodectl preflight 
-INFO[0000] RUNNING PREFLIGHT TASKS                      
-INFO[0000] Running firewall checks                      
-INFO[0001] Preflight checks for Firewall                 Firewall Issues=0
-INFO[0001] Starting Port Checks                         
-INFO[0001] Preflight checks for Ports                    Port Issues=0
-INFO[0001] Starting Systemd Checks                      
-INFO[0001] Preflight checks for Systemd                  Systemd Issues=0
-INFO[0001] Preflight Summary                             FWRules=0 PortCheck=0 SystemdCheck=0
-INFO[0001] No preflight errors found 
-</code></pre>
-
 <h1 id="setting-up-the-yaml-file">Setting Up The YAML File</h1>
-<p>You will need to set up your YAML file for your environment. This includes things like knowing the MAC Addresses of the OpenShift nodes and other infrastructure related things. Please consult the <a href="../yaml-file-forward/">YAML File Documentation</a> for more details.</p>
-<p>As I'm going to do a "Full Stack" install (using all services). I will use the following YAML file.</p>
+<p>You will need to set up your YAML file for your environment. This includes things like knowing the MAC Addresses of the OpenShift nodes that will be installed (either VMs or Bare Metal hosts) and other infrastructure related things. Please consult the <a href="../yaml-file-forward/">YAML File Documentation</a> for more details.</p>
+<p>As I'm going to do a "Full Stack" install (using all services). I will
+use the following YAML file and save it as <code>helpernode.yaml</code>.</p>
 <pre><code class="yaml">version: v2
 arch: &quot;x86_64&quot;
 helper:
@@ -711,6 +673,84 @@ workers:
        valid_lft forever preferred_lft forever
 </code></pre>
 
+<h1 id="saving-the-configuration">Saving The Configuration</h1>
+<p>Although it's possible to pass <code>--config</code> to the <code>helpernodectl</code> command,
+it's better to save it. This saves you from having to pass <code>--config</code>
+to each subcommand.</p>
+<pre><code class="shell">helpernodectl save -f helpernode.yaml
+</code></pre>
+
+<p>This will save the file under <code>~/.helper.yaml</code>.</p>
+<blockquote>
+<p><strong>NOTE</strong>: Do not modify <code>~/.helper.yaml</code> directly. The correct way to
+modify is to edit your YAML (<code>helpernode.yaml</code> for example) and rerun the
+<code>save</code> subcommand.</p>
+</blockquote>
+<h1 id="preflight-checks">Preflight Checks</h1>
+<p>Now that you have the binary, perform preflight checks to see if there
+are any potential issues.</p>
+<pre><code class="shell">helpernodectl preflight 
+</code></pre>
+
+<p>The output should look like this</p>
+<pre><code class="shell">INFO[0000] RUNNING PREFLIGHT TASKS                      
+INFO[0000] Running firewall checks                      
+INFO[0001] Preflight checks for Firewall                 Firewall Issues=10
+INFO[0001] Starting Port Checks                         
+INFO[0001] Preflight checks for Ports                    Port Issues=0
+INFO[0001] Starting Systemd Checks                      
+INFO[0001] Preflight checks for Systemd                  Systemd Issues=0
+INFO[0001] Preflight Summary                             FWRules=10 PortCheck=0 SystemdCheck=0
+FATA[0001] Cannot Start, preflight errors found 
+</code></pre>
+
+<p>This shows that I have 10 potential firewall rules that are not in place. Preflight also checks for port conflicts (in case you're running other services, <em>NOT</em> recomended btw) and Systemd conflicts as well.</p>
+<p>At this point we recommend the users to handle these manually. For more information about what ports are needed, consult the <a href="../preflight/">preflight cli documentation.</a></p>
+<p>There is an <em>experimental</em> flag <code>--fix-all</code> that tries to add firewall rules and disable conflicting systemd service.</p>
+<pre><code class="shell">helpernodectl preflight  --fix-all 
+</code></pre>
+
+<p>The output of <code>--fix-all</code> should look like this:</p>
+<pre><code class="shell">INFO[0000] RUNNING PREFLIGHT TASKS                      
+INFO[0000] ==========================BESTEFFORT IN FIXING ERRORS============================ 
+INFO[0000] Running firewall checks                      
+INFO[0001] OPENING PORT: 6443/tcp                       
+INFO[0002] OPENING PORT: 22623/tcp                      
+INFO[0003] OPENING PORT: 8080/tcp                       
+INFO[0004] OPENING PORT: 9000/tcp                       
+INFO[0005] OPENING PORT: 67/udp                         
+INFO[0006] OPENING PORT: 53/tcp                         
+INFO[0007] OPENING PORT: 53/udp                         
+INFO[0008] OPENING PORT: 80/tcp                         
+INFO[0009] OPENING PORT: 443/tcp                        
+INFO[0010] OPENING PORT: 69/udp                         
+INFO[0011] Preflight checks for Firewall                 Firewall Issues=10 Firewall rules added=10
+INFO[0011] Starting Port Checks                         
+INFO[0011] Preflight checks for Ports                    Port Issues=0
+INFO[0011] Starting Systemd Checks                      
+INFO[0011] Preflight checks for Systemd                  Systemd Issues=0
+INFO[0011] Preflight Summary                             FWRules=10 PortCheck=0 SystemdCheck=0
+</code></pre>
+
+<blockquote>
+<p>Note, use with caution.</p>
+</blockquote>
+<p>Once the cli reports <code>No preflight errors found</code>, you can proceed.</p>
+<pre><code class="shell">helpernodectl preflight 
+</code></pre>
+
+<p>Output should say "No preflight errors found":</p>
+<pre><code class="shell">INFO[0000] RUNNING PREFLIGHT TASKS                      
+INFO[0000] Running firewall checks                      
+INFO[0001] Preflight checks for Firewall                 Firewall Issues=0
+INFO[0001] Starting Port Checks                         
+INFO[0001] Preflight checks for Ports                    Port Issues=0
+INFO[0001] Starting Systemd Checks                      
+INFO[0001] Preflight checks for Systemd                  Systemd Issues=0
+INFO[0001] Preflight Summary                             FWRules=0 PortCheck=0 SystemdCheck=0
+INFO[0001] No preflight errors found 
+</code></pre>
+
 <h1 id="prepulling-images">Prepulling Images</h1>
 <p>You can, optionally, prepull images to make startup faster</p>
 <pre><code class="shell">helpernodectl pull
@@ -718,12 +758,13 @@ workers:
 
 <p>This isn't required, as the <code>start</code> command will pull them anyway, but will speed up startup.</p>
 <h1 id="starting-services">Starting Services</h1>
-<p>Once I have my YAML file ready and images pulled, I can start the
-HelperNode services. I do this by passing <code>--config</code> and the path to my
-config file.</p>
-<pre><code class="shell"># helpernodectl start --config helpernode.yaml
-INFO[0001] Using --config file:helpernode.yaml          
-INFO[0001] Found a configuration                        
+<p>Once I have my YAML file ready, saved, and images pulled, I can start the
+HelperNode services.</p>
+<pre><code class="shell">helpernodectl start
+</code></pre>
+
+<p>This should run <code>preflight</code> and start the services:</p>
+<pre><code>INFO[0001] Found a configuration                        
 INFO[0001] RUNNING PREFLIGHT TASKS                      
 INFO[0001] Running firewall checks                      
 INFO[0002] Preflight checks for Firewall                 Firewall Issues=0
@@ -753,8 +794,11 @@ can skip these checks (to speed up startup, if you've already done
 preflight) by passing the <code>--skip-preflight</code> option.</p>
 </blockquote>
 <p>Once startup as finsihed, you can check to see if it's running.</p>
-<pre><code class="shell"># helpernodectl status
-Names                     Status              Image
+<pre><code class="shell">helpernodectl status
+</code></pre>
+
+<p>This should output the running services:</p>
+<pre><code>Names                     Status              Image
 helpernode-pxe            Up 38 seconds ago   quay.io/helpernode/pxe:latest
 helpernode-loadbalancer   Up 40 seconds ago   quay.io/helpernode/loadbalancer:latest
 helpernode-http           Up 41 seconds ago   quay.io/helpernode/http:latest
@@ -765,15 +809,21 @@ helpernode-dns            Up 42 seconds ago   quay.io/helpernode/dns:latest
 <h1 id="obtaining-the-ocp-clients">Obtaining The OCP Clients</h1>
 <p>In order to install OpenShift, I will need the clients. The HelperNode cli
 utility can fetch them for you by simply running the <code>get-clients</code> command</p>
-<pre><code class="shell"># helpernodectl get-clients 
-INFO[0000] Getting file openshift-client-linux.tar.gz   
+<pre><code class="shell">helpernodectl get-clients 
+</code></pre>
+
+<p>This should output the following</p>
+<pre><code>INFO[0000] Getting file openshift-client-linux.tar.gz   
 INFO[0000] Getting file openshift-install-linux.tar.gz  
 INFO[0000] Getting file helm.tar.gz
 </code></pre>
 
-<p>This will fetch the clients into your current working directory.</p>
-<pre><code class="shell"># ls -1 *.gz
-helm.tar.gz
+<p>This command fetches the clients into your current working directory.</p>
+<pre><code class="shell">ls -1 *.gz
+</code></pre>
+
+<p>This should output 3 tarballs:</p>
+<pre><code>helm.tar.gz
 openshift-client-linux.tar.gz
 openshift-install-linux.tar.gz
 </code></pre>
@@ -787,8 +837,11 @@ rm -f /usr/local/bin/README.md
 </code></pre>
 
 <p>You should now have <code>oc</code>, <code>openshift-install</code>, <code>kubectl</code>, and <code>helm</code> in your path</p>
-<pre><code class="shell"># ls -l /usr/local/bin/{oc,openshift-install,kubectl,helm}
--rwxr-xr-x. 1 3434 3434  41607168 Oct 26 08:36 /usr/local/bin/helm
+<pre><code class="shell">ls -l /usr/local/bin/{oc,openshift-install,kubectl,helm}
+</code></pre>
+
+<p>This should list all the binaries that were extracted:</p>
+<pre><code>-rwxr-xr-x. 1 3434 3434  41607168 Oct 26 08:36 /usr/local/bin/helm
 -rwxr-xr-x. 2 root root  74528264 Nov  4 13:38 /usr/local/bin/kubectl
 -rwxr-xr-x. 2 root root  74528264 Nov  4 13:38 /usr/local/bin/oc
 -rwxr-xr-x. 1 root root 353038336 Nov  6 04:41 /usr/local/bin/openshift-install
@@ -807,8 +860,11 @@ details about installing OpenShift.</p>
 </code></pre>
 
 <p>Visit <a href="https://cloud.redhat.com/openshift/install">cloud.redhat.com</a> and select "Bare Metal" then "UPI". Download your pull secret and save it under <code>~/.openshift/pull-secret</code></p>
-<pre><code class="shell"># ls -1 ~/.openshift/pull-secret
-/root/.openshift/pull-secret
+<pre><code class="shell">ls -1 ~/.openshift/pull-secret
+</code></pre>
+
+<p>This should list your pullsecret</p>
+<pre><code>/root/.openshift/pull-secret
 </code></pre>
 
 <p>Now create an install directory for the <code>openshift-install</code> command to use. </p>
@@ -848,22 +904,28 @@ EOF
 </code></pre>
 
 <p>Next, create the OpenShift install manifest.</p>
-<pre><code class="shell"># openshift-install create manifests 
-INFO Consuming Install Config from target directory 
+<pre><code class="shell">openshift-install create manifests 
+</code></pre>
+
+<p>This should output the following:</p>
+<pre><code>INFO Consuming Install Config from target directory 
 WARNING Making control-plane schedulable by setting MastersSchedulable to true for Scheduler cluster settings 
 INFO Manifests created in: manifests and openshift 
 </code></pre>
 
 <p>Edit the <code>manifests/cluster-scheduler-02-config.yml</code> Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting <code>mastersSchedulable</code> to false.</p>
 <blockquote>
-<p>Skip this step if you're installing a compact cluster!</p>
+<p><strong>NOTE</strong>: Skip this step if you're installing a compact cluster!</p>
 </blockquote>
 <pre><code class="shell">sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 </code></pre>
 
-<p>It should look something like this after you edit it.</p>
-<pre><code class="shell"># cat manifests/cluster-scheduler-02-config.yml
-apiVersion: config.openshift.io/v1
+<p>View the file for varification.</p>
+<pre><code class="shell">cat manifests/cluster-scheduler-02-config.yml
+</code></pre>
+
+<p>The output should look something like this:</p>
+<pre><code class="yaml">apiVersion: config.openshift.io/v1
 kind: Scheduler
 metadata:
   creationTimestamp: null
@@ -876,13 +938,7 @@ status: {}
 </code></pre>
 
 <p>Next, generate the ignition configs</p>
-<pre><code class="shell"># openshift-install create ignition-configs 
-INFO Consuming Common Manifests from target directory 
-INFO Consuming Openshift Manifests from target directory 
-INFO Consuming Worker Machines from target directory 
-INFO Consuming OpenShift Install (Manifests) from target directory 
-INFO Consuming Master Machines from target directory 
-INFO Ignition-Configs created in: . and auth 
+<pre><code class="shell">openshift-install create ignition-configs 
 </code></pre>
 
 <p>Now you need copy these ignition configs to the <code>http</code> HelperNode
@@ -891,8 +947,11 @@ service. You do this by running the <code>copy-ign</code> command.</p>
 <p>NOTE: You need to pass <code>--dir</code> and the path where the ignition files
 are located.</p>
 </blockquote>
-<pre><code class="shell"># helpernodectl copy-ign --dir ~/ocp4/
-INFO[0000] Copying over /root/ocp4/bootstrap.ign to http container 
+<pre><code class="shell">helpernodectl copy-ign --dir ~/ocp4/
+</code></pre>
+
+<p>Output should look something like this</p>
+<pre><code>INFO[0000] Copying over /root/ocp4/bootstrap.ign to http container 
 INFO[0000] Copying over /root/ocp4/master.ign to http container 
 INFO[0000] Copying over /root/ocp4/worker.ign to http container
 </code></pre>
@@ -917,8 +976,11 @@ INFO[0000] Copying over /root/ocp4/worker.ign to http container
 need to point to <code>localhost</code> (or <code>127.0.0.1</code>) in order to connect to
 your cluster.</p>
 <p>This is what I have in my <code>/etc/resolv.conf</code></p>
-<pre><code class="shell"># cat /etc/resolv.conf
-# Generated by NetworkManager
+<pre><code class="shell">cat /etc/resolv.conf
+</code></pre>
+
+<p>This is a sample output:</p>
+<pre><code># Generated by NetworkManager
 nameserver 127.0.0.1
 nameserver 8.8.8.8
 </code></pre>
@@ -947,35 +1009,35 @@ INFO Time elapsed: 6m42s
 </blockquote>
 <h1 id="finish-install">Finish Install</h1>
 <p>First, login to your cluster</p>
-<pre><code>export KUBECONFIG=/root/ocp4/auth/kubeconfig
+<pre><code class="shell">export KUBECONFIG=/root/ocp4/auth/kubeconfig
 </code></pre>
 
 <p>Your install may be waiting for worker nodes to get approved. Normally the <code>machineconfig node approval operator</code> takes care of this for you. However, in a Platform Agnostic UPI install, this needs to be done manually. Check pending CSRs with the following command.</p>
-<pre><code>oc get csr
+<pre><code class="shell">oc get csr
 </code></pre>
 
 <p>You can approve all pending CSRs in "one shot" with the following</p>
-<pre><code>oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}{{end}}' | xargs oc adm certificate approve
+<pre><code class="shell">oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{&quot;\n&quot;}}{{end}}{{end}}' | xargs oc adm certificate approve
 </code></pre>
 
 <p>You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a <code>watch</code> on these CSRs</p>
-<pre><code>watch oc get csr
+<pre><code class="shell">watch oc get csr
 </code></pre>
 
 <p>In order to setup your registry, you first have to set the <code>managementState</code> to <code>Managed</code> for your cluster</p>
-<pre><code>oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{&quot;spec&quot;:{&quot;managementState&quot;:&quot;Managed&quot;}}'
+<pre><code class="shell">oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{&quot;spec&quot;:{&quot;managementState&quot;:&quot;Managed&quot;}}'
 </code></pre>
 
 <p>For PoCs, using <code>emptyDir</code> is okay (to use PVs follow <a href="https://docs.openshift.com/container-platform/latest/installing/installing_bare_metal/installing-bare-metal.html#registry-configuring-storage-baremetal_installing-bare-metal">this</a> doc)</p>
-<pre><code>oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{&quot;spec&quot;:{&quot;storage&quot;:{&quot;emptyDir&quot;:{}}}}'
+<pre><code class="shell">oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{&quot;spec&quot;:{&quot;storage&quot;:{&quot;emptyDir&quot;:{}}}}'
 </code></pre>
 
 <p>If you need to expose the registry, run this command</p>
-<pre><code>oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{&quot;spec&quot;:{&quot;defaultRoute&quot;:true}}'
+<pre><code class="shell">oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{&quot;spec&quot;:{&quot;defaultRoute&quot;:true}}'
 </code></pre>
 
 <p>To finish the install process, run the following</p>
-<pre><code>openshift-install wait-for install-complete
+<pre><code class="shell">openshift-install wait-for install-complete
 </code></pre>
 
 <blockquote>
@@ -984,16 +1046,16 @@ INFO Time elapsed: 6m42s
 <h1 id="login-to-the-web-console">Login to the web console</h1>
 <p>The OpenShift 4 web console will be running at <code>https://console-openshift-console.apps.{{ dns.clusterid }}.{{ dns.domain }}</code> (e.g. <code>https://console-openshift-console.apps.ocp4.example.com</code>)</p>
 <ul>
-<li>Username: kubeadmin</li>
+<li>Username: <code>kubeadmin</code></li>
 <li>Password: the output of <code>cat /root/ocp4/auth/kubeadmin-password</code></li>
 </ul>
 <h1 id="upgrade">Upgrade</h1>
 <p>If you didn't install the latest release, then just run the following to upgrade.</p>
-<pre><code>oc adm upgrade --to-latest
+<pre><code class="shell">oc adm upgrade --to-latest
 </code></pre>
 
 <p>Scale the router if you need to (if, for example, you installed a compact cluster or are using 3 workers)</p>
-<pre><code>oc patch --namespace=openshift-ingress-operator --patch='{&quot;spec&quot;: {&quot;replicas&quot;: 3}}' --type=merge ingresscontroller/default
+<pre><code class="shell">oc patch --namespace=openshift-ingress-operator --patch='{&quot;spec&quot;: {&quot;replicas&quot;: 3}}' --type=merge ingresscontroller/default
 </code></pre>
 
 <h1 id="done">DONE</h1>
