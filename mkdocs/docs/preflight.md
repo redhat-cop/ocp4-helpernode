@@ -23,7 +23,7 @@ helpernodectl preflight --fix-all
 ```
 
 Again, this is experimental and assumes you have `firewalld` running on
-a RHEL 8/CentOS Stream 8 server/node/machine/vm.
+a RHEL 8/CentOS 8 server/node/machine/vm.
 
 Currently the firewall rules needed for the HelperNode are:
 

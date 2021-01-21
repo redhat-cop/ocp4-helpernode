@@ -8,7 +8,7 @@ using the Platform Agnostic UPI install method.
 
 I will be using the following for my HelperNode:
 
-* CentOS Stream 8
+* CentOS 8
 * 50GB HD
 * 4 vCPUs
 * 8 GB RAM

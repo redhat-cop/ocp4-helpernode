@@ -16,7 +16,7 @@ The HelperNode is meant to help you install an OpenShift 4 cluster using the Pla
 
 The [`helpernodectl`](https://github.com/RedHatOfficial/ocp4-helpernode/releases) utility is only (currently) supported/tested with the following:
 
-* RHEL 8/CentOS Stream 8
+* RHEL 8/CentOS 8
 * Podman 1.6.4
 * Firewalld 0.8.0
 
