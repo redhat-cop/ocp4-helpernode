@@ -21,6 +21,6 @@ EXPOSE 67/udp
 
 RUN rm -f /etc/yum.repos.d/CentOS.repo
 
-RUN setcap 'cap_net_raw=+ep' /usr/sbin/dhcpd
+#RUN setcap 'cap_net_bind_service,cap_net_raw=+ep' /usr/sbin/dhcpd
 
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
