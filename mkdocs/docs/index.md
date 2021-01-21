@@ -20,7 +20,7 @@ The [`helpernodectl`](https://github.com/RedHatOfficial/ocp4-helpernode/releases
 * Podman 1.6.4
 * Firewalld 0.8.0
 
-The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.4
+The version of OpenShift is "tied" to the binary. For the current version, we are using OpenShift 4.6.12
 
 # Quickstarts
 
