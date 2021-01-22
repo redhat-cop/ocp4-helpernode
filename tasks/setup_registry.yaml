@@ -11,10 +11,12 @@
     - data
 
 - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+  run_once: true
   openssl_privatekey:
     path: /opt/registry/certs/domain.pem
 
 - name: Generate an OpenSSL Certificate Signing Request
+  run_once: true
   openssl_csr:
     path: /opt/registry/certs/domain.csr
     privatekey_path: /opt/registry/certs/domain.pem
@@ -24,11 +26,29 @@
     common_name: "{{ registry_host }}"
 
 - name: Generate a Self Signed OpenSSL certificate
+  run_once: true
   openssl_certificate:
     path: /opt/registry/certs/domain.crt
     privatekey_path: /opt/registry/certs/domain.pem
     csr_path: /opt/registry/certs/domain.csr
     provider: selfsigned
+
+- name: Create the user and password for local registry
+  run_once: true
+  shell: htpasswd -bBc /opt/registry/auth/htpasswd admin admin
+  args:
+    creates: /opt/registry/auth/htpasswd
+
+- name: Synchronize directories across all hosts
+  synchronize:
+    src: "{{ item }}"
+    dest: "{{ item }}"
+    recursive: yes
+  delegate_to: "{{ ansible_play_batch[0] }}"
+  with_items:
+    - /opt/registry/
+    - ~/.openshift/
+  when: high_availability is defined
 
 - name: Copy Self Signed OpenSSL certificate
   copy:
@@ -45,11 +65,6 @@
   until: cert_trust.stdout|int == 1
   retries: 3
   delay: 10
-
-- name: Create the user and password for local registry
-  shell: htpasswd -bBc /opt/registry/auth/htpasswd admin admin
-  args:
-    creates: /opt/registry/auth/htpasswd
 
 - name: Generate local-registry service file
   template:
