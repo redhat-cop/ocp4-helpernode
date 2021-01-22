@@ -612,6 +612,10 @@
     with_items:
       - NetworkManager
 
+  - name: Setup keepalived service
+    when: high_availability is defined
+    import_tasks: setup_keepalived.yaml
+
   - name: Setup Local Registry
     when: setup_registry.deploy
     block:
@@ -622,10 +626,6 @@
 
     - name: Setup Registry
       import_tasks: setup_registry.yaml
-
-  - name: Setup keepalived service
-    when: high_availability is defined
-    import_tasks: setup_keepalived.yaml
 
   - name: Enable restart always for critical services
     include_tasks: restart_config.yaml
