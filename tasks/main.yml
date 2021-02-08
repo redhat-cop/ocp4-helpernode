@@ -373,6 +373,44 @@
       when:
         - workers is defined
         - workers | length > 0
+
+    ############ Static IP for ppc64le with tftp and dhcp boot ################## 
+    - name: Create the ppc64le bootstrap grub2 file for dhcp + static IP
+      template:
+        src: ../templates/ppc64le-grub2-bootstrap.j2
+        dest: "/var/lib/tftpboot/boot/grub2/powerpc-ieee1275/grub.cfg-01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+        mode: 0555
+      notify:
+        - restart tftp 
+      when:
+        - bootstrap.networkifacename is defined
+
+    - name: Create the ppc64le master grub2 files for dhcp + static IP
+      template:
+        src: ../templates/ppc64le-grub2-master.j2
+        dest: "/var/lib/tftpboot/boot/grub2/powerpc-ieee1275/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ masters | lower }}"
+      notify:
+        - restart tftp
+      when:
+        - item.networkifacename is defined
+
+    - name: Create the ppc64le worker grub2 files for dhcp + static IP
+      template:
+        src: ../templates/ppc64le-grub2-worker.j2
+        dest: "/var/lib/tftpboot/boot/grub2/powerpc-ieee1275/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+        mode: 0555
+      with_items: "{{ workers | lower }}"
+      notify:
+        - restart tftp
+      when:
+        - workers is defined
+        - workers | length > 0
+        - item.networkifacename is defined
+    ############ End Static IP for ppc64le ################## 
+
+
     when: not staticips and ppc64le and (("metal" in ocp_bios) or ("rootfs" in ocp_bios))
 
 

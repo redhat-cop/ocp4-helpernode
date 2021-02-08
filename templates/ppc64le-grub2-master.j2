@@ -1,0 +1,16 @@
+{% if item.ipaddr is defined and item.networkifacename is defined %}
+  {% set ipconfig = item.ipaddr + "::" + dhcp.router + ":" + dhcp.netmask + ":" + item.name + ":" + item.networkifacename + ":none" %}
+  {% set ipconfig = ipconfig + " nameserver=" + helper.ipaddr %}
+{% else %}
+  {% set ipconfig = "dhcp" %}
+{% endif %}
+
+set default=0
+set timeout=5
+
+menuentry 'Install OCP master node static ip for ppc64le' {
+  echo "Loading kernel for OCP"
+  linux "/rhcos/kernel" ip={{ ipconfig }} console=tty0 console=ttyS0 console=hvc0,115200n8 rd.neednet=1 coreos.inst=yes coreos.inst.install_dev={{ disk }} {{ coreos_inst_url }} coreos.inst.ignition_url=http://{{ helper.ipaddr }}:8080/ignition/master.ign
+  echo "Loading initrd"
+  initrd  "/rhcos/initramfs.img"
+}
