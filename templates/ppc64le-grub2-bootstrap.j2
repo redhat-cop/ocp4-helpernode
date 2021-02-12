@@ -1,5 +1,5 @@
 {% if bootstrap.ipaddr is defined and bootstrap.networkifacename is defined %}
-  {% set ipconfig = bootstrap.ipaddr + "::" + dhcp.router + ":" + dhcp.netmask + ":" + bootstrap.name + "." + dns.clusterid + "." + dns.domain + ":" + bootstrap.networkifacename + ":none" %}
+  {% set ipconfig = bootstrap.ipaddr + "::" + dhcp.router + ":" + dhcp.netmask + ":" + bootstrap.name + ":" + bootstrap.networkifacename + ":none" %}
   {% set ipconfig = ipconfig + " nameserver=" + helper.ipaddr %}
 {% else %}
   {% set ipconfig = "dhcp" %}
