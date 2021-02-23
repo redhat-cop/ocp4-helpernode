@@ -18,6 +18,7 @@ max-lease-time 14400;
     interface {{ networkifacename }};
         pool {
             range {{ dhcp.poolstart }} {{ dhcp.poolend }};
+{% if not ipi %}
         # Static entries
 {% if bootstrap is defined %}
         host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
@@ -30,13 +31,16 @@ max-lease-time 14400;
         host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
 {% endfor %}
 {% endif %}
+{% endif %}
 {% if other is defined %}
 {% for o in other %}
         host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
 {% endfor %}
 {% endif %}
+{% if not ipi %}
         # this will not give out addresses to hosts not listed above
         deny unknown-clients;
+{% endif %}
 
         # this is PXE specific
 {% if ppc64le is sameas true %}
