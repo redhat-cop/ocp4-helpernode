@@ -6,7 +6,11 @@ max-lease-time 14400;
 option routers                  {{ dhcp.router }};
 option broadcast-address        {{ dhcp.bcast }};
 option subnet-mask              {{ dhcp.netmask }};
+{% if dhcp.dns is defined and dhcp.dns != "" %}
+option domain-name-servers      {{ dhcp.dns }};
+{% else %}
 option domain-name-servers      {{ helper.ipaddr }};
+{% endif %}
 option domain-name              "{{ dns.clusterid }}.{{ dns.domain | lower }}";
 option domain-search            "{{ dns.clusterid }}.{{ dns.domain | lower }}", "{{ dns.domain | lower }}";
 

@@ -75,6 +75,7 @@ dhcp:
   router: "192.168.7.1"
   bcast: "192.168.7.255"
   netmask: "255.255.255.0"
+  dns: "{{ helper.ipaddr }}"
   poolstart: "192.168.7.10"
   poolend: "192.168.7.30"
   ipid: "192.168.7.0"
@@ -86,6 +87,7 @@ Explanation of the options you can set:
 * `dhcp.router` - This is the default gateway of your network you're going to assign to the masters/workers
 * `dhcp.bcast` - This is the broadcast address for your network
 * `dhcp.netmask` - This is the netmask that gets assigned to your masters/workers
+* `dhcp.dns` - This is the domain name server, it is optional, the default value is set to `helper.ipaddr`
 * `dhcp.poolstart` - This is the first address in your dhcp address pool
 * `dhcp.poolend` - This is the last address in your dhcp address pool
 * `dhcp.ipid` - This is the ip network id for the range
