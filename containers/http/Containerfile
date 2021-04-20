@@ -8,11 +8,11 @@ ENV HELPERNODEVERSION="v2beta"
 
 ENV HELPERNODE_HTTP_PORT="8080"
 
-ENV HELMVERSION="3.5.0"
+ENV HELMVERSION="3.5.4"
 
 RUN dnf -y install httpd jq wget python3-pip && \
     python3 -m pip install -U pip && \
-    pip3 install "ansible==2.9"
+    pip3 install "ansible==2.9" && \
     mkdir -m 775 -p /var/www/html/{install,ignition,artifacts}
 
 COPY files/httpd.conf.j2 /usr/local/src/
