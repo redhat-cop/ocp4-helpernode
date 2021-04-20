@@ -15,7 +15,7 @@ RUN chmod 0644 /etc/yum.repos.d/CentOS.repo && \
     dnf -y install --enablerepo CentOS-AppStream --enablerepo CentOS-BaseOS tftp-server syslinux && \
     dnf -y install wget jq python3-pip && \
     python3 -m pip install -U pip && \
-    pip3 install "ansible==2.9"
+    pip3 install yq "ansible==2.9"
 
 COPY files/pxe-bootstrap.j2 /usr/local/src/
 COPY files/pxe-master.j2 /usr/local/src/
