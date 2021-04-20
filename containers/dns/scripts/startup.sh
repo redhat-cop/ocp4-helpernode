@@ -16,7 +16,7 @@ ansibleLog=/var/log/helperpod_ansible_run.log
 extraVars="-e setup_registry=false -e serialnumber=$(date +%s)"
 
 #
-## Make sure the HELPERPOD_CONFIG_YAML env var has size
+## Make sure the HELPERPOD_CONFIG_YAML env var has size.
 [[ ${#HELPERPOD_CONFIG_YAML} -eq 0 ]] && echo "FATAL: HELPERPOD_CONFIG_YAML env var not set!!!" && exit 254
 
 #
