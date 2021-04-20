@@ -43,7 +43,9 @@ registry	IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
 ; Create entry for the bootstrap host
+{% if bootstrap is defined %}
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
+{% endif %}
 ;
 ; Create entries for the master hosts
 {% if masters is defined %}

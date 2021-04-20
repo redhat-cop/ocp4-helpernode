@@ -25,7 +25,9 @@ echo ${HELPERPOD_CONFIG_YAML} | base64 -d > ${helperPodYaml}
 ## Create pxe/tftp files based on the template and yaml passed in.
 
 # First create the bootstrap
-ansible localhost -c local -e @${helperPodYaml} -e "http_port=${HELPERNODE_HTTP_PORT}" -e disk=$(yq -r .bootstrap.disk ${helperPodYaml} | tr [:upper:] [:lower:]) -m template -a "src=${bootstrapPxeTemplate} dest=${pxeConfig}/01-$(yq -r .bootstrap.macaddr ${helperPodYaml} | tr [:upper:] [:lower:] | sed 's~:~-~g') mode=0555" >> ${ansibleLog} 2>&1
+if yq -r .bootstrap ${helperPodYaml} > /dev/null 2>&1; then
+	ansible localhost -c local -e @${helperPodYaml} -e "http_port=${HELPERNODE_HTTP_PORT}" -e disk=$(yq -r .bootstrap.disk ${helperPodYaml} | tr [:upper:] [:lower:]) -m template -a "src=${bootstrapPxeTemplate} dest=${pxeConfig}/01-$(yq -r .bootstrap.macaddr ${helperPodYaml} | tr [:upper:] [:lower:] | sed 's~:~-~g') mode=0555" >> ${ansibleLog} 2>&1
+fi
 
 # For the masters, we need to loop
 masters=($(yq -r '.masters[] | @base64'  < ${helperPodYaml}))

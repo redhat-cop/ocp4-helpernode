@@ -16,7 +16,9 @@ $TTL 1W
 {% endfor %}
 {% endif %}
 ;
+{% if bootstrap is defined %}
 {{ bootstrap.ipaddr.split('.')[3] }}	IN	PTR	{{ bootstrap.name | lower  }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{% endif %}
 ;
 {% if ipiip is defined %}
 {{ ipiip.api.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
