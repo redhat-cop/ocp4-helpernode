@@ -18,18 +18,7 @@ The options are:
 * `bootstrap.disk` - The disk that will be used to install RHCOS onto.
 
 After an install, you probably want to remove the bootstrap from the
-loadbalancer. To do this, add `bootstrap.inlb` and set it to `false`.
-
-For example:
-
-```yaml
-bootstrap:
-  name: "bootstrap"
-  ipaddr: "192.168.7.20"
-  macaddr: "52:54:00:60:72:67"
-  disk: vda
-  inlb: false
-```
+loadbalancer. To do this, just omit the `bootstrap` section from the YAML.
 
 > *NOTE* You need to `stop` then `start` the service after this change
 > has been made.
