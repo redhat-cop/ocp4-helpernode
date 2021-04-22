@@ -59,49 +59,53 @@
       - restart dhcpd
     when: not staticips and uefi
 
-  - name: Write out named file
-    template:
-      src: ../templates/named.conf.j2
-      dest: /etc/named.conf
-    notify:
-      - restart bind
+  - name: Setup named configuration files
+    block:
+    - name: Write out named file
+      template:
+        src: ../templates/named.conf.j2
+        dest: /etc/named.conf
+      notify:
+        - restart bind
+    
+    - name: Installing DNS Serialnumber generator
+      copy:
+        src: ../files/set-dns-serial.sh
+        dest: /usr/local/bin/set-dns-serial.sh
+        mode: '0555'
 
-  - name: Installing DNS Serialnumber generator
-    copy:
-      src: ../files/set-dns-serial.sh
-      dest: /usr/local/bin/set-dns-serial.sh
-      mode: '0555'
+    - name: Set zone serial number
+      shell: "/usr/local/bin/set-dns-serial.sh"
+      register: dymanicserialnumber
 
-  - name: Set zone serial number
-    shell: "/usr/local/bin/set-dns-serial.sh"
-    register: dymanicserialnumber
+    - name: Setting serial number as a fact
+      set_fact:
+        serialnumber: "{{ dymanicserialnumber.stdout }}"
 
-  - name: Setting serial number as a fact
-    set_fact:
-      serialnumber: "{{ dymanicserialnumber.stdout }}"
+    - name: Write out "{{ dns.domain | lower }}" zone file
+      template:
+        src: ../templates/zonefile.j2
+        dest: /var/named/zonefile.db
+        mode: '0644'
+      notify:
+        - restart bind
 
-  - name: Write out "{{ dns.domain | lower }}" zone file
-    template:
-      src: ../templates/zonefile.j2
-      dest: /var/named/zonefile.db
-      mode: '0644'
-    notify:
-      - restart bind
+    - name: Write out reverse zone file
+      template:
+        src: ../templates/reverse.j2
+        dest: /var/named/reverse.db
+        mode: '0644'
+      notify:
+        - restart bind
 
-  - name: Write out reverse zone file
-    template:
-      src: ../templates/reverse.j2
-      dest: /var/named/reverse.db
-      mode: '0644'
-    notify:
-      - restart bind
-
-  - name: Write out haproxy config file
-    template:
-      src: ../templates/haproxy.cfg.j2
-      dest: /etc/haproxy/haproxy.cfg
-    notify:
-      - restart haproxy
+    - name: Write out haproxy config file
+      template:
+        src: ../templates/haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+      notify:
+        - restart haproxy
+      when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr  
+    when: dhcp.dns is not defined or dhcp.dns == helper.ipaddr 
 
   - name: Copy httpd conf file
     copy:
@@ -214,6 +218,7 @@
       persistent: yes
     notify:
       - restart haproxy
+    when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr 
 
   - name: Copy over files needed for TFTP
     shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
@@ -630,6 +635,18 @@
   - name: Enable restart always for critical services
     include_tasks: restart_config.yaml
     loop: "{{ critical_services }}"
+
+  - name: Disable named service
+    service:
+      name: named
+      state: stopped
+    when: dhcp.dns is defined and dhcp.dns != helper.ipaddr
+
+  - name: Disable haproxy service
+    service:
+      name: haproxy
+      state: stopped
+    when: (dhcp.dns is defined and dhcp.dns != helper.ipaddr) or (dns.lb_ipaddr is defined and dns.lb_ipaddr != helper.ipaddr)
 
   - name:  Information about this install
     debug:

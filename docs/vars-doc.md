@@ -51,14 +51,16 @@ dns:
   clusterid: "ocp4"
   forwarder1: "8.8.8.8"
   forwarder2: "8.8.4.4"
+  lb_ipaddr: "{{ helper.ipaddr }}"
 ```
 
 Explanation of the DNS variables:
 
 * `dns.domain` - This is what domain the installed DNS server will have. This needs to match what you will put for the [baseDomain](examples/install-config-example.yaml#L2) inside the `install-config.yaml` file.
 * `dns.clusterid` - This is what your clusterid will be named and needs to match what you will for [metadata.name](examples/install-config-example.yaml#L12) inside the `install-config.yaml` file.
-* `dns.forwarder1` - Tis will be set up as the DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.
-* `dns.forwarder2` - Tis will be set up as the second DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.
+* `dns.forwarder1` - This will be set up as the DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.
+* `dns.forwarder2` - This will be set up as the second DNS forwarder. This is usually one of the corporate (or "upstream") DNS servers.
+* `lb_ipaddr` - This is the load balancer IP, it is optional, the default value is `helper.ipaddr`.
 
 The DNS server will be set up using `dns.clusterid` + `dns.domain` as the domain it's serving. In the above example, the helper will be setup to be the SOA for `ocp4.example.com`. The helper will also be setup as it's [own DNS server](../templates/resolv.conf.j2)
 
