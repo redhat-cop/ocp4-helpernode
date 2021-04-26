@@ -64,3 +64,88 @@ func isImageRunning(containername string) bool {
 	}
 		return false
 }
+
+func createImageList() {
+	//TODO probably move this to setupCtlConfig
+	helpernodectlConfig.SetEnvPrefix("helpernode")
+	helpernodectlConfig.BindEnv("image_prefix")
+	if helpernodectlConfig.GetString("image_prefix") == "" {
+		logrus.Debug("HELPERNODE_IMAGE_PREFIX not found")
+		helpernodectlConfig.Set("image_prefix", "quay.io")
+	} else {
+		logrus.Debug("Using quay.io as the registry")
+	}
+
+	helpernodectlConfig.AutomaticEnv() // read in environment variables that match
+
+	registry = helpernodectlConfig.GetString("image_prefix")
+
+	for _, name := range coreImageNames {
+		images[name] = registry + "/" + repository + "/" + name + ":" + VERSION
+	}
+	//TODO Add pluggable images here
+	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
+	for pluggableImageName, _ := range pluggableServices {
+		pImageName := helperConfig.GetString("pluggableServices." + pluggableImageName + ".image")
+		logrus.Debugf("image value is %s\n", pImageName)
+		images[pluggableImageName] = pImageName
+
+		//lets get ports
+		ports := helperConfig.GetStringSlice("pluggableServices." + pluggableImageName + ".ports")
+		for _, v := range ports {
+			portvalue := strings.Split(v, "/")
+			portlist[portvalue[0]] = append(portlist[portvalue[0]], portvalue[1])
+		}
+	}
+
+	//Just some logic to print if in debug
+	if logrus.GetLevel().String() == "debug" {
+		logrus.Debug("Using registry : " + registry)
+		for name, image := range images {
+			logrus.Debug(name + ":" + image)
+		}
+	}
+}
+
+func verifyContainerRuntime() {
+	_, err := exec.LookPath("podman")
+	if err != nil {
+		logrus.Fatal("Podman not found. Please install")
+	}
+
+}
+
+//This reconciles a list of images to start or stop
+//defaults to all images unless specifically
+func reconcileImageList(list []string) {
+
+	//TODO change this to read from helpernodectl viper configuration
+	/* Robert told me to do it this way
+	disabledServices := viper.GetStringSlice("disabledServices")
+	*/
+	disabledServices := helperConfig.GetStringSlice("disabledServices")
+
+	//all is implied so need to remove disabledServices
+	if list[0] == "all" {
+		//lets remove any disabled images
+		for name := range disabledServices {
+			delete(images, disabledServices[name])
+		}
+	} else {
+		//create a new list from our args
+		var subsetOfServices = make(map[string]string)
+
+		for _, name := range list {
+			subsetOfServices[name] = images[name]
+		}
+		images = subsetOfServices
+
+		if logrus.GetLevel().String() == "debug" {
+			for name, image := range subsetOfServices {
+				logrus.Debug("Subset: " + name + ":" + image)
+			}
+		}
+	}
+	//TODO add plugable images
+}
+

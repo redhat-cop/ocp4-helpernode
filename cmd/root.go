@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/base64"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"net"
 	"os"
 	"runtime"
 	"strings"
@@ -44,12 +48,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	//this is really only here for testing the code on a mac
-	//helpernodectl is not currently supported on macOS
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != "linux" {
+		logrus.Fatal("helpernodectl only runs on linux")
+	} else {
 		verifyContainerRuntime()
 		verifyFirewallCommand()
 	}
+
 	//TODO lets move --config to subcommands that need it. that way we can set it required or not.
 	// Need it in start and pull
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.helpernodectl.yaml)")
@@ -59,7 +64,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-
 	setUpLogging()
 	setupCtlConfig()
 	setupHelperConfig()
@@ -157,44 +161,82 @@ func setUpLogging() {
 	//	logrus.SetReportCaller(true)
 }
 
-func createImageList() {
-	//TODO probably move this to setupCtlConfig
-	helpernodectlConfig.SetEnvPrefix("helpernode")
-	helpernodectlConfig.BindEnv("image_prefix")
-	if helpernodectlConfig.GetString("image_prefix") == "" {
-		logrus.Debug("HELPERNODE_IMAGE_PREFIX not found")
-		helpernodectlConfig.Set("image_prefix", "quay.io")
+//TODO need to update this to use helperconfig
+func getEncodedConfuration() string {
+	//Not sure if this will stay here but lets do some validation on the configuration
+	if !validateConfiguration() {
+		logrus.Fatal("Error in configuration file!!!")
+	}
+	// Check to see if file exists
+	logrus.Trace("Config file used: " + helperConfig.ConfigFileUsed())
+	var encoded string
+	configurationFile := helperConfig.ConfigFileUsed()
+	if _, err := os.Stat(helperConfig.ConfigFileUsed()); os.IsNotExist(err) {
+		logrus.Error("File " + configurationFile + " does not exist")
 	} else {
-		logrus.Debug("Using quay.io as the registry")
+		// Open file on disk
+		f, _ := os.Open(configurationFile)
+		// Read file into a byte slice
+		reader := bufio.NewReader(f)
+		content, _ := ioutil.ReadAll(reader)
+		//Encode to base64
+		encoded = base64.StdEncoding.EncodeToString(content)
 	}
+	return encoded
+}
 
-	helpernodectlConfig.AutomaticEnv() // read in environment variables that match
-
-	registry = helpernodectlConfig.GetString("image_prefix")
-
-	for _, name := range coreImageNames {
-		images[name] = registry + "/" + repository + "/" + name + ":" + VERSION
-	}
-	//TODO Add pluggable images here
-	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
-	for pluggableImageName, _ := range pluggableServices {
-		pImageName := helperConfig.GetString("pluggableServices." + pluggableImageName + ".image")
-		logrus.Debugf("image value is %s\n", pImageName)
-		images[pluggableImageName] = pImageName
-
-		//lets get ports
-		ports := helperConfig.GetStringSlice("pluggableServices." + pluggableImageName + ".ports")
-		for _, v := range ports {
-			portvalue := strings.Split(v, "/")
-			portlist[portvalue[0]] = append(portlist[portvalue[0]], portvalue[1])
+func validateConfiguration() bool {
+	//initially lets check that the interface name matches something on this NIC
+	logrus.Infof("Validationg configuration in %s", helperConfig.ConfigFileUsed())
+	interfaces, _ := net.Interfaces()
+	found := false
+	configInterface := helperConfig.GetString("helper.networkifacename")
+	for _, ifc := range interfaces {
+		if ifc.Name == configInterface {
+			found = true
+			break
 		}
 	}
-
-	//Just some logic to print if in debug
-	if logrus.GetLevel().String() == "debug" {
-		logrus.Debug("Using registry : " + registry)
-		for name, image := range images {
-			logrus.Debug(name + ":" + image)
-		}
+	if !found {
+		logrus.Errorf("Could not find %s in interface list of this machine", configInterface)
 	}
+	return found
+}
+
+func validateArgs(args []string) {
+	imageCount := len(args)
+
+	//if bare start command assume "all"
+	if imageCount == 0 {
+		logrus.Debug("Setting target images to all")
+		imageList = []string{"all"}
+	} else if imageCount == 1 {
+
+		logrus.Debug("starting: " + args[0])
+		//parse image list
+		imageList = strings.Split(args[0], ",")
+		logrus.Info(imageList)
+
+		//TODO make sure pluggable images is added to images var
+		//Lets make sure its in our list of images (should include pluggable images)
+		for _, name := range imageList {
+			if _, exists := images[name]; exists {
+				continue
+			} else {
+				logrus.Fatal("Listed service is not part of image list ")
+			}
+
+		}
+	} else {
+		logrus.Fatal("Wrong number of arguments passed. Must be comma separated list")
+	}
+
+}
+func verifyConfig() {
+	if !helpernodectlConfig.IsSet("configFile") && !rootCmd.PersistentFlags().Changed("config") {
+		logrus.Fatal("Config file was not passed or has no previous save")
+	} else {
+		logrus.Info("Found a configuration")
+	}
+
 }
