@@ -43,7 +43,8 @@ func startImage(image string, encodedyaml string, containername string) {
 	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
 	if _, ok := pluggableServices[containername]; ok {
 		pContainerStartOptions := helperConfig.GetString("pluggableServices." + containername + ".startupOptions")
-		startOptions = append(startOptions, pContainerStartOptions)
+		parsedOptions := strings.Fields(pContainerStartOptions)
+		startOptions = append(startOptions, parsedOptions...)
 	} else {
 		startOptions = append(startOptions, coreImageOptions)
 	}
