@@ -13,6 +13,7 @@ import (
 func runCmd(cmd *exec.Cmd) {
 	stderr, _ := cmd.StderrPipe()
 	if err := cmd.Start(); err != nil {
+
 		logrus.Fatal(err)
 	}
 
@@ -36,8 +37,20 @@ func pullImage(image string, version string) {
 //TODO we need to adjust startImage to account for pluggable container that won't take the encoded file or need --net-host
 //TODO lets add a generic label to make stop all easier.  filter on helpernode=true or something similar
 func startImage(image string, encodedyaml string, containername string) {
+	startOptions := []string{containerRuntime, "run", "--rm", "-d", "--label=helpernode-" + containername + "=" + VERSION, "--net=host", "--name=helpernode-" + containername}
+	coreImageOptions := "--env=HELPERPOD_CONFIG_YAML=" + encodedyaml
+
+	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
+	if _, ok := pluggableServices[containername]; ok {
+		pContainerStartOptions := helperConfig.GetString("pluggableServices." + containername + ".startupOptions")
+		startOptions = append(startOptions, pContainerStartOptions)
+	} else {
+		startOptions = append(startOptions, coreImageOptions)
+	}
 	logrus.Info("Starting helpernode-" + containername)
-	cmd := exec.Command(containerRuntime, "run", "--rm", "-d", "--env=HELPERPOD_CONFIG_YAML="+encodedyaml, "--label=helpernode-"+containername+"="+VERSION, "--net=host", "--name=helpernode-"+containername, image)
+	startOptions = append(startOptions, image)
+	cmd := exec.Command(containerRuntime)
+	cmd.Args = startOptions
 	runCmd(cmd)
 
 }
@@ -62,7 +75,7 @@ func isImageRunning(containername string) bool {
 		logrus.Debugf("%s is running", name)
 		return true
 	}
-		return false
+	return false
 }
 
 func createImageList() {
@@ -85,7 +98,7 @@ func createImageList() {
 	}
 	//TODO Add pluggable images here
 	pluggableServices := helperConfig.GetStringMapString("pluggableServices")
-	for pluggableImageName, _ := range pluggableServices {
+	for pluggableImageName := range pluggableServices {
 		pImageName := helperConfig.GetString("pluggableServices." + pluggableImageName + ".image")
 		logrus.Debugf("image value is %s\n", pImageName)
 		images[pluggableImageName] = pImageName
@@ -148,4 +161,3 @@ func reconcileImageList(list []string) {
 	}
 	//TODO add plugable images
 }
-
