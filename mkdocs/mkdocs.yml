@@ -22,6 +22,7 @@ nav:
     - 'Pulling Images': 'pull.md'
     - 'Saving YAML Config': 'saving-yaml.md'
     - 'Starting the HelperNode Services': 'start.md'
+    - 'Restarting the HelperNode Services': 'restart.md'
     - 'Displaying Status': 'status.md'
     - 'Stopping the HelperNode Services': 'stop.md'
 - Documentation for helpernode.yaml:

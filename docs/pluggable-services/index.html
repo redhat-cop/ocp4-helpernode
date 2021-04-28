@@ -291,6 +291,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../restart/" class="md-nav__link">
+      Restarting the HelperNode Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../status/" class="md-nav__link">
       Displaying Status
     </a>
@@ -564,15 +576,17 @@
 container group. This can be done by adding <code>pluggableService</code> to your
 config. Below is an example:</p>
 <pre><code class="yaml">pluggableServices:
-  anotherweb:
-    image: quay.io/christianh814/test-webserver:latest
+  nfs:
+    image: docker.io/itsthenetwork/nfs-server-alpine
     ports:
-      - 8899/tcp
-      - 8899/udp
+      - 2049/tcp
+      - 2049/udp
+    startupOptions: &quot;--privileged -v /myshare:/nfsshare:Z -e SHARED_DIRECTORY=/nfsshare&quot;
   myweb:
     image: quay.io/christianh814/webserver-test:latest
     ports:
       - 8888/tcp
+    startupOptions: &quot;--label=foo=bar&quot;
 </code></pre>
 
 <p>You will need:</p>
@@ -580,9 +594,14 @@ config. Below is an example:</p>
 <li><code>pluggableServices.&lt;name&gt;</code> - Name your service something. You must name it something not in the "reserved names". For example you <strong>CANNOT</strong> name your service <code>loadbalancer</code> as that's reserved.</li>
 <li><code>pluggableServices.image</code> - This is the registry where the image is stored. You must pass the tag as well.</li>
 <li><code>pluggableServices.ports</code> - This is an array of ports with their protocol.</li>
+<li><code>pluggableServices.startupOptions</code> - These are options you want to pass to the startup process (this is optional)</li>
 </ul>
+<p>Note in the example I'm using an nfs image that binds to
+local storage. This is only an EXAMPLE, and you should <a href="https://hub.docker.com/r/itsthenetwork/nfs-server-alpine/">read the documentaion</a>
+about the image to formulate your own. If you're binding to local storage,
+you have to make sure that path exists first. Other nuances will exist.</p>
 <blockquote>
-<p><strong>NOTE</strong>: Binding to local storage is not supported currently, but it is planned.</p>
+<p><strong>NOTE</strong> This is a "garbage in/garbage out" situation. We do not validate what is passed via <code>startupOptions</code></p>
 </blockquote>
                 
               
