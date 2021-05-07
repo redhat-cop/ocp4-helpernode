@@ -224,7 +224,7 @@ Default is set to `false` as to NOT install it.
 
 ### SSH Key
 
-This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssk/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
+This playbook [creates an SSH key](../tasks/generate_ssh_keys.yaml) as `~/.ssh/helper_rsa` that can be used for the `install-config.yaml` file. It also creates an `~/.ssh/config` file to use this as your default key when sshing into the nodes.
 
 ```
 ssh_gen_key: true

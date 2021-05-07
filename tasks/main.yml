@@ -473,7 +473,7 @@
     block:
     - name: Create folder for additional machineconfig
       file:
-        path: ../machineconfig
+        path: "{{ machineconfig_path }}"
         state: directory
 
     - name: Create temporary chrony.conf file
@@ -489,13 +489,13 @@
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
-        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+        dest: "{{ machineconfig_path }}/99-{{item}}-chrony-configuration.yaml"
       loop:
         - master
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2
-        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+        dest: "{{ machineconfig_path }}/99-{{item}}-chrony-configuration.yaml"
       loop:
         - worker
       when:
