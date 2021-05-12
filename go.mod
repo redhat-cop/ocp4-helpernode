@@ -1,6 +1,6 @@
-module github.com/robertsandoval/ocp4-helpernode
+module github.com/RedHatOfficial/ocp4-helpernode
 
-go 1.14
+go 1.16
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

@@ -16,7 +16,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/robertsandoval/ocp4-helpernode/cmd"
+	"github.com/RedHatOfficial/ocp4-helpernode/cmd"
 )
 
 func main() {
