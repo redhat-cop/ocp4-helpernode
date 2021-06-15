@@ -23,3 +23,4 @@ setup_registry:
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
   release_tag: "4.6.1-x86_64"
+machineconfig_path: ../machineconfig
