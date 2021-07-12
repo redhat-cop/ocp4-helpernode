@@ -311,7 +311,9 @@ chmod o+r /var/www/html/ignition/*.ign
 
 After helper node is setup with all the services for OCP, now it is time to boot it up to install RHCOS on to LPAR's disk and complete the OCP installation. The following command HMC CLI can be used to boot the LPAR with bootp, it need to be run on HMC system:
 
+```
 lpar_netboot  -f -t ent -m <macaddr> -s auto -d auto <lpar_name> <profile_name> <managed_system>
+```
 
 > **NOTE**  The <macaddr> format is fad38e3ca520, which does not contain `:`.
 
