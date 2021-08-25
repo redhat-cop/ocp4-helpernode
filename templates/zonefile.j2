@@ -41,6 +41,7 @@ api-int		IN	A	{{ helper.ipaddr }}
 registry	IN	A	{{ helper.ipaddr }}
 ;
 {% endif %}
+{% if not ipi %}
 {% if bootstrap is defined %}
 ; Create entry for the bootstrap host
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
@@ -63,6 +64,11 @@ registry	IN	A	{{ helper.ipaddr }}
 etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
+; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
+{% for m in masters %}
+_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{% endfor %}
+{% endif %}
 {% if other is defined %}
 ; Create entries for the other hosts
 {% for o in other %}
@@ -70,9 +76,5 @@ etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
 {% endif %}
-; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
-{% for m in masters %}
-_etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
-{% endfor %}
 ;
 ;EOF

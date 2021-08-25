@@ -41,7 +41,7 @@
   - set_fact:
       registry_host: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}"
       local_registry: "registry.{{ dns.clusterid }}.{{ dns.domain | lower  }}:5000"
-      release_image: "quay.io/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ setup_registry.release_tag }}"
+      release_image: "{{ setup_registry.remote_registry | default('quay.io') }}/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ setup_registry.release_tag }}"
 
 - block:
   - set_fact:
@@ -70,7 +70,7 @@
       uefipkgs:
         - shim-x64
         - grub2-efi-x64
-  
+
   - set_fact:
       owner: nfsnobody
       group: nfsnobody

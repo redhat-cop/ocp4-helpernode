@@ -169,6 +169,19 @@ workers:
 
 Below are example of "extra" features beyond the default built-in vars that you can manipulate.
 
+### IPI installation
+
+In order to use the helper node to deploy openshift using [IPI installation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html) 
+you'll need to pass `-e ipi=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file
+
+```
+ipi: true
+```
+
+This effectively disables (mostly, but not fully) HAproxy, DHCP, TFTP, and PXE on the helper, as well as simplify the DNS records needed. 
+
+**NOTE**: The default setting is `ipi: false` which installs HAproxy, DHCP, TFTP, DNS with full needed records and PXE.
+
 ### Static IPs
 
 In order to use static IPs, you'll need to pass `-e staticips=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file

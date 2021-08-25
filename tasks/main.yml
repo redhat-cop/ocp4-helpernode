@@ -107,48 +107,50 @@
       when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr  
     when: dhcp.dns is not defined or dhcp.dns == helper.ipaddr 
 
-  - name: Copy httpd conf file
-    copy:
-      src: ../files/httpd.conf
-      dest: /etc/httpd/conf/httpd.conf
-    notify:
-      - restart httpd
+  - name: Set HTTP server and prepare OCP4 bios
+    block:
+    - name: Copy httpd conf file
+      copy:
+        src: ../files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+      notify:
+        - restart httpd
 
-  - name: Create apache directories for installing
-    file:
-      path: "{{ item }}"
-      state: directory
-      mode: 0755
-    with_items:
-      - /var/www/html/install
-      - /var/www/html/ignition
+    - name: Create apache directories for installing
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      with_items:
+        - /var/www/html/install
+        - /var/www/html/ignition
 
-  - name: Delete OCP4 files, if requested, to download again
-    file:
-       state: absent
-       path: "{{ item }}"
-    with_items:
-      - "/usr/local/src/openshift-client-linux.tar.gz"
-      - "/usr/local/src/openshift-install-linux.tar.gz"
-      - "/var/www/html/install/bios.raw.gz"
-      - "/var/www/html/install/rootfs.img"
-      - "/var/lib/tftpboot/rhcos/initramfs.img"
-      - "/var/lib/tftpboot/rhcos/kernel"
-    when: force_ocp_download
+    - name: Delete OCP4 files, if requested, to download again
+      file:
+         state: absent
+         path: "{{ item }}"
+      with_items:
+        - "/usr/local/src/openshift-client-linux.tar.gz"
+        - "/usr/local/src/openshift-install-linux.tar.gz"
+        - "/var/www/html/install/bios.raw.gz"
+        - "/var/www/html/install/rootfs.img"
+        - "/var/lib/tftpboot/rhcos/initramfs.img"
+        - "/var/lib/tftpboot/rhcos/kernel"
+      when: force_ocp_download
 
-  - name: Downloading OCP4 installer Bios
-    get_url:
-      url: "{{ ocp_bios }}"
-      dest: /var/www/html/install/bios.raw.gz
-      mode: 0555
-    when: ("metal" in ocp_bios) 
+    - name: Downloading OCP4 installer Bios
+      get_url:
+        url: "{{ ocp_bios }}"
+        dest: /var/www/html/install/bios.raw.gz
+        mode: 0555
+      when: ("metal" in ocp_bios) and (download_imgs or force_ocp_download)
 
-  - name: Downloading OCP4 installer rootfs
-    get_url:
-      url: "{{ ocp_bios }}"
-      dest: /var/www/html/install/rootfs.img
-      mode: 0555
-    when: ("rootfs" in ocp_bios) 
+    - name: Downloading OCP4 installer rootfs
+      get_url:
+        url: "{{ ocp_bios }}"
+        dest: /var/www/html/install/rootfs.img
+        mode: 0555
+      when: ("rootfs" in ocp_bios) and (download_imgs or force_ocp_download) 
 
   - name: Start firewalld service
     systemd:
@@ -220,180 +222,182 @@
       - restart haproxy
     when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr 
 
-  - name: Copy over files needed for TFTP
-    shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
-    when: not staticips and not ppc64le
-
-  - name: Downloading OCP4 installer initramfs
-    get_url:
-      url: "{{ ocp_initramfs }}"
-      dest: /var/lib/tftpboot/rhcos/initramfs.img
-      mode: 0555
-    when: not staticips
-
-  - name: Downloading OCP4 installer kernel
-    get_url:
-      url: "{{ ocp_install_kernel }}"
-      dest: /var/lib/tftpboot/rhcos/kernel
-      mode: 0555
-    when: not staticips
-
-  - name: Generate pxe config files
+  - name: Setting TFTP server
+    when: not ipi and not baremetal
     block:
-    - name: Set the default tftp file
-      template:
-        src: ../templates/default.j2
-        dest: /var/lib/tftpboot/pxelinux.cfg/default
+    - name: Copy over files needed for TFTP
+      shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
+      when: not staticips and not ppc64le
+
+    - name: Downloading OCP4 installer initramfs
+      get_url:
+        url: "{{ ocp_initramfs }}"
+        dest: /var/lib/tftpboot/rhcos/initramfs.img
         mode: 0555
-      when: "{{ pxe.generate_default | default(false) }}"
-      notify:
-        - restart tftp
+      when: not staticips
 
-    - name: Set the bootstrap specific tftp file
-      template:
-        src: ../templates/pxe-bootstrap.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+    - name: Downloading OCP4 installer kernel
+      get_url:
+        url: "{{ ocp_install_kernel }}"
+        dest: /var/lib/tftpboot/rhcos/kernel
         mode: 0555
-      notify:
-        - restart tftp
-      when: bootstrap is defined
+      when: not staticips
 
-    - name: Set the master specific tftp files
-      template:
-        src: ../templates/pxe-master.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ masters | lower }}"
-      notify:
-        - restart tftp
+    - name: Generate pxe config files
+      block:
+      - name: Set the default tftp file
+        template:
+          src: ../templates/default.j2
+          dest: /var/lib/tftpboot/pxelinux.cfg/default
+          mode: 0555
+        when: "{{ pxe.generate_default | default(false) }}"
+        notify:
+          - restart tftp
 
-    - name: Set the worker specific tftp files
-      template:
-        src: ../templates/pxe-worker.j2
-        dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ workers | lower }}"
-      notify:
-        - restart tftp
-      when:
-        - workers is defined
-        - workers | length > 0
-    when: not staticips and not ppc64le
+      - name: Set the bootstrap specific tftp file
+        template:
+          src: ../templates/pxe-bootstrap.j2
+          dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+          mode: 0555
+        notify:
+          - restart tftp
+        when: bootstrap is defined
 
-  - name: Prepare UEFI netboot configuration
-    block:
-    - name: Install packages for UEFI install
-      package:
-        name: "{{ uefipkgs }}"
-        state: present
+      - name: Set the master specific tftp files
+        template:
+          src: ../templates/pxe-master.j2
+          dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+          mode: 0555
+        with_items: "{{ masters | lower }}"
+        notify:
+          - restart tftp
 
-    - name: Create tftp grub2 directory
-      file:
-        path: /var/lib/tftpboot/grub2
-        state: directory
-        mode: '0755'
+      - name: Set the worker specific tftp files
+        template:
+          src: ../templates/pxe-worker.j2
+          dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
+          mode: 0555
+        with_items: "{{ workers | lower }}"
+        notify:
+          - restart tftp
+        when:
+          - workers is defined
+          - workers | length > 0
+      when: not staticips and not ppc64le
 
-    - name: copy UEFI shim to grub2 tftpboot/grub2 directory
+    - name: Prepare UEFI netboot configuration
+      block:
+      - name: Install packages for UEFI install
+        package:
+          name: "{{ uefipkgs }}"
+          state: present
+
+      - name: Create tftp grub2 directory
+        file:
+          path: /var/lib/tftpboot/grub2
+          state: directory
+          mode: '0755'
+
+      - name: copy UEFI shim to grub2 tftpboot/grub2 directory
+        copy:
+          src: /boot/efi/EFI/redhat/shimx64.efi
+          dest: /var/lib/tftpboot/grub2/shimx64.efi
+          mode: '0555'
+          remote_src: yes
+
+      - name: copy grub2 EFI file to tftpboot/grub2 directory
+        copy:
+          src: /boot/efi/EFI/redhat/grubx64.efi
+          dest: /var/lib/tftpboot/grub2/grubx64.efi
+          mode: '0555'
+          remote_src: yes
+
+      - name: Create the bootstrap specific grub2 file
+        template:
+          src: ../templates/grub2-bootstrap.j2
+          dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
+          mode: 0555
+        notify:
+          - restart tftp
+
+      - name: Set the master specific tftp files
+        template:
+          src: ../templates/grub2-master.j2
+          dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+          mode: 0555
+        with_items: "{{ masters | lower }}"
+        notify:
+          - restart tftp
+
+      - name: Set the worker specific tftp files
+        template:
+          src: ../templates/grub2-worker.j2
+          dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
+          mode: 0555
+        with_items: "{{ workers | lower }}"
+        notify:
+          - restart tftp
+        when:
+          - workers is defined
+          - workers | length > 0
+      when: not staticips and not ppc64le and uefi
+
+    - name: Generate grub2 config files
+      block:
+      - set_fact:
+          coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
+        when: ("metal" in ocp_bios)
+
+      - set_fact:
+          coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
+        when: ("rootfs" in ocp_bios)
+
+      - name: create grub.cfg
+        copy:
+          dest: /var/lib/tftpboot/boot/grub2/grub.cfg
+          content: |
+            default=0
+            fallback=1
+            timeout=1
+
+      - name: generate grub entry (bootstrap)
+        vars:
+          role: bootstrap
+          mac: "{{ bootstrap.macaddr }}"
+        include_tasks: generate_grub.yml
+        when: bootstrap is defined
+
+      - name: generate grub entry (masters)
+        vars:
+          role: master
+          mac: "{{ item.macaddr }}"
+        include_tasks: generate_grub.yml
+        with_items: "{{ masters }}"
+
+      - name: generate grub entry (workers)
+        vars:
+          role: worker
+          mac: "{{ item.macaddr }}"
+        include_tasks: generate_grub.yml
+        with_items: "{{ workers }}"
+        when:
+          - workers is defined
+          - workers | length > 0
+      when: not staticips and ppc64le and (("metal" in ocp_bios) or ("rootfs" in ocp_bios))
+
+    - name: Installing TFTP Systemd helper
       copy:
-        src: /boot/efi/EFI/redhat/shimx64.efi
-        dest: /var/lib/tftpboot/grub2/shimx64.efi
+        src: ../files/start-tftp.sh
+        dest: /usr/local/bin/start-tftp.sh
         mode: '0555'
-        remote_src: yes
+      when: not staticips
 
-    - name: copy grub2 EFI file to tftpboot/grub2 directory
+    - name: Installing TFTP Systemd unit file
       copy:
-        src: /boot/efi/EFI/redhat/grubx64.efi
-        dest: /var/lib/tftpboot/grub2/grubx64.efi
-        mode: '0555'
-        remote_src: yes
-
-    - name: Create the bootstrap specific grub2 file
-      template:
-        src: ../templates/grub2-bootstrap.j2
-        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ bootstrap.macaddr | lower | regex_replace (':', '-')}}"
-        mode: 0555
-      notify:
-        - restart tftp
-
-    - name: Set the master specific tftp files
-      template:
-        src: ../templates/grub2-master.j2
-        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ masters | lower }}"
-      notify:
-        - restart tftp
-
-    - name: Set the worker specific tftp files
-      template:
-        src: ../templates/grub2-worker.j2
-        dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
-        mode: 0555
-      with_items: "{{ workers | lower }}"
-      notify:
-        - restart tftp
-      when:
-        - workers is defined
-        - workers | length > 0
-    when: not staticips and not ppc64le and uefi
-
-  - name: Generate grub2 config files
-    block:
-    - set_fact:
-        coreos_inst_url: "coreos.inst.image_url=http://{{ helper.ipaddr }}:8080/install/bios.raw.gz"
-      when: ("metal" in ocp_bios)
-
-    - set_fact:
-        coreos_inst_url: "coreos.live.rootfs_url=http://{{ helper.ipaddr }}:8080/install/rootfs.img"
-      when: ("rootfs" in ocp_bios)    
- 
-    - name: create grub.cfg
-      copy:
-        dest: /var/lib/tftpboot/boot/grub2/grub.cfg
-        content: |
-          default=0
-          fallback=1
-          timeout=1
-
-    - name: generate grub entry (bootstrap)
-      vars:
-        role: bootstrap
-        mac: "{{ bootstrap.macaddr }}"
-      include_tasks: generate_grub.yml
-      when: bootstrap is defined
-
-    - name: generate grub entry (masters)
-      vars:
-        role: master
-        mac: "{{ item.macaddr }}"
-      include_tasks: generate_grub.yml
-      with_items: "{{ masters }}"
-
-    - name: generate grub entry (workers)
-      vars:
-        role: worker
-        mac: "{{ item.macaddr }}"
-      include_tasks: generate_grub.yml
-      with_items: "{{ workers }}"
-      when:
-        - workers is defined
-        - workers | length > 0
-    when: not staticips and ppc64le and (("metal" in ocp_bios) or ("rootfs" in ocp_bios))
-
-
-  - name: Installing TFTP Systemd helper
-    copy:
-      src: ../files/start-tftp.sh
-      dest: /usr/local/bin/start-tftp.sh
-      mode: '0555'
-    when: not staticips
-
-  - name: Installing TFTP Systemd unit file
-    copy:
-      src: ../files/helper-tftp.service
-      dest: /etc/systemd/system/helper-tftp.service
-      mode: '0655'
-    when: not staticips
+        src: ../files/helper-tftp.service
+        dest: /etc/systemd/system/helper-tftp.service
+        mode: '0655'
+      when: not staticips
 
   - name: Systemd daemon reload
     systemd:
@@ -408,7 +412,7 @@
     with_items:
       - "{{ services }}"
 
-  - name: Starting DHCP/PXE services
+  - name: Starting UPI DHCP/PXE services
     service:
       name: "{{ item }}"
       enabled: yes
@@ -417,7 +421,16 @@
       - dhcpd
       - tftp
       - helper-tftp
-    when: not staticips
+    when: not staticips and not ipi
+
+  - name: Starting IPI DHCP/PXE services
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - dhcpd
+    when: not staticips and ipi
 
   - name: Unmasking Services
     systemd:
@@ -426,7 +439,7 @@
       masked: no
     with_items:
       - tftp
-    when: not staticips
+    when: not staticips and not ipi
 
   - name: Copy info script over
     template:
@@ -508,71 +521,80 @@
         - workers | length > 0
     when: chronyconfig.enabled
 
-  - name: Downloading OCP4 client
-    get_url:
-      url: "{{ ocp_client }}"
-      dest: /usr/local/src/openshift-client-linux.tar.gz
+  - name: Preparing OCP client
+    when: ocp_client is defined
+    block:
+    - name: Downloading OCP4 client
+      get_url:
+        url: "{{ ocp_client }}"
+        dest: /usr/local/src/openshift-client-linux.tar.gz
 
-  - name: Downloading OCP4 Installer
-    get_url:
-      url: "{{ ocp_installer }}"
-      dest: /usr/local/src/openshift-install-linux.tar.gz
+    - name: Unarchiving OCP4 client
+      unarchive:
+        src: /usr/local/src/openshift-client-linux.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
 
-  - name: Unarchiving OCP4 client
-    unarchive:
-      src: /usr/local/src/openshift-client-linux.tar.gz
-      dest: /usr/local/bin
-      remote_src: yes
+  - name: Preparing OCP installer
+    when: ocp_installer is defined
+    block:
+    - name: Downloading OCP4 Installer
+      get_url:
+        url: "{{ ocp_installer }}"
+        dest: /usr/local/src/openshift-install-linux.tar.gz
 
-  - name: Unarchiving OCP4 Installer
-    unarchive:
-      src: /usr/local/src/openshift-install-linux.tar.gz
-      dest: /usr/local/bin
-      remote_src: yes
+    - name: Unarchiving OCP4 Installer
+      unarchive:
+        src: /usr/local/src/openshift-install-linux.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
 
   - name: Removing files that are not needed
     file:
       path: /usr/local/bin/README.md
       state: absent
 
-  - name: Create helm source directory
-    file:
-      path: "{{ item }}"
-      state: directory
-      mode: 0755
-    with_items:
-      - /usr/local/src/helm
+  - name: Install and configure helm
+    when: helm_source is defined
+    block:
+    - name: Create helm source directory
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      with_items:
+        - /usr/local/src/helm
 
-  - name: Downloading helm source binary tarball
-    get_url:
-      url: "{{ helm_source }}"
-      dest: /usr/local/src/helm/helm-client.tar.gz
+    - name: Downloading helm source binary tarball
+      get_url:
+        url: "{{ helm_source }}"
+        dest: /usr/local/src/helm/helm-client.tar.gz
 
-  - name: Unarchiving helm tarball
-    unarchive:
-      src: /usr/local/src/helm/helm-client.tar.gz
-      dest: /usr/local/src/helm
-      remote_src: yes
+    - name: Unarchiving helm tarball
+      unarchive:
+        src: /usr/local/src/helm/helm-client.tar.gz
+        dest: /usr/local/src/helm
+        remote_src: yes
 
-  - name: Copy helm cli to bin directory for amd64
-    copy:
-      src: /usr/local/src/helm/linux-amd64/helm
-      dest: /usr/local/bin/helm
-      owner: root
-      group: root
-      mode: '0755'
-      remote_src: true
-    when: not ppc64le
+    - name: Copy helm cli to bin directory for amd64
+      copy:
+        src: /usr/local/src/helm/linux-amd64/helm
+        dest: /usr/local/bin/helm
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+      when: not ppc64le
 
-  - name: Copy helm cli to bin directory for ppc64le
-    copy:
-      src: /usr/local/src/helm/linux-ppc64le/helm
-      dest: /usr/local/bin/helm
-      owner: root
-      group: root
-      mode: '0755'
-      remote_src: true
-    when: ppc64le
+    - name: Copy helm cli to bin directory for ppc64le
+      copy:
+        src: /usr/local/src/helm/linux-ppc64le/helm
+        dest: /usr/local/bin/helm
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: true
+      when: ppc64le
 
   - name: Downloading filetranspiler source
     git:
