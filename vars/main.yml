@@ -26,4 +26,6 @@ setup_registry:
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
   release_tag: "4.8.11-x86_64"
+  registry_user: "admin"
+  registry_password: "admin"
 machineconfig_path: ../machineconfig

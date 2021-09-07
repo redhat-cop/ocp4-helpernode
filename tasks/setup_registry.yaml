@@ -35,7 +35,7 @@
 
 - name: Create the user and password for local registry
   run_once: true
-  shell: htpasswd -bBc /opt/registry/auth/htpasswd admin admin
+  shell: htpasswd -bBc /opt/registry/auth/htpasswd {{ setup_registry.registry_user | default('admin') }} {{ setup_registry.registry_password | default('admin') }}
   args:
     creates: /opt/registry/auth/htpasswd
 
@@ -104,7 +104,7 @@
     - "{{ registry_services }}"
 
 - name: Get local registry pod
-  shell: curl -u admin:admin -k https://{{ local_registry }}/v2/_catalog | grep repositories
+  shell: curl -u {{ setup_registry.registry_user | default('admin') }}:{{ setup_registry.registry_password | default('admin') }} -k https://{{ local_registry }}/v2/_catalog | grep repositories
   register: pod_state
   until: pod_state.stdout != ""
   retries: 3
@@ -115,7 +115,7 @@
   block:
   - name: Generate the base64-encoded user name and password or token for your mirror registry
     shell: |
-      registry_token=`echo -n "admin:admin" | base64 -w0`
+      registry_token=`echo -n "{{ setup_registry.registry_user  | default('admin') }}:{{ setup_registry.registry_password | default('admin') }}" | base64 -w0`
       jq '.auths += {"{{ local_registry }}": {"auth": "'$registry_token'","email": "noemail@localhost"}}' < ~/.openshift/pull-secret > ~/.openshift/pull-secret-updated
     args:
       creates: ~/.openshift/pull-secret-updated
