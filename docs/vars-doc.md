@@ -334,6 +334,8 @@ setup_registry:
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
   release_tag: "4.4.9-x86_64"
+  registry_user: "admin"
+  registry_password: "admin"
 ```
 
 * `setup_registry.deploy` - Set this to true to enable registry installation.
@@ -343,6 +345,9 @@ setup_registry:
 * `setup_registry.product_repo` - Where the images are hosted in the product repo.
 * `setup_registry.release_name` - This is the name of the image release.
 * `setup_registry.release_tag` - The version of OpenShift you want to sync.
+* `setup_registry.registry_user` - This is the registry username (default:admin).
+* `setup_registry.registry_password` - This is the registry password (default:admin).
+
 
 ### Running on Power
 
