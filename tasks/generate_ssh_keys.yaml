@@ -5,10 +5,10 @@
     mode: 0700
 
 - openssh_keypair:
-   path: "{{ ansible_env.HOME }}/.ssh/helper_rsa"
-   size: 4096
-   comment: "{{ ansible_env.USER }}@helper"
-   state: present
+    path: "{{ ansible_env.HOME }}/.ssh/helper_rsa"
+    size: 4096
+    comment: "{{ ansible_env.USER }}@helper"
+    state: present
 
 - blockinfile:
     path: "{{ ansible_env.HOME }}/.ssh/config"
