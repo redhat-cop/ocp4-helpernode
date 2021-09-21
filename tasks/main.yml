@@ -141,6 +141,7 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/bios.raw.gz
       mode: 0555
+      timeout: 300
     when: ("metal" in ocp_bios) 
 
   - name: Downloading OCP4 installer rootfs
@@ -148,6 +149,7 @@
       url: "{{ ocp_bios }}"
       dest: /var/www/html/install/rootfs.img
       mode: 0555
+      timeout: 300
     when: ("rootfs" in ocp_bios) 
 
   - name: Start firewalld service
@@ -229,6 +231,7 @@
       url: "{{ ocp_initramfs }}"
       dest: /var/lib/tftpboot/rhcos/initramfs.img
       mode: 0555
+      timeout: 300
     when: not staticips
 
   - name: Downloading OCP4 installer kernel
@@ -236,6 +239,7 @@
       url: "{{ ocp_install_kernel }}"
       dest: /var/lib/tftpboot/rhcos/kernel
       mode: 0555
+      timeout: 300
     when: not staticips
 
   - name: Generate pxe config files
