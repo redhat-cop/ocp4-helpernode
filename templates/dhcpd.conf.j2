@@ -20,19 +20,19 @@ max-lease-time 14400;
             range {{ dhcp.poolstart }} {{ dhcp.poolend }};
         # Static entries
 {% if bootstrap is defined %}
-        host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
+        host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; option host-name "{{ bootstrap.name | lower }}"; }
 {% endif %}
 {% for m in masters %}
-        host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
+        host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; option host-name "{{ m.name | lower }}"; }
 {% endfor %}
 {% if workers is defined %}
 {% for w in workers %}
-        host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; }
+        host {{ w.name | lower }} { hardware ethernet {{ w.macaddr }}; fixed-address {{ w.ipaddr }}; option host-name "{{ w.name | lower }}"; }
 {% endfor %}
 {% endif %}
 {% if other is defined %}
 {% for o in other %}
-        host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; }
+        host {{ o.name }} { hardware ethernet {{ o.macaddr }}; fixed-address {{ o.ipaddr }}; option host-name "{{ o.name | lower }}"; }
 {% endfor %}
 {% endif %}
         # this will not give out addresses to hosts not listed above
