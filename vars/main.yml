@@ -24,3 +24,4 @@ setup_registry:
   release_name: "ocp-release"
   release_tag: "4.8.2-x86_64"
 machineconfig_path: ../machineconfig
+  

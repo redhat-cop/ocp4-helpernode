@@ -3,6 +3,18 @@ Description=OpenShift Registry for HelperNode
 After=network.target syslog.target
 
 [Service]
+{% if proxy.server != "" and proxy.user == "" %}
+Environment=ftp_proxy="http://{{ proxy.server }}:{{ proxy.port }}"
+Environment=http_proxy="http://{{ proxy.server }}:{{ proxy.port }}"
+Environment=https_proxy="http://{{ proxy.server }}:{{ proxy.port }}"
+Environment=no_proxy="{{ proxy.no_proxy }}"
+{% endif %}
+{% if proxy.server != "" and proxy.user != "" %}
+Environment=ftp_proxy="http://{{ proxy.user }}:{{ proxy.password }}@{{ proxy.server }}:{{ proxy.port }}"
+Environment=http_proxy="http://{{ proxy.user }}:{{ proxy.password }}@{{ proxy.server }}:{{ proxy.port }}"
+Environment=https_proxy="http://{{ proxy.user }}:{{ proxy.password }}@{{ proxy.server }}:{{ proxy.port }}"
+Environment=no_proxy="{{ proxy.no_proxy }}"
+{% endif %}
 Type=simple
 TimeoutStartSec=5m
 ExecStartPre=-/usr/bin/podman rm "local-registry"
