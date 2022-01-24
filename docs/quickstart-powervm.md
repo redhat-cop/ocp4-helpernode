@@ -14,7 +14,7 @@ This playbook assumes the following:
 2. The network you're on does NOT have DHCP (or you can block your existing DHCP from responding to the MAC addresses used for the OpenShift LPARs).
 3. The ocp4-helpernode will be your Load Balancer/DHCP/TFTP/DNS/HTTP and NFS server for the OpenShift cluster.
 
-![OpenShift-Cluster](https://raw.githubusercontent.com/RedHatOfficial/ocp4-helpernode/master/docs/images/hn.png)
+![OpenShift-Cluster](https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/master/docs/images/hn.png)
 
 It's important to note that you can delegate DNS to the ocp4-helpernode if you don't want to use it as your main DNS server. You will have to delegate `$CLUSTERID.$DOMAIN` to this helper node.
 
@@ -189,7 +189,7 @@ $ ls -1 ~/.ssh/id_rsa
 ## Download ocp4-helpernode playbook
 
 ```shell
-git clone https://github.com/RedHatOfficial/ocp4-helpernode
+git clone https://github.com/redhat-cop/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
@@ -441,7 +441,7 @@ If you're having issues upgrading you can try adding `--force` to the upgrade co
 oc adm upgrade --to-latest --force
 ```
 
-See [issue #46](https://github.com/RedHatOfficial/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
+See [issue #46](https://github.com/redhat-cop/ocp4-helpernode/issues/46) to understand why the `--force` is necessary and an alternative to using it.
 
 
 Scale the router if you need to
