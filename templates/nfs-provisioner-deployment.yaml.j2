@@ -25,7 +25,7 @@ spec:
 {% if setup_registry.deploy and  setup_registry.autosync_registry %}
           image: registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest
 {% else %}
-          image: quay.io/external_storage/nfs-client-provisioner:latest
+          image: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0
 {% endif %}
 {% endif %}
           volumeMounts:

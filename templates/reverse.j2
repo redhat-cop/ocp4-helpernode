@@ -10,6 +10,7 @@ $TTL 1W
 ; syntax is "last octet" and the host must have fqdn with trailing dot
 {{ helper.ipaddr.split('.')[3] }}       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
 
+{% if not ipi %}
 {% for m in masters %}
 {{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
@@ -29,10 +30,14 @@ $TTL 1W
 {% endfor %}
 {% endif %}
 ;
+{% endif %}
 {% if other is defined %}
 {% for o in other %}
 {{ o.ipaddr.split('.')[3] }}	IN	PTR	{{ o.name }}.{{ dns.clusterid }}.{{ dns.domain }}.
 {% endfor %}
 ;
 {% endif %}
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+{{ helper.ipaddr.split('.')[3] }}	IN	PTR	api-int.{{ dns.clusterid }}.{{ dns.domain | lower }}.
+;
 ;EOF

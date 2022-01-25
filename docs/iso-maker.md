@@ -8,7 +8,7 @@ Although very useful, with my opinionated playbook and his opinionated playbook;
 
 ## Cloning The Repo
 
-I assume you've done all the steps up to (and including) [creating the ignition files](https://github.com/RedHatOfficial/ocp4-helpernode/blob/master/docs/quickstart-static.md#create-ignition-configs). After the ignition files have been created and copied over to your webserver, clone the ISO maker repo.
+I assume you've done all the steps up to (and including) [creating the ignition files](https://github.com/redhat-cop/ocp4-helpernode/blob/master/docs/quickstart-static.md#create-ignition-configs). After the ignition files have been created and copied over to your webserver, clone the ISO maker repo.
 
 ```
 cd ~
@@ -112,4 +112,4 @@ Choose the correct option for the server you're installing. I would boot them in
 
 Once you've booted into the right option, RHCOS will install with the right IP address.
 
-You're now ready to continue with [the next step](https://github.com/RedHatOfficial/ocp4-helpernode/blob/master/docs/quickstart-static.md#wait-for-install) of the install.
+You're now ready to continue with [the next step](https://github.com/redhat-cop/ocp4-helpernode/blob/master/docs/quickstart-static.md#wait-for-install) of the install.

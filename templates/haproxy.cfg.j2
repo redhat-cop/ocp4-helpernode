@@ -66,13 +66,21 @@ listen stats
     stats uri /
     monitor-uri /healthz
 
-
 frontend openshift-api-server
     bind *:6443
+{% if ipi %}
+    acl sni-api req_ssl_sni -i api.{{ dns.clusterid }}.{{ dns.domain | lower }}
+    use_backend openshift-api-server if sni-api
+{% else %}
     default_backend openshift-api-server
     option tcplog
+{% endif %}
 
 backend openshift-api-server
+{% if ipi %}
+    balance roundrobin
+    server backend-api {{ helper.api_ipaddr }}:6443 check
+{% else %}
     balance source
 {% if bootstrap is defined %}
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
@@ -80,7 +88,9 @@ backend openshift-api-server
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
 {% endfor %}
-    
+{% endif %}
+
+{% if not ipi %}
 frontend machine-config-server
     bind *:22623
     default_backend machine-config-server
@@ -94,13 +104,23 @@ backend machine-config-server
 {% for m in masters %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
 {% endfor %}
-  
+{% endif %}
+
 frontend ingress-http
     bind *:80
+{% if ipi %}
+    acl sni-ingress req_ssl_sni -i apps.{{ dns.clusterid }}.{{ dns.domain | lower }}
+    use_backend ingress-http if sni-ingress
+{% else %}
     default_backend ingress-http
     option tcplog
+{% endif %}
 
 backend ingress-http
+{% if ipi %}
+    balance roundrobin
+    server backend-ingress {{ helper.ingress_ipaddr }}:80 check
+{% else %}
     balance source
 {% if workers is defined %}
 {% for w in workers %}
@@ -111,13 +131,23 @@ backend ingress-http
     server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
 {% endfor %}
 {% endif %}
-   
+{% endif %}
+
 frontend ingress-https
     bind *:443
+{% if ipi %}
+    acl sni-https req_ssl_sni -i apps.{{ dns.clusterid }}.{{ dns.domain | lower }}
+    use_backend ingress-https if sni-https
+{% else %}
     default_backend ingress-https
     option tcplog
+{% endif %}
 
 backend ingress-https
+{% if ipi %}
+    balance roundrobin
+    server backend-https {{ helper.ingress_ipaddr }}:443 check
+{% else %}
     balance source
 {% if workers is defined %}
 {% for w in workers %}
@@ -127,6 +157,7 @@ backend ingress-https
 {% for m in masters %}
     server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
 {% endfor %}
+{% endif %}
 {% endif %}
 
 #---------------------------------------------------------------------
