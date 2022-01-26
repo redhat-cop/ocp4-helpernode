@@ -14,7 +14,7 @@ This playbook assumes the following:
 2. The network you're on does NOT have DHCP (or you can block your existing DHCP from responding to the MAC addresses used for the OpenShift LPARs).
 3. The ocp4-helpernode will be your Load Balancer/DHCP/TFTP/DNS/HTTP and NFS server for the OpenShift cluster.
 
-![OpenShift-Cluster](https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/master/docs/images/hn.png)
+![OpenShift-Cluster](https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/main/docs/images/hn.png)
 
 It's important to note that you can delegate DNS to the ocp4-helpernode if you don't want to use it as your main DNS server. You will have to delegate `$CLUSTERID.$DOMAIN` to this helper node.
 

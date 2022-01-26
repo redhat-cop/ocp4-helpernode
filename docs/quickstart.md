@@ -22,7 +22,7 @@ cd ~/ocp4-workingdir
 Download the virtual network configuration file, [virt-net.xml](examples/virt-net.xml)
 
 ```
-wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/master/docs/examples/virt-net.xml
+wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/main/docs/examples/virt-net.xml
 ```
 
 Create a virtual network using this file file provided in this repo (modify if you need to).
@@ -44,12 +44,12 @@ Download the Kickstart file for either [EL 7](examples/helper-ks.cfg) or [EL 8](
 
 __EL 7__
 ```
-wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/master/docs/examples/helper-ks.cfg -O helper-ks.cfg
+wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/main/docs/examples/helper-ks.cfg -O helper-ks.cfg
 ```
 
 __EL 8__
 ```
-wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/master/docs/examples/helper-ks8.cfg -O helper-ks.cfg
+wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/main/docs/examples/helper-ks8.cfg -O helper-ks.cfg
 ```
 
 Edit `helper-ks.cfg` for your environment and use it to install the helper. The following command installs it "unattended".
