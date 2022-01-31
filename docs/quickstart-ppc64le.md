@@ -58,21 +58,21 @@ Edit `helper-ks.cfg` for your environment and use it to install the helper. The 
 
 __EL 7__
 ```
-virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 
---disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 
---os-variant centos7.0 --network network=openshift4,model=virtio 
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-ppc64le-Minimal-2003.iso 
---initrd-inject helper-ks7.cfg --controller type=scsi,model=virtio-scsi --serial pty 
+virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
+--disk path=/var/lib/libvirt/images/ocp4-aHelper.qcow2,bus=virtio,size=50 \
+--os-variant centos7.0 --network network=openshift4,model=virtio \
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-7-ppc64le-Minimal-2003.iso \
+--initrd-inject helper-ks7.cfg --controller type=scsi,model=virtio-scsi --serial pty \
 --nographics --console pty,target_type=virtio  --extra-args "console=hvc0 inst.text inst.ks=file:/helper-ks.cfg"
 ```
 
 __EL 8__
 ```
-virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 
---disk path=/home/libvirt/image_store/ocp4-aHelper.qcow2,bus=virtio,size=50 
---os-variant centos8 --network network=openshift4,model=virtio 
---boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8.1.1911-ppc64le-dvd1.iso
---initrd-inject helper-ks.cfg --controller type=scsi,model=virtio-scsi --serial pty 
+virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
+--disk path=/home/libvirt/image_store/ocp4-aHelper.qcow2,bus=virtio,size=50 \ 
+--os-variant centos8 --network network=openshift4,model=virtio \
+--boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8.1.1911-ppc64le-dvd1.iso \
+--initrd-inject helper-ks.cfg --controller type=scsi,model=virtio-scsi --serial pty \
 --nographics --console pty,target_type=virtio  --extra-args "console=hvc0 xive=off inst.text inst.ks=file:/helper-ks.cfg"
 ```
 
