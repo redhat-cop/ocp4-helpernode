@@ -223,7 +223,7 @@
     when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr 
 
   - name: Setting TFTP server
-    when: not ipi and not baremetal
+    when: not ipi and baremetal
     block:
     - name: Copy over files needed for TFTP
       shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
@@ -412,7 +412,7 @@
     with_items:
       - "{{ services }}"
 
-  - name: Starting UPI DHCP/PXE services
+  - name: Starting DHCP/PXE services for baremetal
     service:
       name: "{{ item }}"
       enabled: yes
@@ -421,16 +421,16 @@
       - dhcpd
       - tftp
       - helper-tftp
-    when: not staticips and not ipi
+    when: not staticips and baremetal
 
-  - name: Starting IPI DHCP/PXE services
+  - name: Starting DHCP/PXE services
     service:
       name: "{{ item }}"
       enabled: yes
       state: started
     with_items:
       - dhcpd
-    when: not staticips and ipi
+    when: not staticips and not baremetal
 
   - name: Unmasking Services
     systemd:
