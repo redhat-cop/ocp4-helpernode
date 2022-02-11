@@ -8,12 +8,16 @@
   handlers:
   - import_tasks: ../handlers/main.yml
 
-  # According to RFC 952, and RFC 1123, also RFC about SRV records should be taken into account)
-  # underscores in hostnames are illegal.
+  # Running Pretasks like checking hostnames and verifying the version of ansible
   pre_tasks:
+  - name: Verify Ansible version.
+    assert:
+      that: "ansible_version.full is version_compare('2.9', '>=')"
+      msg: >
+          "You must update Ansible to at least 2.9"
   - name: validate hostnames
     import_tasks: validate_host_names.yaml
-
+    
   tasks:
   - name: generate ssh keys
     import_tasks: generate_ssh_keys.yaml
@@ -223,7 +227,7 @@
     when: dns.lb_ipaddr is not defined or dns.lb_ipaddr == helper.ipaddr 
 
   - name: Setting TFTP server
-    when: not ipi and not baremetal
+    when: not ipi and baremetal
     block:
     - name: Copy over files needed for TFTP
       shell: "cp -a /usr/share/syslinux/* /var/lib/tftpboot"
@@ -412,7 +416,7 @@
     with_items:
       - "{{ services }}"
 
-  - name: Starting UPI DHCP/PXE services
+  - name: Starting DHCP/PXE services for baremetal
     service:
       name: "{{ item }}"
       enabled: yes
@@ -421,16 +425,16 @@
       - dhcpd
       - tftp
       - helper-tftp
-    when: not staticips and not ipi
+    when: not staticips and baremetal
 
-  - name: Starting IPI DHCP/PXE services
+  - name: Starting DHCP/PXE services
     service:
       name: "{{ item }}"
       enabled: yes
       state: started
     with_items:
       - dhcpd
-    when: not staticips and ipi
+    when: not staticips and not baremetal
 
   - name: Unmasking Services
     systemd:
@@ -595,23 +599,6 @@
         mode: '0755'
         remote_src: true
       when: ppc64le
-
-  - name: Downloading filetranspiler source
-    git:
-      repo: https://github.com/ashcrow/filetranspiler
-      dest: /usr/local/src/filetranspiler
-    when: install_filetranspiler
-
-  - name: Building filetranspiler
-    shell: "podman build /usr/local/src/filetranspiler -t filetranspiler:latest"
-    when: install_filetranspiler
-
-  - name: Installing filetranspiler
-    copy:
-      src: ../files/filetranspiler
-      dest: /usr/local/bin/filetranspiler
-      mode: '0555'
-    when: install_filetranspiler
 
   - name: Set the local resolv.conf file
     template:
