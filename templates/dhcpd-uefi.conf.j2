@@ -47,7 +47,7 @@ subnet {{ dhcp.ipid }} netmask {{ dhcp.netmaskid }} {
 {% if bootstrap is defined %}
     host {{ bootstrap.name | lower }} { hardware ethernet {{ bootstrap.macaddr }}; fixed-address {{ bootstrap.ipaddr }}; }
 {% endif %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
     host {{ m.name | lower }} { hardware ethernet {{ m.macaddr }}; fixed-address {{ m.ipaddr }}; }
 {% endfor %}
 {% if workers is defined %}

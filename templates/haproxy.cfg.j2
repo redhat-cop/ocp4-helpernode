@@ -85,7 +85,7 @@ backend openshift-api-server
 {% if bootstrap is defined %}
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
 {% endif %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
     server {{ m.name | lower }} {{ m.ipaddr }}:6443 check
 {% endfor %}
 {% endif %}
@@ -101,7 +101,7 @@ backend machine-config-server
 {% if bootstrap is defined %}
     server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
 {% endif %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
     server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
 {% endfor %}
 {% endif %}
@@ -127,7 +127,7 @@ backend ingress-http
     server {{ w.name | lower }}-http-router{{ loop.index0 }} {{ w.ipaddr }}:80 check
 {% endfor %}
 {% else %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
     server {{ m.name | lower }}-http-router{{ loop.index0 }} {{ m.ipaddr }}:80 check
 {% endfor %}
 {% endif %}
@@ -154,7 +154,7 @@ backend ingress-https
     server {{ w.name | lower }}-https-router{{ loop.index0 }} {{ w.ipaddr }}:443 check
 {% endfor %}
 {% else %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
     server {{ m.name | lower }}-https-router{{ loop.index0 }} {{ m.ipaddr }}:443 check
 {% endfor %}
 {% endif %}

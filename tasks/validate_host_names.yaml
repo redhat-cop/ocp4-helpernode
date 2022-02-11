@@ -6,5 +6,5 @@
   - "{{ dns.domain }}"
   - "{{ helper.name }}"
   - "{{ bootstrap.name | default('') }}"
-  - "{{ masters }}"
+  - "{{ controlplane_nodes }}"
   - "{{ workers | default('') }}"

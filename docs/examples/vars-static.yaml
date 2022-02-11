@@ -11,12 +11,12 @@ dns:
 bootstrap:
   name: "bootstrap"
   ipaddr: "192.168.7.20"
-masters:
-  - name: "master0"
+controlplane_nodes:
+  - name: "controlplane0"
     ipaddr: "192.168.7.21"
-  - name: "master1"
+  - name: "controlplane1"
     ipaddr: "192.168.7.22"
-  - name: "master2"
+  - name: "controlplane2"
     ipaddr: "192.168.7.23"
 workers:
   - name: "worker0"

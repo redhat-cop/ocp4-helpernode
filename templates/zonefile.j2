@@ -47,8 +47,8 @@ registry	IN	A	{{ helper.ipaddr }}
 {{ bootstrap.name | lower }}	IN	A	{{ bootstrap.ipaddr }}
 ;
 {% endif %}
-; Create entries for the master hosts
-{% for m in masters %}
+; Create entries for the control plane hosts
+{% for m in controlplane_nodes %}
 {{ m.name | lower }}		IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
@@ -59,13 +59,13 @@ registry	IN	A	{{ helper.ipaddr }}
 {% endfor %}
 {% endif %}
 ;
-; The ETCd cluster lives on the masters...so point these to the IP of the masters
-{% for m in masters %}
+; The ETCd cluster lives on the control plane nodes...so point these to the IP of the control plane nodes
+{% for m in controlplane_nodes %}
 etcd-{{ loop.index0 }}	IN	A	{{ m.ipaddr }}
 {% endfor %}
 ;
 ; The SRV records are IMPORTANT....make sure you get these right...note the trailing dot at the end...
-{% for m in masters %}
+{% for m in controlplane_nodes %}
 _etcd-server-ssl._tcp	IN	SRV	0 10 2380 etcd-{{ loop.index0 }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
 {% endif %}

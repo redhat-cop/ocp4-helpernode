@@ -47,7 +47,7 @@ git clone https://github.com/redhat-cop/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Get the mac address of the instances/vms/servers that are going to be your OpenShift 4 cluster. At a minimum you need 1 bootstrap, 3 masters, and 2 workers. So you'll need to have 6 Mac Addresses
+Get the mac address of the instances/vms/servers that are going to be your OpenShift 4 cluster. At a minimum you need 1 bootstrap, 3 control plane nodes, and 2 workers. So you'll need to have 6 Mac Addresses
 
 Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of your instances.
 
@@ -117,7 +117,7 @@ compute:
   replicas: 0
 controlPlane:
   hyperthreading: Enabled
-  name: master
+  name: controlplane
   replicas: 3
 metadata:
   name: ocp4
@@ -141,12 +141,12 @@ Create the installation manifests
 openshift-install create manifests
 ```
 
-Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `mastersSchedulable` to `false`.
+Edit the `manifests/cluster-scheduler-02-config.yml` Kubernetes manifest file to prevent Pods from being scheduled on the control plane machines by setting `controlplaneSchedulable` to `false`.
 
 > :rotating_light: Skip this step if you're installing a compact cluster
 
 ```shell
-$ sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+$ sed -i 's/controlplaneSchedulable: true/controlplaneSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 ```
 
 It should look something like this after you edit it.
@@ -159,7 +159,7 @@ metadata:
   creationTimestamp: null
   name: cluster
 spec:
-  mastersSchedulable: false
+  controlplaneSchedulable: false
   policy:
     name: ""
 status: {}
@@ -196,7 +196,7 @@ firefox http://192.168.7.77:9000
 ```
 > :warning: Make sure you don't expose this port in public cloud environments!
 
-You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+You'll see the bootstrap turn "green" and then the control plane nodes turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
 ## Wait for install
 
