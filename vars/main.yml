@@ -1,6 +1,5 @@
 ---
 ssh_gen_key: true
-install_filetranspiler: false
 ipi: false
 baremetal: true
 staticips: false
@@ -9,8 +8,8 @@ remove_old_config_files: false
 ocp_bios: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-4.9.0-x86_64-live-rootfs.x86_64.img"
 ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-4.9.0-x86_64-live-initramfs.x86_64.img"
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-4.9.0-x86_64-live-kernel-x86_64"
-ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.11/openshift-client-linux-4.9.11.tar.gz"
-ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.11/openshift-install-linux-4.9.11.tar.gz"
+ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.18/openshift-client-linux-4.9.18.tar.gz"
+ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.18/openshift-install-linux-4.9.18.tar.gz"
 helm_source: "https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz"
 download_imgs: true
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
@@ -25,7 +24,7 @@ setup_registry:
   local_repo: "ocp4/openshift4"
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
-  release_tag: "4.9.11-x86_64"
+  release_tag: "4.9.18-x86_64"
   registry_user: "admin"
   registry_password: "admin"
 machineconfig_path: ../machineconfig
