@@ -155,7 +155,7 @@ for i in dhcpd named haproxy httpd tftp keepalived local-registry; do echo -e "S
 }
 ###
 nfs-info () {
-availablesize=$(df -h --output=avail /export | tail -1 | tr -d " ""\t""[:alpha:]")
+availablesize=$(df -BM --output=avail /export | tail -1 | tr -d " ""\t""[:alpha:]")
 warningsize=50
 #
 cat <<EOF
