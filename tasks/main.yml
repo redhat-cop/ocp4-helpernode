@@ -2,6 +2,10 @@
 # Setup OCP4 Helper Node
 
 - hosts: all
+  vars:
+    proxy_env:
+      https_proxy: http://proxy-02:8000
+      http_proxy: http://proxy-02:8000
   vars_files:
     - ../vars/main.yml
     - ../vars/ports.yml
@@ -148,13 +152,15 @@
         dest: /var/www/html/install/bios.raw.gz
         mode: 0555
       when: ("metal" in ocp_bios) and (download_imgs or force_ocp_download)
+      environment: "{{proxy_env}}"
 
     - name: Downloading OCP4 installer rootfs
       get_url:
         url: "{{ ocp_bios }}"
         dest: /var/www/html/install/rootfs.img
         mode: 0555
-      when: ("rootfs" in ocp_bios) and (download_imgs or force_ocp_download) 
+      when: ("rootfs" in ocp_bios) and (download_imgs or force_ocp_download)
+      environment: "{{proxy_env}}" 
 
   - name: Start firewalld service
     systemd:
@@ -239,6 +245,7 @@
         dest: /var/lib/tftpboot/rhcos/initramfs.img
         mode: 0555
       when: not staticips
+      environment: "{{proxy_env}}"
 
     - name: Downloading OCP4 installer kernel
       get_url:
@@ -246,6 +253,7 @@
         dest: /var/lib/tftpboot/rhcos/kernel
         mode: 0555
       when: not staticips
+      environment: "{{proxy_env}}"
 
     - name: Generate pxe config files
       block:
@@ -532,6 +540,7 @@
       get_url:
         url: "{{ ocp_client }}"
         dest: /usr/local/src/openshift-client-linux.tar.gz
+      environment: "{{proxy_env}}"
 
     - name: Unarchiving OCP4 client
       unarchive:
@@ -546,6 +555,7 @@
       get_url:
         url: "{{ ocp_installer }}"
         dest: /usr/local/src/openshift-install-linux.tar.gz
+      environment: "{{proxy_env}}"        
 
     - name: Unarchiving OCP4 Installer
       unarchive:
