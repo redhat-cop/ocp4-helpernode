@@ -64,6 +64,7 @@ listen stats
     mode http
     stats enable
     stats uri /
+    stats refresh 15s
     monitor-uri /healthz
 
 frontend openshift-api-server
