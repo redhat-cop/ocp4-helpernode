@@ -69,7 +69,7 @@ virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
 __EL 8__
 ```
 virt-install --machine pseries --name="ocp4-aHelper" --vcpus=2 --ram=4096 \
---disk path=/home/libvirt/image_store/ocp4-aHelper.qcow2,bus=virtio,size=50 \ 
+--disk path=/home/libvirt/image_store/ocp4-aHelper.qcow2,bus=virtio,size=50 \
 --os-variant centos8 --network network=openshift4,model=virtio \
 --boot hd,menu=on --location /var/lib/libvirt/ISO/CentOS-8.1.1911-ppc64le-dvd1.iso \
 --initrd-inject helper-ks.cfg --controller type=scsi,model=virtio-scsi --serial pty \
@@ -83,7 +83,7 @@ The provided Kickstart file installs the helper with the following settings (whi
 * Default Gateway - 192.168.7.1
 * DNS Server - 8.8.8.8
 
-You can watch the progress by lauching the viewer
+You can watch the progress by launching the viewer
 
 ```
 virt-viewer --domain-name ocp4-aHelper

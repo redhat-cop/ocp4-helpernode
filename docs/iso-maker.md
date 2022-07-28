@@ -18,14 +18,14 @@ cd coreos-iso-maker
 
 ## Configuring ISO Maker
 
-Onced cloned, you'll need to modify the `group_vars/all.yml` file to match your environment.
+Once cloned, you'll need to modify the `group_vars/all.yml` file to match your environment.
 
 ```yaml
 ---
 gateway: 192.168.7.1
 netmask: 255.255.255.0
 interface: ens3
-dns: 
+dns:
   - 192.168.7.77
   - 192.168.7.1
 webserver_url: 192.168.7.77
@@ -55,7 +55,7 @@ all:
       hosts:
         bootstrap.ocp4.example.com:
           ipv4: 192.168.7.20
-    
+
     masters:
       hosts:
         master0.ocp4.example.com:
@@ -66,7 +66,7 @@ all:
 
         master2.ocp4.example.com:
           ipv4: 192.168.7.23
-        
+
     workers:
       hosts:
         worker0.ocp4.example.com:

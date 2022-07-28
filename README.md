@@ -4,7 +4,7 @@
 
 This playbook helps set up an "all-in-one" node, that has all the infrastructure/services in order to install OpenShift 4. After you run the playbook, you'll be ready to begin the installation process.
 
-A lot of OpenShift 4 specifc jargon is used throughout this doc, so please visit the [official documentation page](https://docs.openshift.com/container-platform/latest) to get familiar with OpenShift 4.
+A lot of OpenShift 4 specific jargon is used throughout this doc, so please visit the [official documentation page](https://docs.openshift.com/container-platform/latest) to get familiar with OpenShift 4.
 
 > :warning: This playbook originally was written with BareMetal UPI install in mind
 

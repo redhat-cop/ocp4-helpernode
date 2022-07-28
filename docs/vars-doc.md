@@ -171,14 +171,14 @@ Below are example of "extra" features beyond the default built-in vars that you 
 
 ### IPI installation
 
-In order to use the helper node to deploy openshift using [IPI installation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html) 
+In order to use the helper node to deploy openshift using [IPI installation](https://docs.openshift.com/container-platform/4.6/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html)
 you'll need to pass `-e ipi=true` to your `ansible-playbook` command or add the following in your `vars.yaml` file
 
 ```
 ipi: true
 ```
 
-This effectively disables (mostly, but not fully) HAproxy, DHCP, TFTP, and PXE on the helper, as well as simplify the DNS records needed. 
+This effectively disables (mostly, but not fully) HAproxy, DHCP, TFTP, and PXE on the helper, as well as simplify the DNS records needed.
 
 **NOTE**: The default setting is `ipi: false` which installs HAproxy, DHCP, TFTP, DNS with full needed records and PXE.
 
@@ -196,7 +196,7 @@ This effectively disables DHCP, TFTP, and PXE on the helper. This implicitly mea
 
 ### Specifying Artifacts
 
-You can have the helper deploy specific artifacts for a paticular version of OCP. Or, the nightly builds of OpenShift 4 or even OKD. Adding the following to your `vars.yaml` file will pull in the coresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly build:
+You can have the helper deploy specific artifacts for a paticular version of OCP. Or, the nightly builds of OpenShift 4 or even OKD. Adding the following to your `vars.yaml` file will pull in the corresponding artifacts. Below is an example of pulling the `4.2.0-0.nightly-2019-09-16-114316` nightly build:
 
 > :warning: note, you need to use the `ocp_bios` var for the rootfs image for 4.6+
 
@@ -239,7 +239,7 @@ Default is set to `true`, set it to `false` if you don't want it to create the S
 
 ### PXE default config
 
-**OPTIONAL**  
+**OPTIONAL**
 
 This section influences the creation of pxe artifacts
 
@@ -248,13 +248,13 @@ pxe:
   generate_default: true
 ```
 
-Default is false to prevent unexpected issues booting hosts in the "other" section.    
-* `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options 
+Default is false to prevent unexpected issues booting hosts in the "other" section.
+* `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options
 `templates/default.j2` -> `/var/lib/tftpboot/pxelinux.cfg/default`
 
 ### UEFI default config
 
-**OPTIONAL**  
+**OPTIONAL**
 
 This section influences the creation of uefi artifacts for tftp boot.
 
@@ -364,7 +364,7 @@ nfs:
 
 ### NTP Configuration
 
-If you would like to use your own NTP servers, you can specify them in using the follwing config.
+If you would like to use your own NTP servers, you can specify them in using the following config.
 
 ```
 chronyconfig:
@@ -431,7 +431,7 @@ To use host binaries, run `chroot /host`
 Pod IP: 192.168.7.12
 If you don't see a command prompt, try pressing enter.
 sh-4.2# chroot /host
-sh-4.4# cat /etc/chrony.conf 
+sh-4.4# cat /etc/chrony.conf
 server 0.centos.pool.ntp.org iburst
 server 1.centos.pool.ntp.org iburst
 driftfile /var/lib/chrony/drift
