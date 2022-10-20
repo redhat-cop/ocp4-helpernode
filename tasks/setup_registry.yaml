@@ -145,4 +145,4 @@
 
   - name: Mirror NFS image (ppc64le)
     when: setup_registry.autosync_registry and ppc64le
-    shell: "oc image mirror docker.io/ibmcom/nfs-client-provisioner-ppc64le:latest registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner-ppc64le:latest -a ~/.openshift/pull-secret-updated"
+    shell: "oc image mirror gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:ppc64le-linux-v4.0.0 registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest -a ~/.openshift/pull-secret-updated"
