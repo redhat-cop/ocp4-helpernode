@@ -20,14 +20,14 @@ bootstrap:
   name: "bootstrap"
   ipaddr: "192.168.7.20"
   macaddr: "52:54:00:60:72:67"
-masters:
-  - name: "master0"
+controlplane_nodes:
+  - name: "controlplane0"
     ipaddr: "192.168.7.21"
     macaddr: "52:54:00:e7:9d:67"
-  - name: "master1"
+  - name: "controlplane1"
     ipaddr: "192.168.7.22"
     macaddr: "52:54:00:80:16:23"
-  - name: "master2"
+  - name: "controlplane2"
     ipaddr: "192.168.7.23"
     macaddr: "52:54:00:d5:1c:39"
 other:

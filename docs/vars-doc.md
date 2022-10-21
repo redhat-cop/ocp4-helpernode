@@ -14,9 +14,9 @@ In the first section, you'll see that it's asking for a disk
 disk: vda
 ```
 
-This needs to be set to the disk where you are installing RHCOS on the masters/workers. This will be set in the boot options for the [pxe server](../templates/default.j2).
+This needs to be set to the disk where you are installing RHCOS on the control plane nodes/workers. This will be set in the boot options for the [pxe server](../templates/default.j2).
 
-**NOTE**: This will be the same for ALL masters and workers. Support for "mixed disk" (i.e. if your masters use `sda` and your workers are `vda`) is not supported at this time
+**NOTE**: This will be the same for ALL control plane nodes and workers. Support for "mixed disk" (i.e. if your control plane nodes use `sda` and your workers are `vda`) is not supported at this time
 
 You can, however edit the `/var/lib/tftpboot/pxelinux.cfg/default` file by hand after the install.
 
@@ -86,9 +86,9 @@ dhcp:
 
 Explanation of the options you can set:
 
-* `dhcp.router` - This is the default gateway of your network you're going to assign to the masters/workers
+* `dhcp.router` - This is the default gateway of your network you're going to assign to the control plane nodes/workers
 * `dhcp.bcast` - This is the broadcast address for your network
-* `dhcp.netmask` - This is the netmask that gets assigned to your masters/workers
+* `dhcp.netmask` - This is the netmask that gets assigned to your control plane nodes/workers
 * `dhcp.dns` - This is the domain name server, it is optional, the default value is set to `helper.ipaddr`
 * `dhcp.poolstart` - This is the first address in your dhcp address pool
 * `dhcp.poolend` - This is the last address in your dhcp address pool
@@ -117,31 +117,31 @@ The options are:
 
 ## Master Node section
 
-Similar to the bootstrap section; this sets up master node configuration. Please note that this is an array.
+Similar to the bootstrap section; this sets up control plane node configuration. Please note that this is an array.
 
 ```
-masters:
-  - name: "master0"
+controlplane_nodes:
+  - name: "controlplane0"
     ipaddr: "192.168.7.21"
     macaddr: "52:54:00:e7:9d:67"
-  - name: "master1"
+  - name: "controlplane1"
     ipaddr: "192.168.7.22"
     macaddr: "52:54:00:80:16:23"
-  - name: "master2"
+  - name: "controlplane2"
     ipaddr: "192.168.7.23"
     macaddr: "52:54:00:d5:1c:39"
 ```
 
-* `masters.name` - The hostname (**__WITHOUT__** the fqdn) of the master node you want to set (x of 3).
-* `masters.ipaddr` - The IP address (x of 3) that you want set (this modifies the [dhcp config file](../templates/dhcpd.conf.j2#L19), the [dns zonefile](../templates/zonefile.j2#L29), and the [reverse dns zonefile](../templates/reverse.j2#L11))
-* `masters.macaddr` - The mac address for [dhcp reservation](../templates/dhcpd.conf.j2#L19). This option is not needed if you're doing static ips.
+* `controlplane_nodes.name` - The hostname (**__WITHOUT__** the fqdn) of the control plane node you want to set (x of 3).
+* `controlplane_nodes.ipaddr` - The IP address (x of 3) that you want set (this modifies the [dhcp config file](../templates/dhcpd.conf.j2#L19), the [dns zonefile](../templates/zonefile.j2#L29), and the [reverse dns zonefile](../templates/reverse.j2#L11))
+* `controlplane_nodes.macaddr` - The mac address for [dhcp reservation](../templates/dhcpd.conf.j2#L19). This option is not needed if you're doing static ips.
 
 
 **NOTE**: 3 Masters are MANDATORY for installation of OpenShift 4
 
 ## Worker Node section
 
-Similar to the master section; this sets up worker node configuration. Please note that this is an array.
+Similar to the control plane node section; this sets up worker node configuration. Please note that this is an array.
 
 > :rotating_light: This section is optional if you're installing a compact cluster
 
@@ -249,7 +249,7 @@ pxe:
 ```
 
 Default is false to prevent unexpected issues booting hosts in the "other" section.    
-* `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/master/worker) sections.  It is recommended to modify the template with appropriate boot options 
+* `pxe.generate_default` - Setting to true Generates a generic default pxe config file with options for hosts not defined in the (bootstrap/control plane/worker) sections.  It is recommended to modify the template with appropriate boot options 
 `templates/default.j2` -> `/var/lib/tftpboot/pxelinux.cfg/default`
 
 ### UEFI default config
@@ -403,7 +403,7 @@ The playbook created the `machineConfig` files where you cloned the repo. For ex
 ```shell
 # ll ~/ocp4-helpernode/machineconfig/
 total 8
--rw-r--r--. 1 root root 748 Jul 16 07:59 99-master-chrony-configuration.yaml
+-rw-r--r--. 1 root root 748 Jul 16 07:59 99-controlplane-chrony-configuration.yaml
 -rw-r--r--. 1 root root 748 Jul 16 07:59 99-worker-chrony-configuration.yaml
 ```
 
@@ -416,9 +416,9 @@ cp ~/ocp4-helpernode/machineconfig/* ~/ocp4/openshift/
 Continue on with the installation. Once done you should have chrony setup pointing to your NTP servers.
 
 ```shell
-# oc get machineconfig 99-{master,worker}-chrony-configuration
+# oc get machineconfig 99-{controlplane,worker}-chrony-configuration
 NAME                             GENERATEDBYCONTROLLER   IGNITIONVERSION   AGE
-99-master-chrony-configuration                           2.2.0             42s
+99-controlplane-chrony-configuration                           2.2.0             42s
 99-worker-chrony-configuration                           2.2.0             43s
 ```
 
@@ -439,7 +439,7 @@ makestep 1.0 3
 rtcsync
 ```
 
-> :bulb: This config should be on all the masters and workers.
+> :bulb: This config should be on all the control plane nodes and workers.
 
 __Post-Install__
 
@@ -449,26 +449,26 @@ To set this up post-installation, just apply the `machineConfig` using `oc apply
 oc apply  -f ~/ocp4-helpernode/machineconfig/
 ```
 
-:warning: This will reboot ALL your nodes (masters/workers) in a "rolling" fashion. You can check this with `oc get nodes`
+:warning: This will reboot ALL your nodes (control plane nodes/workers) in a "rolling" fashion. You can check this with `oc get nodes`
 
 ```shell
 # oc get nodes
-NAME                       STATUS                     ROLES    AGE   VERSION
-master0.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
-master1.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
-master2.ocp4.example.com   Ready,SchedulingDisabled   master   41m   v1.17.1+912792b
-worker0.ocp4.example.com   Ready,SchedulingDisabled   worker   26m   v1.17.1+912792b
-worker1.ocp4.example.com   Ready                      worker   26m   v1.17.1+912792b
+NAME                             STATUS                     ROLES    AGE   VERSION
+controlplane0.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
+controlplane1.ocp4.example.com   Ready                      master   41m   v1.17.1+912792b
+controlplane2.ocp4.example.com   Ready,SchedulingDisabled   master   41m   v1.17.1+912792b
+worker0.ocp4.example.com         Ready,SchedulingDisabled   worker   26m   v1.17.1+912792b
+worker1.ocp4.example.com         Ready                      worker   26m   v1.17.1+912792b
 ```
 
 
 This should create the `machineConfig`
 
 ```shell
-# oc get machineconfig 99-{master,worker}-chrony-configuration
-NAME                             GENERATEDBYCONTROLLER   IGNITIONVERSION   AGE
-99-master-chrony-configuration                           2.2.0             42s
-99-worker-chrony-configuration                           2.2.0             43s
+# oc get machineconfig 99-{controlplane,worker}-chrony-configuration
+NAME                                   GENERATEDBYCONTROLLER   IGNITIONVERSION   AGE
+99-controlplane-chrony-configuration                           2.2.0             42s
+99-worker-chrony-configuration                                 2.2.0             43s
 ```
 
 # Example Vars file

@@ -3,7 +3,7 @@
 This quickstart will get you up and running on PowerVM server managed using [HMC](https://www.ibm.com/support/knowledgecenter/en/9009-22A/p9eh6/p9eh6_kickoff.htm).
 
 This playbook will set up an "all-in-one" node (called ocp4-helpernode), that has all the infrastructure/services in order to install OpenShift 4. 
-This playbook will also install an OpenShift 4 cluster with 3 master nodes and 2 worker nodes.
+This playbook will also install an OpenShift 4 cluster with 3 control plane nodes and 2 worker nodes.
 After you run the playbook, you'll be ready to logon to the OpenShift cluster.
 
 A lot of OpenShift 4 specific jargon is used throughout this doc, so please visit the [official documentation page](https://docs.openshift.com/container-platform/latest) to get familiar with OpenShift 4.
@@ -63,16 +63,16 @@ $ mksyscfg -r lpar -m <managed_system> -i name=ocp4-bootstrap, profile_name=defa
 > **NOTE** Make sure you attach the LPAR to the appropriate network and add storage (HMC GUI or HMC chsyscfg command) after successful LPAR creation.
 > **NOTE** No OS installation is needed at this point.
 
-__Masters__
+__Control Plane Nodes__
 
-Create the three master LPARs.
+Create the three control plane LPARs.
 
 * 2 vCPUs (desired_procs)
 * 32 GB of RAM (desired_mem)
 * 120 GB HD (OS)
 
 ```
-$ for i in master{0..2}
+$ for i in controlplane{0..2}
 do
   mksyscfg -r lpar -m <managed_system> -i name="ocp4-${i}", profile_name=default_profile, lpar_env=aixlinux, shared_proc_pool_util_auth=1, min_mem=32768, desired_mem=32768, max_mem=16384, proc_mode=shared, min_proc_units=0.2, desired_proc_units=0.2, max_proc_units=4.0, min_procs=2, desired_procs=2, max_procs=2, sharing_mode=uncap, uncap_weight=128, max_virtual_slots=64, boot_mode=norm, conn_monitoring=1
 done
@@ -201,7 +201,7 @@ cp docs/examples/vars-ppc64le.yaml vars.yaml
 Edit the `vars.yaml`:
 - Update `helper` section for your helper node info
 - Update `dns` and `dhcp` based on your network setup
-- Update `bootstrap`, `masters` and `workers` with IP and MAC address of the LPARs.
+- Update `bootstrap`, `controlplane_nodes` and `workers` with IP and MAC address of the LPARs.
 
 > **NOTE** See the `vars.yaml` [documentation page](vars-doc.md) for more info about what it does.
 
@@ -243,7 +243,7 @@ compute:
   replicas: 0
 controlPlane:
   hyperthreading: Enabled
-  name: master
+  name: controlplane
   replicas: 3
 metadata:
   name: ocp4
@@ -330,7 +330,7 @@ On your laptop/workstation visit the status page
 firefox http://<helper_ip>:9000
 ```
 
-You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+You'll see the bootstrap turn "green" and then the control plane nodes turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
 Also you can check all cluster node LPAR status in HMC's partition list view.
 

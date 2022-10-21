@@ -267,12 +267,12 @@
           - restart tftp
         when: bootstrap is defined
 
-      - name: Set the master specific tftp files
+      - name: Set the control plane specific tftp files
         template:
-          src: ../templates/pxe-master.j2
+          src: ../templates/pxe-controlplane.j2
           dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ item.macaddr | regex_replace (':', '-')}}"
           mode: 0555
-        with_items: "{{ masters | lower }}"
+        with_items: "{{ controlplane_nodes | lower }}"
         notify:
           - restart tftp
 
@@ -324,12 +324,12 @@
         notify:
           - restart tftp
 
-      - name: Set the master specific tftp files
+      - name: Set the control plane specific tftp files
         template:
-          src: ../templates/grub2-master.j2
+          src: ../templates/grub2-controlplane.j2
           dest: "/var/lib/tftpboot/grub2/grub.cfg-01-{{ item.macaddr | regex_replace (':', '-')}}"
           mode: 0555
-        with_items: "{{ masters | lower }}"
+        with_items: "{{ controlplane_nodes | lower }}"
         notify:
           - restart tftp
 
@@ -371,12 +371,12 @@
         include_tasks: generate_grub.yml
         when: bootstrap is defined
 
-      - name: generate grub entry (masters)
+      - name: generate grub entry (control plane)
         vars:
-          role: master
+          role: controlplane
           mac: "{{ item.macaddr }}"
         include_tasks: generate_grub.yml
-        with_items: "{{ masters }}"
+        with_items: "{{ controlplane_nodes }}"
 
       - name: generate grub entry (workers)
         vars:
@@ -513,7 +513,7 @@
         src: ../templates/chrony-machineconfig.j2
         dest: "{{ machineconfig_path }}/99-{{item}}-chrony-configuration.yaml"
       loop:
-        - master
+        - controlplane
     - name: Generate Chrony machineconfig
       template:
         src: ../templates/chrony-machineconfig.j2

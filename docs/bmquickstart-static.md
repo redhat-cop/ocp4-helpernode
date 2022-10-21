@@ -46,7 +46,7 @@ git clone https://github.com/redhat-cop/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the masters/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server.
+Create the [vars-static.yaml](examples/vars-static.yaml) file with the IP addresss that will be assigned to the control plane nodes/workers/boostrap. The IP addresses need to be right since they will be used to create your DNS server.
 
 ```
 cp docs/examples/vars-static.yaml .
@@ -115,7 +115,7 @@ compute:
   replicas: 0
 controlPlane:
   hyperthreading: Enabled
-  name: master
+  name: controlplane
   replicas: 3
 metadata:
   name: ocp4
@@ -215,7 +215,7 @@ On your laptop/workstation visit the status page
 firefox http://192.168.7.77:9000
 ```
 
-You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+You'll see the bootstrap turn "green" and then the control plane nodes turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
 ### ISO Maker
 

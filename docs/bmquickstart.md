@@ -47,7 +47,7 @@ git clone https://github.com/redhat-cop/ocp4-helpernode
 cd ocp4-helpernode
 ```
 
-Get the mac address of the instances/vms/servers that are going to be your OpenShift 4 cluster. At a minimum you need 1 bootstrap, 3 masters, and 2 workers. So you'll need to have 6 Mac Addresses
+Get the mac address of the instances/vms/servers that are going to be your OpenShift 4 cluster. At a minimum you need 1 bootstrap, 3 control plane nodes, and 2 workers. So you'll need to have 6 Mac Addresses
 
 Edit the [vars.yaml](examples/vars.yaml) file with the mac addresses of your instances.
 
@@ -117,7 +117,7 @@ compute:
   replicas: 0
 controlPlane:
   hyperthreading: Enabled
-  name: master
+  name: controlplane
   replicas: 3
 metadata:
   name: ocp4
@@ -196,7 +196,7 @@ firefox http://192.168.7.77:9000
 ```
 > :warning: Make sure you don't expose this port in public cloud environments!
 
-You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+You'll see the bootstrap turn "green" and then the control plane nodes turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
 ## Wait for install
 

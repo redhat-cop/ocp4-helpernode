@@ -1,6 +1,6 @@
 # RHCOS ISO Maker
 
-You can create a custom ISO using [Chuckers' ISO Maker repo](https://github.com/chuckersjp/coreos-iso-maker). This playbook will create a single ISO that has a menu entry for each component (bootstrap/masters/workers).
+You can create a custom ISO using [Chuckers' ISO Maker repo](https://github.com/chuckersjp/coreos-iso-maker). This playbook will create a single ISO that has a menu entry for each component (bootstrap/control plane nodes/workers).
 
 Although very useful, with my opinionated playbook and his opinionated playbook; it makes it difficult to incorporate it within my playbook. Therefore, I've created this little "how to use the ISO maker with the helpernode".
 
@@ -56,15 +56,15 @@ all:
         bootstrap.ocp4.example.com:
           ipv4: 192.168.7.20
     
-    masters:
+    controlplane_nodes:
       hosts:
-        master0.ocp4.example.com:
+        controlplane0.ocp4.example.com:
           ipv4: 192.168.7.21
 
-        master1.ocp4.example.com:
+        controlplane1.ocp4.example.com:
           ipv4: 192.168.7.22
 
-        master2.ocp4.example.com:
+        controlplane2.ocp4.example.com:
           ipv4: 192.168.7.23
         
     workers:
@@ -85,7 +85,7 @@ You'll need to move some stuff around where the ISO maker expects them to find t
 cp /var/www/html/install/bios.raw.gz /var/www/html/
 cp /var/www/html/ignition/*.ign /var/www/html/
 ln -s /var/www/html/worker.ign /var/www/html/workers.ign
-ln -s /var/www/html/master.ign /var/www/html/masters.ign
+ln -s /var/www/html/controlplane.ign /var/www/html/controlplane_nodes.ign
 chmod o+r /var/www/html/*
 restorecon -vR /var/www/html
 ```
@@ -106,7 +106,7 @@ When you boot into this ISO, you'll be greeted with the following menu.
 
 ![isomaker](images/rhcos-iso-maker.png)
 
-Choose the correct option for the server you're installing. I would boot them in the following order: bootstrap, masters, and then workers.
+Choose the correct option for the server you're installing. I would boot them in the following order: bootstrap, control plane nodes, and then workers.
 
 ## Success
 

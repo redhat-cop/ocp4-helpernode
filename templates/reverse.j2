@@ -11,7 +11,7 @@ $TTL 1W
 {{ helper.ipaddr.split('.')[3] }}       IN      PTR     helper.{{ dns.clusterid }}.{{ dns.domain }}.
 
 {% if not ipi %}
-{% for m in masters %}
+{% for m in controlplane_nodes %}
 {{ m.ipaddr.split('.')[3] }}	IN	PTR	{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}.
 {% endfor %}
 ;

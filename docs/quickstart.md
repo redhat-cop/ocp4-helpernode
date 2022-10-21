@@ -101,10 +101,10 @@ Create (but do NOT install) 6 empty VMs. Please follow the [min requirements](ht
 
 __Masters__
 
-Create the master VMs
+Create the control plane VMs
 
 ```
-for i in master{0..2}
+for i in controlplane{0..2}
 do
   virt-install --name="ocp4-${i}" --vcpus=4 --ram=12288 \
   --disk path=/var/lib/libvirt/images/ocp4-${i}.qcow2,bus=virtio,size=120 \
@@ -156,7 +156,7 @@ cd ocp4-helpernode
 Get the Mac addresses with this command running from your hypervisor host:
 
 ```
-for i in bootstrap master{0..2} worker{0..1}
+for i in bootstrap controlplane{0..2} worker{0..1}
 do
   echo -ne "${i}\t" ; virsh dumpxml ocp4-${i} | grep "mac address" | cut -d\' -f2
 done
@@ -230,7 +230,7 @@ compute:
   replicas: 0
 controlPlane:
   hyperthreading: Enabled
-  name: master
+  name: controlplane
   replicas: 3
 metadata:
   name: ocp4
@@ -310,7 +310,7 @@ firefox http://192.168.7.77:9000
 ```
 > :warning: Make sure you don't expose this port in public cloud environments!
 
-You'll see the bootstrap turn "green" and then the masters turn "green", then the bootstrap turn "red". This is your indication that you can continue.
+You'll see the bootstrap turn "green" and then the control plane nodes turn "green", then the bootstrap turn "red". This is your indication that you can continue.
 
 ## Wait for install
 

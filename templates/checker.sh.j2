@@ -7,21 +7,21 @@
 ##
 show_help () {
 echo "Usage:"
-echo "$(basename $0) {dns-masters|dns-workers|dns-etcd|dns-other|local-registry-info|install-info|haproxy|services|nfs-info}"
+echo "$(basename $0) {dns-controlplane-nodes|dns-workers|dns-etcd|dns-other|local-registry-info|install-info|haproxy|services|nfs-info}"
 echo ""
 }
 ##
-dns-masters () {
-echo "======================"
-echo "DNS Config for Masters"
-echo "======================"
+dns-controlplane-nodes () {
+echo "=================================="
+echo "DNS Config for Control Plane Nodes"
+echo "=================================="
 echo ""
-egrep --color=none -A {{ (masters | length) + 1 }} '^; Create entries for the master hosts' /var/named/zonefile.db
+egrep --color=none -A {{ (controlplane_nodes | length) + 1 }} '^; Create entries for the control plane hosts' /var/named/zonefile.db
 echo ""
-echo "======================"
-echo "DNS Lookup for Masters"
-echo "======================"
-{% for m in masters %}
+echo "=================================="
+echo "DNS Lookup for Control Plane Nodes"
+echo "=================================="
+{% for m in controlplane_nodes %}
 echo ""
 echo "{{ m.name | lower }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
 echo "-------------------------------------------------"
@@ -211,8 +211,8 @@ fi
 ##################################################
 
 case "$1" in
-  dns-masters)
-    dns-masters
+  dns-controlplane-nodes)
+    dns-controlplane-nodes
     ;;
   dns-workers)
     dns-workers

@@ -24,7 +24,7 @@
       Host {{ item.name }}.{{ dns.clusterid }}.{{ dns.domain }}
         User core
         IdentityFile {{ ansible_env.HOME }}/.ssh/helper_rsa
-  loop: "{{ masters }}"
+  loop: "{{ controlplane_nodes }}"
 
 - blockinfile:
     path: "{{ ansible_env.HOME }}/.ssh/config"
