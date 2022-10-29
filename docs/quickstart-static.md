@@ -1,6 +1,6 @@
 # Helper Node Quickstart Install - Static IPs
 
-This quickstart will get you up and running on `libvirt`. This should work on other environments (i.e. Virtualbox or Enterprise networks); you just have to substitue where applicable
+This quickstart will get you up and running on `libvirt`. This should work on other environments (i.e. Virtualbox or Enterprise networks); you just have to substitute where applicable
 
 To start login to your virtualization server / hypervisor
 
@@ -82,7 +82,7 @@ The provided Kickstart file installs the helper with the following settings (whi
 
 > **NOTE** If you want to use macvtap (i.e. have the VM "be on your network"); you can use `--network type=direct,source=enp0s31f6,source_mode=bridge,model=virtio` ; replace the interface where applicable
 
-You can watch the progress by lauching the viewer
+You can watch the progress by launching the viewer
 
 ```
 virt-viewer --domain-name ocp4-aHelper
@@ -332,7 +332,7 @@ export KUBECONFIG=/root/ocp4/auth/kubeconfig
 Your install may be waiting for worker nodes to get approved. Normally the `machineconfig node approval operator` takes care of this for you. However, sometimes this needs to be done manually. Check pending CSRs with the following command.
 
 ```
-oc get csr 
+oc get csr
 ```
 
 You can approve all pending CSRs in "one shot" with the following
@@ -344,7 +344,7 @@ oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{
 You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a `watch` on these CSRs
 
 ```
-watch oc get csr 
+watch oc get csr
 ```
 
 In order to setup your registry, you first have to set the `managementState` to `Managed` for your cluster
