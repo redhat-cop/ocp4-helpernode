@@ -9,14 +9,14 @@ Create a machine/vm with the following minimum configuration.
 * CentOS/RHEL 7 or 8
 * 50GB HD
 * 4 CPUs
-* 8 GB of RAM 
+* 8 GB of RAM
 
 In this example, I'll be using the following.
 
 * CentOS 8
 * 50GB HD
 * 4CPUs
-* 8 GB of RAM 
+* 8 GB of RAM
 * IP - 192.168.7.77
 * NetMask - 255.255.255.0
 * Default Gateway - 192.168.7.1
@@ -201,7 +201,7 @@ coreos.inst.ignition_url=http://192.168.7.77:8080/ignition/bootstrap.ign
 
 ^ Do this for **ALL** of your VMs!!!
 
-> **NOTE** Using `ip=...` syntax will set the host with a static IP you provided persistantly accross reboots. The syntax is `ip=<ipaddress>::<defaultgw>:<netmask>:<hostname>:<iface>:none`. To set the DNS server use `nameserver=<dnsserver>`. You can use `nameserver=` multiple times.
+> **NOTE** Using `ip=...` syntax will set the host with a static IP you provided persistently across reboots. The syntax is `ip=<ipaddress>::<defaultgw>:<netmask>:<hostname>:<iface>:none`. To set the DNS server use `nameserver=<dnsserver>`. You can use `nameserver=` multiple times.
 
 Boot/install the VMs in the following order
 
@@ -254,7 +254,7 @@ export KUBECONFIG=/root/ocp4/auth/kubeconfig
 Your install may be waiting for worker nodes to get approved. Normally the `machineconfig node approval operator` takes care of this for you. However, sometimes this needs to be done manually. Check pending CSRs with the following command.
 
 ```
-oc get csr 
+oc get csr
 ```
 
 You can approve all pending CSRs in "one shot" with the following
@@ -266,7 +266,7 @@ oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{
 You may have to run this multiple times depending on how many workers you have and in what order they come in. Keep a `watch` on these CSRs
 
 ```
-watch oc get csr 
+watch oc get csr
 ```
 
 In order to setup your registry, you first have to set the `managementState` to `Managed` for your cluster

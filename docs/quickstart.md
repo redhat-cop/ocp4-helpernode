@@ -25,7 +25,7 @@ Download the virtual network configuration file, [virt-net.xml](examples/virt-ne
 wget https://raw.githubusercontent.com/redhat-cop/ocp4-helpernode/main/docs/examples/virt-net.xml
 ```
 
-Create a virtual network using this file file provided in this repo (modify if you need to).
+Create a virtual network using this file provided in this repo (modify if you need to).
 
 ```
 virsh net-define --file virt-net.xml
@@ -81,7 +81,7 @@ The provided Kickstart file installs the helper with the following settings (whi
 * Default Gateway - 192.168.7.1
 * DNS Server - 8.8.8.8
 
-You can watch the progress by lauching the viewer
+You can watch the progress by launching the viewer
 
 ```
 virt-viewer --domain-name ocp4-aHelper

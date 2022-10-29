@@ -99,6 +99,8 @@
         - python3-libselinux
         - podman
         - nfs-utils
+        - grub2-tools
+        - grub2-tools-extra
   
   - set_fact:
       dhcppkgs:
@@ -127,4 +129,4 @@
         - httpd
         - rpcbind
         - nfs-server
-  when: ansible_distribution_major_version == "8"
+  when: ansible_distribution_major_version >= "8"
