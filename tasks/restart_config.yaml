@@ -12,7 +12,7 @@
     dest: /etc/systemd/system/{{item}}.service.d/restart.conf
 
 - name: restart services
-  service:
+  systemd:
     name: "{{ item }}"
     state: restarted
     daemon_reload: yes
