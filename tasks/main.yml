@@ -41,7 +41,7 @@
     package:
       name: "{{ pxepkgs }}"
       state: present
-    when: not staticips
+    when: not staticips and baremetal
 
   - name: Install additional package for Intel platforms
     package:
@@ -153,14 +153,14 @@
         url: "{{ ocp_bios }}"
         dest: /var/www/html/install/bios.raw.gz
         mode: 0555
-      when: ("metal" in ocp_bios) and (download_imgs or force_ocp_download)
+      when: ("metal" in ocp_bios) and (download_imgs or force_ocp_download) and baremetal
 
     - name: Downloading OCP4 installer rootfs
       get_url:
         url: "{{ ocp_bios }}"
         dest: /var/www/html/install/rootfs.img
         mode: 0555
-      when: ("rootfs" in ocp_bios) and (download_imgs or force_ocp_download) 
+      when: ("rootfs" in ocp_bios) and (download_imgs or force_ocp_download) and baremetal
 
   - name: Start firewalld service
     systemd:
@@ -210,18 +210,18 @@
       mode: 0755
     notify:
       - restart tftp
-    when: not staticips and not ppc64le
+    when: not staticips and not ppc64le and baremetal
 
   - name: generate netboot entry for grub2
     shell: grub2-mknetdir --net-directory=/var/lib/tftpboot
-    when: not staticips and ppc64le
+    when: not staticips and ppc64le and baremetal
 
   - name: Create TFTP RHCOS dir
     file:
       path: /var/lib/tftpboot/rhcos
       state: directory
       mode: 0755
-    when: not staticips
+    when: not staticips and baremetal
 
   - name: SEBool allow haproxy connect any port
     seboolean:
@@ -433,7 +433,7 @@
       - helper-tftp
     when: not staticips and baremetal
 
-  - name: Starting DHCP/PXE services
+  - name: Starting DHCP services for non baremetal
     service:
       name: "{{ item }}"
       enabled: yes
