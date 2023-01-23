@@ -31,9 +31,15 @@
       name: "{{ packages }}"
       state: present
 
-  - name: Install packages for DHCP/PXE install
+  - name: Install packages for DHCP install
     package:
       name: "{{ dhcppkgs }}"
+      state: present
+    when: not staticips
+
+  - name: Install packages for PXE install
+    package:
+      name: "{{ pxepkgs }}"
       state: present
     when: not staticips
 

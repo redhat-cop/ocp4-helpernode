@@ -60,6 +60,9 @@
   - set_fact:
       dhcppkgs:
         - dhcp
+
+  - set_fact:
+      pxepkgs:
         - tftp-server
 
   - set_fact:
@@ -105,6 +108,9 @@
   - set_fact:
       dhcppkgs:
         - dhcp-server
+
+  - set_fact:
+      pxepkgs:
         - tftp-server
 
   - set_fact:
