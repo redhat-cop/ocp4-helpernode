@@ -35,7 +35,7 @@
     package:
       name: "{{ dhcppkgs }}"
       state: present
-    when: not staticips
+    when: not staticips and not externaldhcp
 
   - name: Install packages for PXE install
     package:
@@ -59,7 +59,7 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips and not uefi
+    when: not staticips and not uefi and not externaldhcp
 
   - name: Write out dhcp file (UEFI)
     template:
@@ -67,7 +67,7 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips and uefi
+    when: not staticips and uefi and not externaldhcp
 
   - name: Setup named configuration files
     block:
@@ -440,7 +440,7 @@
       state: started
     with_items:
       - dhcpd
-    when: not staticips and not baremetal
+    when: not staticips and not baremetal and not externaldhcp
 
   - name: Unmasking Services
     systemd:
@@ -449,7 +449,7 @@
       masked: no
     with_items:
       - tftp
-    when: not staticips and not ipi
+    when: not staticips and not ipi and not baremetal
 
   - name: Copy info script over
     template:

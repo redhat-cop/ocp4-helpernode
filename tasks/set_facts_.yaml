@@ -18,7 +18,7 @@
 - block:
   - set_fact:
       critical_services: "{{ critical_services + [ 'dhcpd' ] }}"
-  when: not staticips
+  when: not staticips and not externaldhcp
 
 - block:
   - set_fact:
