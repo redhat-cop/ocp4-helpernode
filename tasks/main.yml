@@ -47,7 +47,7 @@
     package:
       name: "{{ syslinuxpkgs }}"
       state: present
-    when: not staticips and not ppc64le
+    when: not staticips and not ppc64le and baremetal
 
   - name: Remove existing config files
     import_tasks: remove_old_config_files.yaml
