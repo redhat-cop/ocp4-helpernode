@@ -17,12 +17,12 @@
 
 - block:
   - set_fact:
-      critical_services: "{{ critical_services }} + [ 'dhcpd' ]"
+      critical_services: "{{ critical_services + [ 'dhcpd' ] }}"
   when: not staticips
 
 - block:
   - set_fact:
-      critical_services: "{{ critical_services }} + [ 'keepalived' ]"
+      critical_services: "{{ critical_services + [ 'keepalived' ] }}"
   when: high_availability is defined
 
 - block:
