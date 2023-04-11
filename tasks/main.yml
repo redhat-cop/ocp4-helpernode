@@ -30,18 +30,21 @@
     package:
       name: "{{ packages }}"
       state: present
+    when: internet
 
   - name: Install packages for DHCP/PXE install
     package:
       name: "{{ dhcppkgs }}"
       state: present
-    when: not staticips
+    when: 
+      - not staticips
+      - internet 
 
   - name: Install additional package for Intel platforms
     package:
       name: "{{ syslinuxpkgs }}"
       state: present
-    when: not staticips and not ppc64le
+    when: not staticips and not ppc64le and internet 
 
   - name: Remove existing config files
     import_tasks: remove_old_config_files.yaml
@@ -559,7 +562,9 @@
       state: absent
 
   - name: Install and configure helm
-    when: helm_source is defined
+    when: 
+      - helm_source is defined
+      - internet
     block:
     - name: Create helm source directory
       file:
