@@ -347,6 +347,12 @@ ppc64le: true
 
 ### NFS Configuration
 
+```
+nfs_provisioner_image: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0
+```
+
+* `nfs_provisioner_image` - Set the nfs_provisioner image to use. (default: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0)
+
 This playbook sets up a script called [helpernodecheck](../templates/checker.sh.j2). That script can be used to set up the helpernode as an NFS server (this is the default). It uses the [k8s nfs setup in the incubator repo](https://github.com/kubernetes-incubator/external-storage/blob/master/nfs-client/README.md).
 
 > :warning: Run `helpernodecheck nfs-info` for information after the playbook runs.

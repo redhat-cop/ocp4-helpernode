@@ -20,7 +20,7 @@
 
 - name: Set low_priority fact
   set_fact:
-    low_priority: "{{ low_priority | default([]) }} + [ {{ item.priority }} ]"
+    low_priority: "{{ low_priority | default([]) + [ item.priority ] }}"
   with_items:
     - "{{ high_availability.helpernodes }}"
   when: item.state == "BACKUP"
