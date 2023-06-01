@@ -2,10 +2,6 @@
 # Setup OCP4 Helper Node
 
 - hosts: all
-  vars:
-    proxy_env:
-      https_proxy: http://proxy-02:8000
-      http_proxy: http://proxy-02:8000
   vars_files:
     - ../vars/main.yml
     - ../vars/ports.yml
