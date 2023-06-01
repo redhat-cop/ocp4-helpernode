@@ -28,3 +28,6 @@ setup_registry:
   registry_user: "admin"
   registry_password: "admin"
 machineconfig_path: ../machineconfig
+proxy_env:
+  https_proxy: ""
+  http_proxy: ""
