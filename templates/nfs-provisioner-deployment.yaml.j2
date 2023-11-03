@@ -20,7 +20,7 @@ spec:
 {% if setup_registry.deploy and  setup_registry.autosync_registry %}
           image: registry.{{ dns.clusterid }}.{{ dns.domain }}:5000/nfs-client-provisioner:latest
 {% else %}
-          image: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0
+          image: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
 {% endif %}
           volumeMounts:
             - name: nfs-client-root
