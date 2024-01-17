@@ -24,7 +24,7 @@
     when: ssh_gen_key
 
   - name: set setup facts
-    include: set_facts_.yaml
+    import_tasks: set_facts_.yaml
 
   - name: Install needed packages
     package:
