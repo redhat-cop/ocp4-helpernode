@@ -553,6 +553,13 @@
         dest: /usr/local/bin
         remote_src: yes
 
+    - name: Link openshift-install-fips to openshift-install
+      file:
+        src: "/usr/local/bin/openshift-install-fips"
+        dest: "/usr/local/bin/openshift-install"
+        state: link
+      when: fips
+
   - name: Removing files that are not needed
     file:
       path: /usr/local/bin/README.md
