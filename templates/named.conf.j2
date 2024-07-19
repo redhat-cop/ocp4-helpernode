@@ -40,6 +40,9 @@ options {
 	pid-file "/run/named/named.pid";
 	session-keyfile "/run/named/session.key";
 
+	request-ixfr no;
+	allow-transfer { 1.1.1.1;};
+
 	/* https://fedoraproject.org/wiki/Changes/CryptoPolicy */
 	/* include "/etc/crypto-policies/back-ends/bind.config"; */
 };
