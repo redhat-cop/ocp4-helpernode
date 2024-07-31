@@ -29,3 +29,5 @@ setup_registry:
   registry_password: "admin"
 machineconfig_path: ../machineconfig
 fips: false
+secure_named: false
+secure_http: false
