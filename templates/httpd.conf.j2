@@ -347,6 +347,13 @@ AddDefaultCharset UTF-8
 #EnableMMAP off
 EnableSendfile on
 
+{% if secure_http %}
+# Track and Trace are disabled
+RewriteEngine on
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+{% endif %}
+
 # Supplemental configuration
 #
 # Load config files in the "/etc/httpd/conf.d" directory, if any.

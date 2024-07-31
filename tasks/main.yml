@@ -114,8 +114,8 @@
   - name: Set HTTP server and prepare OCP4 bios
     block:
     - name: Copy httpd conf file
-      copy:
-        src: ../files/httpd.conf
+      template:
+        src: ../templates/httpd.conf.j2
         dest: /etc/httpd/conf/httpd.conf
       notify:
         - restart httpd
