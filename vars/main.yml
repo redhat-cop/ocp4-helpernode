@@ -31,3 +31,4 @@ machineconfig_path: ../machineconfig
 fips: false
 secure_named: false
 secure_http: false
+secure_nfs: false

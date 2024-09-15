@@ -196,6 +196,15 @@
       dest: /etc/exports
     notify:
       - restart nfs
+    when: not secure_nfs
+
+  - name: Copy NFS export conf file with secure_nfs
+    template:
+      src: ../templates/nfs-exports.j2
+      dest: /etc/exports
+    notify:
+      - restart nfs
+    when: secure_nfs
 
   - name: Create TFTP config
     file:
