@@ -1,11 +1,9 @@
 {% if bootstrap is defined %}
-/data           {{ bootstrap.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
+/export           {{ bootstrap.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
 {% endif %}
 {% for m in masters %}
-/data           {{ m.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
-/data/registry  {{ m.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
+/export           {{ m.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
 {% endfor %}
 {% for w in workers %}
-/data           {{ w.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
-/data/registry  {{ w.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
+/export           {{ w.ipaddr }}(rw,sync,no_wdelay,no_root_squash,insecure)
 {% endfor %}
