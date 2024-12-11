@@ -27,6 +27,10 @@ options {
 	   reduce such attack surface 
 	*/
 	recursion yes;
+{% if secure_named %}
+        allow-recursion { trusted; };
+        allow-query-cache { trusted; };
+{% endif %}
 
 	/* Fowarders */
 	forward only;
@@ -76,3 +80,18 @@ zone "{{ helper.ipaddr.split('.')[2] }}.{{ helper.ipaddr.split('.')[1] }}.{{ hel
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";
 
+{% if secure_named %}
+acl "trusted" {
+{% if bootstrap is defined %}
+   {{ bootstrap.ipaddr }}/32;
+{% endif %}
+{% for m in masters %}
+   {{ m.ipaddr }}/32;
+{% endfor %}
+{% for w in workers %}
+   {{ w.ipaddr }}/32;
+{% endfor %}
+   localhost;
+   localnets;
+};
+{% endif %}
