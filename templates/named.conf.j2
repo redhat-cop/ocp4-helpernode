@@ -28,8 +28,8 @@ options {
 	*/
 	recursion yes;
 {% if secure_named %}
-        allow-recursion { trusted; };
-        allow-query-cache { trusted; };
+	allow-recursion { trusted; };
+	allow-query-cache { trusted; };
 {% endif %}
 
 	/* Fowarders */
