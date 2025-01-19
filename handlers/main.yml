@@ -30,3 +30,6 @@
     name: nfs-server
     state: restarted
 
+- name: Check postfix
+  command: postfix check
+  when: postfix_check

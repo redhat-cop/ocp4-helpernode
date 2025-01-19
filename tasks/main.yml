@@ -24,7 +24,9 @@
     when: ssh_gen_key
 
   - name: set setup facts
-    include: set_facts_.yaml
+    # ERROR! [DEPRECATED]: ansible.builtin.include has been removed. Use include_tasks or import_tasks instead. This feature was removed from ansible-core in a release after 2023-05-16. Please update your playbooks.
+    # CentOS Stream 8
+    import_tasks: set_facts_.yaml
 
   - name: Install needed packages
     package:
@@ -657,8 +659,13 @@
       state: stopped
     when: (dhcp.dns is defined and dhcp.dns != helper.ipaddr) or (dns.lb_ipaddr is defined and dns.lb_ipaddr != helper.ipaddr)
 
+  - name: Install postfix to receive OpenShift alerts
+    include_tasks: postfix.yaml
+    when: (postfix_install and ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] >= "7") or
+          (postfix_install and ansible_facts['os_family'] == "CentOS" and ansible_facts['distribution_major_version'] >= "7")
+    tags: postfix
+
   - name:  Information about this install
     debug:
       msg:
         - "Please run /usr/local/bin/helpernodecheck for information"
-
