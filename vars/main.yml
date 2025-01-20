@@ -1,4 +1,5 @@
 ---
+postfix_install: false
 ssh_gen_key: true
 ipi: false
 baremetal: true

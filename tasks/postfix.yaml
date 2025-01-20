@@ -1,0 +1,191 @@
+---
+# Distribution defaults are different from the postfix defaults, hence need to
+# reinstall the package
+- name: Remove postfix package(s) to restore config postfix_packages
+  block:
+    # It is assumed that the only package providing config files that might
+    # be modified is postfix - if this is not so, then additional
+    # packages need to be added to this check
+    - name: Get status of package(s) postfix_packages
+      command: rpm -V {{ item }}  # noqa command-instead-of-module
+      loop: "{{ postfix_packages }}"
+      register: postfix_packages_status
+      failed_when: false
+      changed_when: false
+
+    - name: Remove package(s) to reset original confs postfix_packages
+      package:
+        name: "{{ postfix_packages }}"
+        state: absent
+      register: postfix_erased
+      when: postfix_packages_status.results |
+        rejectattr('stdout', 'match', '^package .* is not installed') |
+        selectattr('stdout', 'search', ' /etc/postfix/.*[.]cf($|\n)') |
+        list | length > 0
+
+- name: Remove configuration for replacement
+  block:
+    # It is assumed that the only package providing config files that might
+    # be modified is postfix - if this is not so, then additional
+    # packages need to be added to this check
+    - name: Get status of config files
+      command: rpm -V --nomtime {{ item }}  # noqa command-instead-of-module
+      loop: "{{ postfix_packages }}"
+      register: postfix_packages_status
+      failed_when: false
+      changed_when: false
+
+    - name: Remove config files - make empty
+      copy:
+        dest: "{{ item }}"
+        content: "\n"  # to make postconf -e happy
+        mode: preserve
+      loop: "{{ mod_cf_files }}"
+      vars:
+        mod_cf_files: "{{ postfix_packages_status.results |
+          map(attribute='stdout') | map('default', '') |
+          map('regex_findall', ' (/etc/postfix/.*[.]cf)(?:$|\n)') | select |
+          flatten | list }}"
+
+- name: Install Postfix & mailx
+  package:
+    name: "{{ postfix_packages }}"
+    state: present
+
+- name: Get default database type from postconf
+  command: postconf -h default_database_type
+  changed_when: false
+  register: postfix_register_dbtype
+
+- name: Set postfix_default_database_type
+  set_fact:
+    postfix_default_database_type: "{{ postfix_register_dbtype.stdout | trim }}"
+
+- name: get service facts
+  ansible.builtin.service_facts:
+
+- name: Enable Postfix
+  ansible.builtin.systemd_service:
+    state: started
+    name: postfix
+    enabled: yes
+  when: ansible_facts['services']['postfix.service'] is defined
+
+- name: Get current config
+  command: postconf
+  register: postfix_register_config
+  changed_when: false
+  when: postfix_conf | dict2items | rejectattr('key', 'match', '^previous$')
+    | list | items2dict | d({}) | length > 0
+
+- name: Check given config against current config
+  changed_when: false
+  when:
+    - postfix_conf | dict2items | rejectattr('key', 'match', '^previous$')
+      | list | items2dict | d({}) | length > 0
+    - postfix_register_config is defined
+    - postfix_register_config.stdout_lines is defined
+  set_fact:
+    postfix_has_config_changed: |-
+      {% for key, val in postfix_conf.items() %}
+      {%   if key != 'previous' %}
+      {%     set space = ' ' if val else '' %}
+      {%     set itemstr = '{} ={}{}'.format(key, space, val) %}
+      {%     if itemstr not in postfix_register_config.stdout_lines %}
+      True itemstr {{ itemstr }} is not in postfix_register_config
+      {%     endif %}
+      {%   endif %}
+      {% endfor %}
+
+- name: Configure additional files
+  copy:
+    content: "{{ file['content'] }}"
+    dest: /etc/postfix/{{ file['name'] }}
+    owner: root
+    group: root
+    mode: '0640'
+  loop: "{{ postfix_files }}"
+  register: postfix_postmap_files
+  no_log: true
+  loop_control:
+    loop_var: file
+  notify:
+    - Check postfix
+
+- name: Postmap files
+  command: postmap {{ result["dest"] | quote }}
+  when:
+    - result["changed"]
+    - result["file"]["postmap"] | d(false)
+  no_log: true
+  changed_when: true
+  loop: "{{ postfix_postmap_files['results'] }}"
+  loop_control:
+    loop_var: result
+
+- name: Add smtp users
+  block:
+  - name: Add the users to send & receive email notifications from OpenShift's Alertmanager 
+    ansible.builtin.user:
+      name: "{{ item }}"
+      shell: /usr/sbin/nologin
+      password: '!'
+    with_items:
+      - openshift
+      - incoming
+
+- name: Apply changes
+  when: postfix_has_config_changed | d("") is search("True")
+  block:
+    - name: Gather facts for ansible_date_time
+      setup:
+        filter:
+          - ansible_date_time
+      when: postfix_backup | bool
+
+    - name: Backup configuration
+      copy:
+        remote_src: true
+        src: /etc/postfix/main.cf
+        dest: /etc/postfix/main.cf.{{ postfix_backup_multiple |
+          ternary(ansible_date_time.iso8601, "backup") }}
+        mode: "0644"
+      when: postfix_backup 
+
+    - name: Ensure Last modified header is absent
+      lineinfile:
+        path: /etc/postfix/main.cf
+        regexp: '# Last modified:'
+        state: absent
+
+    - name: Configure Postfix
+      command: postconf -e {{ item.key | quote }}={{ item.value | quote }}
+      notify:
+        - Check postfix
+      with_dict: "{{ postfix_conf }}"
+      when:
+        - item.key not in ['previous']
+        - postfix_has_config_changed
+          | d("") is search("True itemstr " ~ item.key)
+      changed_when:
+        - item.key not in ['previous']
+        - postfix_has_config_changed
+          | d("") is search("True itemstr " ~ item.key)
+
+- name: Restart postfix, in all cases
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+
+- ansible.builtin.wait_for:
+    host: "smtp.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+    port: 25
+ 
+- name: Sending an email using Ansible
+  community.general.mail:
+    host: "smtp.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+    port: 25
+    sender: "openshift@{{ helper.name }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+    to: "incoming@{{ helper.name }}.{{ dns.clusterid }}.{{ dns.domain | lower }}"
+    subject: Email By Ansible
+    body: Test successful

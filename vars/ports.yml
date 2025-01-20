@@ -1,4 +1,5 @@
 ports:
+- 25/tcp
 - 67/udp
 - 53/tcp
 - 53/udp

@@ -130,3 +130,44 @@
         - rpcbind
         - nfs-server
   when: ansible_distribution_major_version >= "8"
+
+- block:
+  - set_fact:
+      postfix_conf: 
+        myorigin: "$mydomain"
+        inet_interfaces: "all"
+        inet_protocols: "all"
+        mydestination: "$myhostname, localhost.$mydomain, localhost"
+        mynetworks_style: "subnet"
+        mynetworks: "127.0.0.0/8 192.168.7.0/24"
+        relay_domains: ""
+
+  - set_fact:
+      # Additional config maps/files, e.g.:
+      # // for all options see link https://github.com/linux-system-roles/postfix //
+      # // this addition to the ocp4-helpernode is the hassle-free option. //
+      # postfix_files:
+      #   - name: 'sasl_passwd'
+      #     content: 'smtp.example.com user@example.com:myFirstPassword
+      #     postmap: true
+      #   - name: 'sender_canonical_maps'
+      #     content: '/.+/    user@example.com'
+      postfix_files: []
+
+  # Whether to run 'postfix check' before it's started
+  - set_fact:
+      postfix_check: true
+
+  # Whether to make backup of current config
+  - set_fact:
+      postfix_backup: false
+
+  # List of default rpm packages to install.
+  - set_fact:
+      postfix_packages:
+        - postfix
+        - mailx
+
+  - set_fact:
+      postfix_smtp_services:
+        - smtp
