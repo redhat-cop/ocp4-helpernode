@@ -139,7 +139,7 @@
         inet_protocols: "all"
         mydestination: "$myhostname, localhost.$mydomain, localhost"
         mynetworks_style: "subnet"
-        mynetworks: "127.0.0.0/8 168.168.7.0/24"
+        mynetworks: "127.0.0.0/8 192.168.7.0/24"
         relay_domains: ""
 
   - set_fact:
