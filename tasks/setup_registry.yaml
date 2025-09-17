@@ -96,7 +96,7 @@
   - internal
   - public
 
-- name: Restarting regitry services
+- name: Restarting registry services
   service:
     name: "{{ item }}"
     state: restarted
