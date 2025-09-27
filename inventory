@@ -1,2 +1,2 @@
-[vmhost]
+[OCP4_HELPERNODE]
 localhost ansible_connection=local
