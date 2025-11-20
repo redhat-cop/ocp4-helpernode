@@ -78,6 +78,13 @@ frontend openshift-api-server
 {% endif %}
 
 backend openshift-api-server
+{% if haproxy_apiserver_healthcheck %}
+    mode        tcp
+    option      log-health-checks
+    option      httpchk GET /readyz HTTP/1.0
+    http-check expect status 200
+    default-server check check-ssl inter 3s fall 2 rise 3 verify none
+{% endif %}
 {% if ipi %}
     balance roundrobin
     server backend-api {{ helper.api_ipaddr }}:6443 check
