@@ -32,3 +32,4 @@ fips: false
 secure_named: false
 secure_http: false
 secure_nfs: false
+haproxy_apiserver_healthcheck: false
