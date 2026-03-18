@@ -120,6 +120,20 @@
     args:
       creates: ~/.openshift/pull-secret-updated
 
+  - name: Store Release Digest sigfile value
+    shell: |
+      oc adm release info {{ release_image }} | grep Digest: | awk '{print $2}' | sed 's/:/-/g'
+    register: RELEASE_DIGEST
+
+  - name: Retrieve sig file
+    shell: |
+      oc image mirror \
+      -a ~/.openshift/pull-secret-updated \
+      {{ setup_registry.remote_registry | default('quay.io') }}/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ RELEASE_DIGEST.stdout }}.sig \
+      {{ local_registry }}/{{ setup_registry.local_repo }}:{{ RELEASE_DIGEST.stdout }}.sig \
+      --force=false --continue-on-error
+    register: sig_output
+
   - name: Mirror the registry
     when: setup_registry.autosync_registry
     shell: oc adm -a ~/.openshift/pull-secret-updated release mirror \

@@ -20,13 +20,16 @@ chronyconfig:
 setup_registry:
   deploy: false
   autosync_registry: false
-  registry_image: docker.io/library/registry:2
+  registry_image: docker.io/library/registry:3
   local_repo: "ocp4/openshift4"
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
   release_tag: "4.9.18-x86_64"
   registry_user: "admin"
   registry_password: "admin"
+  ocp_channel_name: "stable-4.20"
+  ocp_min_version: "4.20.2"
+  ocp_max_version: "4.20.2"
 machineconfig_path: ../machineconfig
 fips: false
 secure_named: false
