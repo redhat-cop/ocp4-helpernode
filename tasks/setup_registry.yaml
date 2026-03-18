@@ -120,19 +120,63 @@
     args:
       creates: ~/.openshift/pull-secret-updated
 
-  - name: Store Release Digest sigfile value
+  - name: Retrieve the Release Image Manifest
     shell: |
-      oc adm release info {{ release_image }} | grep Digest: | awk '{print $2}' | sed 's/:/-/g'
-    register: RELEASE_DIGEST
+      oc adm release info {{ release_image }} -o json
+    register: release_manifest
 
-  - name: Retrieve sig file
+  - name: Query for the OCP Version from Release Image Manifest
     shell: |
+      echo '{{ release_manifest.stdout }}' | jq -r '.' | jq -r '.config.config.Labels["io.openshift.release"]'
+    register: release_version
+
+  - name: Register the MAJOR, MINOR for the ocp_version
+    shell: |
+      echo "{{ release_version.stdout }}" | tr '.' ' ' | awk '{print $1, $2}'
+    register: ocp_version
+
+  - name: Check if image manifest is having Multi payload. 
+    shell: |
+      echo '{{ release_manifest.stdout }}' | jq -r '.metadata.metadata | ."release.openshift.io/architecture"?'
+    register: multi_payload
+  
+  - name: Check if image manifest is having Single payload.
+    shell: |
+      RELEASE_DIGEST=$(oc image info --output=json -a ~/.openshift/pull-secret-updated {{ release_image }} | grep -c "Digest" )
+      echo $RELEASE_DIGEST
+    register: single_payload
+
+  - name: Mirroring with multi arch payload 
+    shell: |
+      for DIGEST in $(oc image info --output=json -a ~/.openshift/pull-secret-updated {{ release_image }} 2>&1 | grep linux | awk '{print $NF}')
+      do
+        SIGFILE=$(echo $DIGEST | sed 's/:/-/g').sig
+        oc image mirror -a ~/.openshift/pull-secret-updated \
+          {{ setup_registry.remote_registry | default('quay.io') }}/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:${SIGFILE} \ 
+          {{ local_registry }}/{{ setup_registry.local_repo }}:${SIGFILE} \
+          --force=false
+      done
+    register: multi_out
+    when:
+      - setup_registry.autosync_registry
+      - multi_payload.stdout == "multi"
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 18 ) or ( (ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+
+  - name: Mirroring with single arch payload
+    shell: |
+      CONTENT_DIGEST=$(oc image info --output=json -a ~/.openshift/pull-secret-updated {{ release_image }} \
+        | jq -r '.contentDigest | split(":")[1]' )
       oc image mirror \
-      -a ~/.openshift/pull-secret-updated \
-      {{ setup_registry.remote_registry | default('quay.io') }}/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:{{ RELEASE_DIGEST.stdout }}.sig \
-      {{ local_registry }}/{{ setup_registry.local_repo }}:{{ RELEASE_DIGEST.stdout }}.sig \
-      --force=false --continue-on-error
-    register: sig_output
+        -a ~/.openshift/pull-secret-updated \
+        {{ setup_registry.remote_registry | default('quay.io') }}/{{ setup_registry.product_repo }}/{{ setup_registry.release_name }}:sha256-$CONTENT_DIGEST.sig \
+        {{ local_registry }}/{{ setup_registry.local_repo }}:sha256-$CONTENT_DIGEST.sig \
+        --force=false
+    register: single_payload
+    when:
+      - setup_registry.autosync_registry
+      - single_payload is defined
+      - single_payload.stdout | trim | int != 0
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 18 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
 
   - name: Mirror the registry
     when: setup_registry.autosync_registry
