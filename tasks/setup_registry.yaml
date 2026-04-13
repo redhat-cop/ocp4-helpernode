@@ -66,6 +66,52 @@
   retries: 3
   delay: 10
 
+- name: Check if oc-mirror is already installed
+  command: which oc-mirror
+  register: oc_mirror_check
+  failed_when: false
+  changed_when: false
+
+- name: Downloading oc-mirror package
+  get_url:
+    url: "{{ oc_mirror }}"
+    dest: /usr/local/src/oc-mirror.tar.gz
+    mode: 0644
+  when: (download_imgs or force_ocp_download) and oc_mirror_check.rc != 0
+  
+- name: Unarchiving oc-mirror package
+  unarchive:
+    src: /usr/local/src/oc-mirror.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    creates: "{{ oc_mirror_bin }}"
+  when: (download_imgs or force_ocp_download) and oc_mirror_check.rc != 0
+
+- name: Set executable permission on oc-mirror
+  file:
+    path: "/usr/local/bin/{{ oc_mirror_bin }}"
+    mode: "0755"
+    owner: root
+    group: root
+  when: (download_imgs or force_ocp_download) and oc_mirror_check.rc != 0
+
+- name: Get openshift-install payload architecture
+  shell: |
+    openshift-install version | awk '/release architecture/ {print $3}'
+  register: os_install_arch
+  changed_when: false
+
+- name: Set ImageSet architecture
+  set_fact:
+    imageset_arch:
+      - >-
+        {{
+          os_install_arch.stdout
+          if os_install_arch.rc == 0 and os_install_arch.stdout | length > 0
+          else
+          'amd64'
+        }}
+
 - name: Generate local-registry service file
   template:
     src: ../templates/local-registry.service.j2
@@ -135,6 +181,20 @@
       echo "{{ release_version.stdout }}" | tr '.' ' ' | awk '{print $1, $2}'
     register: ocp_version
 
+  - name: Register the variables for imageset config
+    set_fact:
+      ocp_channel_name: "stable-{{ (release_version.stdout | regex_replace('^stable-', '')).split('.')[0:2] | join('.') }}"
+      ocp_min_version: "{{ release_version.stdout | regex_replace('^stable-', '') }}"
+      ocp_max_version: "{{ release_version.stdout | regex_replace('^stable-', '') }}"
+
+  - name: Copy ImageSetConfig file
+    template:
+      src: ../templates/imageset-config.yaml.j2
+      dest: /etc/oc-mirror_imageset-config.yaml
+      owner: root
+      group: root
+      mode: 0666
+
   - name: Check if image manifest is having Multi payload. 
     shell: |
       echo '{{ release_manifest.stdout }}' | jq -r '.metadata.metadata | ."release.openshift.io/architecture"?'
@@ -177,6 +237,75 @@
       - single_payload is defined
       - single_payload.stdout | trim | int != 0
       - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 18 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+
+  - name: Re-check oc-mirror after installation
+    command: which oc-mirror
+    register: oc_mirror_check
+    failed_when: false
+    changed_when: false
+
+  - name: Mirror-to-mirror registry with oc-mirror v2
+    shell: |
+      oc-mirror --authfile /root/.openshift/pull-secret-updated \
+        -c /etc/oc-mirror_imageset-config.yaml \
+        --workspace file://{{ oc_mirror_workspace_dir }} \
+        docker://{{ local_registry }}/{{ setup_registry.local_repo }} \
+        --secure-policy --v2 \
+        --parallel-images {{ oc_mirror_parallel_images }} --parallel-layers {{ oc_mirror_parallel_layers }} 2>&1
+    register: registry
+    retries: 5
+    delay: 60
+    until: registry.rc == 0
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+      - oc_mirror_check.rc == 0
+
+  - name: Copy the IDMS file from oc-mirror work-dir
+    copy:
+      src: "{{ oc_mirror_workspace_dir }}/working-dir/cluster-resources/idms-oc-mirror.yaml"
+      dest: /etc/image-digest-mirror-set.yaml
+    register: idms_status
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+      - oc_mirror_check.rc == 0
+
+  - name: Copy the ITMS file from oc-mirror work-dir
+    copy:
+      src: "{{ oc_mirror_workspace_dir }}/working-dir/cluster-resources/itms-oc-mirror.yaml"
+      dest: /etc/image-tag-mirror-set.yaml
+    register: itms_status
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+      - oc_mirror_check.rc == 0
+
+  - name: Copy the signature-configmap.yaml file from oc-mirror work-dir
+    copy:
+      src: "{{ oc_mirror_workspace_dir }}/working-dir/cluster-resources/signature-configmap.yaml"
+      dest: /etc/signature-configmap.yaml
+    register: signature_cm_status
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+      - oc_mirror_check.rc == 0
+
+  - name: Copy the updateService.yaml file from oc-mirror work-dir
+    copy:
+      src: "{{ oc_mirror_workspace_dir }}/working-dir/cluster-resources/updateService.yaml"
+      dest: /etc/updateService.yaml
+    register: update_service_status
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+      - oc_mirror_check.rc == 0
+
+  - name: Delete the oc-mirror cache work dir
+    file:
+      path: "{{ oc_mirror_workspace_dir }}"
+      state: absent
+    when: oc_mirror_wipe_cache | bool
 
   - name: Mirror the registry
     when: setup_registry.autosync_registry
