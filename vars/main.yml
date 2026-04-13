@@ -10,6 +10,7 @@ ocp_initramfs: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos
 ocp_install_kernel: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.9/4.9.0/rhcos-4.9.0-x86_64-live-kernel-x86_64"
 ocp_client: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.18/openshift-client-linux-4.9.18.tar.gz"
 ocp_installer: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.9.18/openshift-install-linux-4.9.18.tar.gz"
+oc_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.20/oc-mirror.tar.gz"
 helm_source: "https://get.helm.sh/helm-v3.6.3-linux-amd64.tar.gz"
 download_imgs: true
 chars: (\\_|\\$|\\\|\\/|\\=|\\)|\\(|\\&|\\^|\\%|\\$|\\#|\\@|\\!|\\*)
@@ -27,12 +28,18 @@ setup_registry:
   release_tag: "4.9.18-x86_64"
   registry_user: "admin"
   registry_password: "admin"
-  ocp_channel_name: "stable-4.20"
-  ocp_min_version: "4.20.2"
-  ocp_max_version: "4.20.2"
 machineconfig_path: ../machineconfig
 fips: false
 secure_named: false
 secure_http: false
 secure_nfs: false
 haproxy_apiserver_healthcheck: false
+ocp_channel_name: "stable-4.20"
+ocp_min_version: "4.20.2"
+ocp_max_version: "4.20.2"
+oc_mirror_parallel_images: 10
+oc_mirror_parallel_layers: 10
+oc_mirror_bin: "oc-mirror"
+oc_mirror_cmd: "/usr/local/bin/oc-mirror"
+oc_mirror_wipe_cache: false
+oc_mirror_workspace_dir: /var/oc-mirror-work-dir
