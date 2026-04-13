@@ -1,0 +1,13 @@
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v2alpha1
+mirror:
+  platform:
+    architectures:
+{% for arch in imageset_arch %}
+      - "{{ arch }}" 
+{% endfor %}
+    channels:
+    - name: "{{ setup_registry.ocp_channel_name }}"
+      minVersion: "{{ setup_registry.ocp_min_version }}"
+      maxVersion: "{{ setup_registry.ocp_max_version }}"
+      type: ocp
