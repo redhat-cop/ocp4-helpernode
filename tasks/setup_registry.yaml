@@ -66,6 +66,54 @@
   retries: 3
   delay: 10
 
+- name: Downloading oc-mirror package
+  get_url:
+    url: "{{ oc_mirror }}"
+    dest: /usr/local/src/oc-mirror.tar.gz
+    mode: 0644
+  when: download_imgs or force_ocp_download
+  
+- name: Unarchiving oc-mirror package
+  unarchive:
+    src: /usr/local/src/oc-mirror.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    creates: "{{ oc_mirror_bin }}"
+
+- name: Set executable permission on oc-mirror
+  file:
+    path: "/usr/local/bin/{{ oc_mirror_bin }}"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Get openshift-install architecture
+  shell: |
+    openshift-install version | awk '/architecture/ {print $3}'
+  register: os_install_arch
+  changed_when: false
+
+- name: Set ImageSet architecture
+  set_fact:
+    imageset_arch: >-
+      {{
+        ['amd64', 'arm64', 'ppc64le', 's390x']
+        if os_install_arch.stdout == 'multi'
+        else
+        [os_install_arch.stdout]
+        if os_install_arch.rc == 0 and os_install_arch.stdout | length > 0
+        else
+        ['amd64']
+      }}
+
+- name: Copy ImageSetConfig file    
+  template:
+    src: ../templates/imageset-config.yaml.j2
+    dest: /etc/imageset-config.yaml
+    owner: root
+    group: root
+    mode: 0666
+
 - name: Generate local-registry service file
   template:
     src: ../templates/local-registry.service.j2
@@ -177,6 +225,19 @@
       - single_payload is defined
       - single_payload.stdout | trim | int != 0
       - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 18 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
+
+  - name: Mirror-to-mirror registry with oc-mirror v2
+    shell: |
+      oc-mirror --authfile /root/.openshift/pull-secret-updated \
+        -c /usr/local/src/imageset-config.yaml \
+        --workspace file://tmp/oc-mirror \
+        docker://{{ local_registry }}/{{ setup_registry.local_repo }} \
+        --secure-policy --v2 \
+        --parallel-images {{ oc_mirror_parallel_images }} --parallel-layers {{ oc_mirror_parallel_layers }}
+    register: ocmirror_result
+    when:
+      - setup_registry.autosync_registry
+      - (((ocp_version.stdout.split(' ')[0] | int ) >= 4 and (ocp_version.stdout.split(' ')[1] | int) > 19 ) or ((ocp_version.stdout.split(' ')[0] | int ) >= 5 ))
 
   - name: Mirror the registry
     when: setup_registry.autosync_registry
