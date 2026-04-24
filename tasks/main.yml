@@ -35,7 +35,13 @@
     package:
       name: "{{ dhcppkgs }}"
       state: present
-    when: not staticips
+    when: not staticips and ansible_distribution_major_version | int < 10
+
+  - name: Install packages for DHCP/PXE install for RHEL 10 and above
+    package:
+      name: "{{ dhcppkgs10 }}"
+      state: present
+    when: not staticips and ansible_distribution_major_version | int >= 10
 
   - name: Install additional package for Intel platforms
     package:
