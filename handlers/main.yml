@@ -20,6 +20,11 @@
     name: dhcpd
     state: restarted
 
+- name: restart kea-dhcp4
+  service:
+    name: kea-dhcp4.service
+    state: restarted
+
 - name: restart tftp
   service:
     name: tftp

@@ -59,7 +59,15 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips and not uefi
+    when: not staticips and not uefi and ansible_distribution_major_version | int < 10
+
+  - name: Write out dhcp file for RHEL 10 and above
+    template:
+      src: ../templates/kea-dhcp4.conf.j2
+      dest: /etc/kea/kea-dhcp4.conf
+    notify:
+      - restart kea-dhcp4
+    when: not staticips and not uefi and ansible_distribution_major_version | int >= 10
 
   - name: Write out dhcp file (UEFI)
     template:
@@ -67,7 +75,15 @@
       dest: /etc/dhcp/dhcpd.conf
     notify:
       - restart dhcpd
-    when: not staticips and uefi
+    when: not staticips and uefi and ansible_distribution_major_version | int < 10
+  
+  - name: Write out dhcp file (UEFI) for RHEL 10 and above
+    template:
+      src: ../templates/kea-dhcp4.conf.j2
+      dest: /etc/kea/kea-dhcp4.conf
+    notify:
+      - restart kea-dhcp4
+    when: not staticips and uefi and ansible_distribution_major_version | int >= 10
 
   - name: Setup named configuration files
     block:
@@ -431,25 +447,33 @@
     with_items:
       - "{{ services }}"
 
-  - name: Starting DHCP/PXE services for baremetal
+  - name: Starting PXE services for baremetal
     service:
       name: "{{ item }}"
       enabled: yes
       state: started
     with_items:
-      - dhcpd
       - tftp
       - helper-tftp
     when: not staticips and baremetal
 
-  - name: Starting DHCP/PXE services
+  - name: Starting DHCP services
     service:
       name: "{{ item }}"
       enabled: yes
       state: started
     with_items:
       - dhcpd
-    when: not staticips and not baremetal
+    when: not staticips and ansible_distribution_major_version | int < 10
+
+  - name: Starting DHCP services for RHEL 10 and above
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - kea-dhcp4
+    when: not staticips and ansible_distribution_major_version | int >= 10
 
   - name: Unmasking Services
     systemd:
