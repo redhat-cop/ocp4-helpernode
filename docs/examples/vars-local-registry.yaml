@@ -47,9 +47,26 @@ other:
 
 setup_registry:
   deploy: true
+  use_mirror_registry: false
   autosync_registry: true
   registry_image: docker.io/library/registry:2
   local_repo: "ocp4/openshift4"
   product_repo: "openshift-release-dev"
   release_name: "ocp-release"
   release_tag: "4.4.9-x86_64"
+
+# Mirror Registry specific variables (only used when use_mirror_registry: true)
+mirror_registry_dir: "/opt/mirror-registry"
+quay_index_image: "quay.io/redhat-user-workloads/quay-eng-tenant/mirror-registry-v2-0@sha256:2a2683e79f4773553e17fe607332e33b1e52b52b84be66381f1944c8341a3054"
+local_copy_dir: "/tmp"
+force_reinstall: false
+registry_url: "brew.registry.redhat.io"
+registry_username: ""  # Required for Mirror Registry
+registry_password: ""  # Required for Mirror Registry
+init_password: "changeme"  
+registry_hostname: "{{ ansible_fqdn }}"
+quay_storage_path: ""
+sqlite_storage_path: ""
+ssl_cert_path: ""
+ssl_key_path: ""
+
