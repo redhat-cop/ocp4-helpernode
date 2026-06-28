@@ -35,8 +35,11 @@ options {
 	/* Fowarders */
 	forward only;
 	forwarders { {{ dns.forwarder1 | default("8.8.8.8") }}; {{ dns.forwarder2 | default("8.8.4.4") }}; };
-
+	
+	{% if ansible_facts['distribution_major_version'] | int < 10 %}
 	dnssec-enable yes;
+	{% endif %}
+
 	dnssec-validation no;
 
 	managed-keys-directory "/var/named/dynamic";

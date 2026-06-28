@@ -2,6 +2,13 @@
   file:
     path: /etc/dhcp/dhcpd.conf
     state: absent
+#  when: ansible_distribution_major_version | int < 10
+
+- name: Remove existing dhcp config for RHEL10 and above
+  file:
+    path: /etc/kea/kea-dhcp4.conf
+    state: absent
+  when: ansible_distribution_major_version | int >= 10
 
 - name: Remove existing named config
   file:
