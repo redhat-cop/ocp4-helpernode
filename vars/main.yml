@@ -19,6 +19,7 @@ chronyconfig:
   enabled: false
 setup_registry:
   deploy: false
+  use_mirror_registry: false
   autosync_registry: false
   registry_image: docker.io/library/registry:3
   local_repo: "ocp4/openshift4"
@@ -30,6 +31,21 @@ setup_registry:
   ocp_channel_name: "stable-4.20"
   ocp_min_version: "4.20.2"
   ocp_max_version: "4.20.2"
+# Mirror Registry specific variables (used when use_mirror_registry: true)
+mirror_registry_dir: "/opt/mirror-registry"
+quay_index_image: "quay.io/redhat-user-workloads/quay-eng-tenant/mirror-registry-v2-0@sha256:2a2683e79f4773553e17fe607332e33b1e52b52b84be66381f1944c8341a3054"
+local_copy_dir: "/tmp"
+force_reinstall: false
+registry_url: "brew.registry.redhat.io"
+registry_username: ""
+registry_password: ""
+init_password: "changeme"
+registry_hostname: "{{ ansible_fqdn }}"
+quay_storage_path: ""           
+sqlite_storage_path: ""        
+redis_storage_path: ""       
+ssl_cert_path: ""               
+ssl_key_path: ""
 machineconfig_path: ../machineconfig
 fips: false
 secure_named: false

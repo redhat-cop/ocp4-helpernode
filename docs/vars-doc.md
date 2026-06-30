@@ -316,6 +316,7 @@ In order to install a local registry on the helper node:
 ```
 setup_registry:
   deploy: false
+  use_mirror_registry: false
   autosync_registry: false
   registry_image: docker.io/library/registry:2
   local_repo: "ocp4/openshift4"
@@ -327,6 +328,7 @@ setup_registry:
 ```
 
 * `setup_registry.deploy` - Set this to true to enable registry installation.
+* `setup_registry.use_mirror_registry` - Set this to true to use Red Hat Mirror Registry (OMR).
 * `setup_registry.autosync_registry` - Set this to true to enable mirroring of installation images.
 * `setup_registry.registry_image` - This is the name of the image used for creating registry container.
 * `setup_registry.local_repo` - This is the name of the repo in your registry.
@@ -335,6 +337,92 @@ setup_registry:
 * `setup_registry.release_tag` - The version of OpenShift you want to sync.
 * `setup_registry.registry_user` - This is the registry username (default:admin).
 * `setup_registry.registry_password` - This is the registry password (default:admin).
+#### Mirror Registry Specific Variables
+
+When `use_mirror_registry` is set to `true`, the following additional variables are used:
+
+```
+mirror_registry_dir: "/opt/mirror-registry"
+quay_index_image: "quay.io/redhat-user-workloads/quay-eng-tenant/mirror-registry-v2-0@sha256:2a2683e79f4773553e17fe607332e33b1e52b52b84be66381f1944c8341a3054"
+local_copy_dir: "/tmp"
+force_reinstall: false
+registry_url: "brew.registry.redhat.io"
+registry_username: "rh-username"
+registry_password: "rh-password"
+init_password: "changeme"
+registry_hostname: "{{ ansible_fqdn }}"
+quay_storage_path: ""
+sqlite_storage_path: ""
+redis_storage_path: ""
+ssl_cert_path: ""
+ssl_key_path: ""
+```
+
+**Variable Descriptions:**
+
+* `mirror_registry_dir` - Directory where Mirror Registry will be installed (default: `/opt/mirror-registry`). This directory will contain the mirror-registry executable and related files.
+* `quay_index_image` - The Mirror Registry container image to pull from Red Hat. Uses a specific SHA256 digest for version pinning to ensure consistent deployments. Default points to Mirror Registry v2.0.
+* `local_copy_dir` - Temporary directory for extracting Mirror Registry tarball during installation (default: `/tmp`). The mirror-registry.tar.gz file will be copied here temporarily.
+* `force_reinstall` - Set to `true` to force reinstall of Mirror Registry (default: `false`). Checks for existing containers and cleans up before reinstalling.
+* `registry_url` - Red Hat registry URL for authentication to pull the Mirror Registry image (default: `brew.registry.redhat.io`). This is the registry where the mirror-registry container image is hosted.
+* `registry_username` - **REQUIRED** Your Red Hat registry username for authenticating to `registry_url`. This is needed to pull the Mirror Registry installation image.
+* `registry_password` - **REQUIRED** Your Red Hat registry password for authenticating to `registry_url`. This is needed to pull the Mirror Registry installation image.
+* `init_password` - Initial password for the Mirror Registry 'init' user (default: `changeme`). This is the admin password you'll use to login to the Quay web UI and API. **Should be changed for security!**
+* `registry_hostname` - Hostname/FQDN for the Mirror Registry (default: `{{ ansible_fqdn }}`). Uses the helper node's actual FQDN. This will be used as the hostname for accessing the Quay registry after installation.
+* `quay_storage_path` - **OPTIONAL** Custom path for Quay storage volume binding (default: empty). When set, mounts host directory to `/var/lib/quay` in container using `-v` flag. Example: `/data/quay`
+* `sqlite_storage_path` - **OPTIONAL** Custom path for PostgreSQL database storage (default: empty). When set, mounts host directory to `/var/lib/pgsql` in container using `-v` flag. Example: `/data/pgsql`
+* `redis_storage_path` - **OPTIONAL** Custom path for Redis data storage (default: empty). When set, mounts host directory to `/var/lib/redis` in container using `-v` flag. Example: `/data/redis`
+* `ssl_cert_path` - **OPTIONAL** Path to custom SSL certificate file (default: empty, uses self-signed). When set, uses `--sslCert` flag during installation. Example: `/etc/pki/tls/certs/registry.crt`
+* `ssl_key_path` - **OPTIONAL** Path to custom SSL key file (default: empty, uses self-signed). When set, uses `--sslKey` flag during installation. Example: `/etc/pki/tls/private/registry.key`
+
+**Important Notes:**
+
+1. **Authentication Required**: You must provide valid Red Hat credentials (`registry_username` and `registry_password`) to authenticate to `brew.registry.redhat.io` and pull the mirror-registry image.
+
+2. **Registry Access**: After installation, the Mirror Registry will be accessible at:
+   - Web UI: `https://<registry_hostname>:8443`
+   - Registry API: `https://<registry_hostname>:8443`
+   - Default user: `init`
+   - Password: Value of `init_password`
+
+3. **Firewall Ports**: The playbook automatically opens ports 8443 and 8080 for Mirror Registry access.
+
+4. **Security Best Practices**:
+   - Never commit credentials to version control
+   - Use Ansible Vault for sensitive data:
+     ```bash
+     ansible-vault encrypt_string 'your-password' --name 'registry_password'
+     ```
+   - Or pass credentials via command line:
+     ```bash
+     ansible-playbook -e @vars.yaml -e "registry_username=$RH_USERNAME" -e "registry_password=$RH_PASSWORD"
+     ```
+
+5. **Image Digest**: The `quay_index_image` uses a specific SHA256 digest to ensure consistent deployments. Update this value when upgrading to newer Mirror Registry versions.
+
+6. **Management Commands**: After installation, you can manage the Mirror Registry using:
+   ```bash
+   # Check status
+   /opt/mirror-registry/mirror-registry status
+   
+   # Stop the registry
+   /opt/mirror-registry/mirror-registry stop
+   
+   # Start the registry
+   /opt/mirror-registry/mirror-registry start
+   
+   # Restart the registry
+   /opt/mirror-registry/mirror-registry restart
+   
+   # Uninstall (with auto-approval)
+   /opt/mirror-registry/mirror-registry uninstall --autoApprove
+   ```
+
+7. **Troubleshooting**: If you encounter issues, check the container logs:
+   ```bash
+   podman logs quay-app
+   podman logs quay-postgres
+   podman logs quay-redis
 
 
 ### Running on Power
