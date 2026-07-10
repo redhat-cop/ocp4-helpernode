@@ -1,7 +1,7 @@
 ---
 # Setup OCP4 Helper Node
 
-- hosts: all
+- hosts: OCP4_HELPERNODE
   vars_files:
     - ../vars/main.yml
     - ../vars/ports.yml

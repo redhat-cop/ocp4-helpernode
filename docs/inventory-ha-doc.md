@@ -3,7 +3,7 @@
 In case while running helpernode playbook from one of the helpernode servers, ensure the rest of the helpernodes are added to the inventory file.
 
 ```
-[vmhost]
+[OCP4_HELPERNODE]
 localhost ansible_connection=local
 192.168.67.3 ansible_connection=ssh ansible_user=root
 ```
@@ -11,7 +11,7 @@ localhost ansible_connection=local
 In case while running helpernode playbook from a remote server, ensure all helpernodes are added to the inventory file.
 
 ```
-[vmhost]
+[OCP4_HELPERNODE]
 192.168.67.2 ansible_connection=ssh ansible_user=root
 192.168.67.3 ansible_connection=ssh ansible_user=root
 ```
