@@ -684,6 +684,21 @@
         name: "{{ registry }}"
         state: present
 
+    - name: Downloading oc-mirror package
+      get_url:
+        url: "{{ oc_mirror }}"
+        dest: /usr/local/src/oc-mirror.tar.gz
+        mode: 0644
+      when: (download_imgs or force_ocp_download) and oc_mirror is defined
+
+    - name: Unarchiving oc-mirror package
+      unarchive:
+        src: /usr/local/src/oc-mirror.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
+        creates: "{{ oc_mirror_bin }}"
+      when: (download_imgs or force_ocp_download)
+
     - name: Setup Registry
       import_tasks: setup_registry.yaml
 
