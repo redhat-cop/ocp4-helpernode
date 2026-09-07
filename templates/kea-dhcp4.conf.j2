@@ -1,0 +1,129 @@
+{
+    "Dhcp4": {
+        "authoritative": true,
+        "valid-lifetime": 14400,
+        "max-valid-lifetime": 14400,
+        "interfaces-config": {
+            "interfaces": [ "{{ networkifacename }}" ]
+        },
+        "lease-database": {
+            "type": "memfile",
+            "lfc-interval": 3600
+        },
+
+        "option-data": [
+            { 
+                "name": "routers", 
+                "data": "{{ dhcp.router }}" 
+            },
+            { 
+                "name": "broadcast-address", 
+                "data": "{{ dhcp.bcast }}" 
+            },
+            { 
+                "name": "subnet-mask", 
+                "data": "{{ dhcp.netmask }}" 
+            },
+
+{% if dhcp.dns is defined and dhcp.dns != "" %}
+            { 
+                "name": "domain-name-servers", 
+                "data": "{{ dhcp.dns }}" 
+            },
+            { 
+                "name": "domain-search", 
+                "data": "{{ dns.clusterid }}.{{ dns.domain | lower }}", "{{ dns.domain | lower }}" 
+            },
+{% else %}
+            { 
+                "name": "domain-name-servers", 
+                "data": "{{ helper.ipaddr }}" 
+            },
+{% endif %}
+            
+{# This is PXE specific #}
+{% if ppc64le is sameas true %}
+            { 
+                "name": "boot-file-name", 
+                "data": "boot/grub2/powerpc-ieee1275/core.elf" 
+            },
+{% else %}
+            { 
+                "name": "boot-file-name", 
+                "data": "pxelinux.0" 
+            },
+{% endif %}
+
+            { 
+                "name": "domain-name", 
+                "data": "{{ dns.clusterid }}.{{ dns.domain | lower }}" 
+            }
+
+        ],
+        "host-reservation-identifiers": [ "hw-address" ],
+
+        "subnet4": [
+            {
+                "id": 1,
+
+{% set ns = namespace(prefix=0) %}
+    {% set bits = { '0': 0, '128': 1, '192': 2, '224': 3, '240': 4, '248': 5, '252': 6, '254': 7, '255': 8 } %}
+{% for octet in dhcp.netmask.split('.') %}
+{% set ns.prefix = ns.prefix + bits[octet] %}
+{% endfor %}
+
+                "subnet": "{{ dhcp.ipid }}/{{ ns.prefix }}",
+                "interface": "{{ networkifacename }}", 
+                "next-server": "{{ helper.ipaddr }}",
+                "pools" :[
+                    {
+                        "pool": "{{ dhcp.poolstart }} - {{ dhcp.poolend }}",
+                        "client-class": "KNOWN"
+                    }
+                ],
+
+                "reservations": [
+{% if not ipi %}
+{# Static entries #}
+  {% if bootstrap is defined %}
+                    { 
+                        "hostname": "{{ bootstrap.name | lower }}", 
+                        "hw-address": "{{ bootstrap.macaddr }}", 
+                        "ip-address": "{{ bootstrap.ipaddr }}" 
+                    }{% if masters or workers is defined or other is defined %},{% endif %}
+  {% endif %}
+
+  {% for m in masters %}
+                    { 
+                        "hostname": "{{ m.name | lower }}", 
+                        "hw-address": "{{ m.macaddr }}", 
+                        "ip-address": "{{ m.ipaddr }}" 
+                    }{% if not loop.last or workers is defined or other is defined %},{% endif %}
+  {% endfor %}
+
+  {% if workers is defined %}
+    {% for w in workers %}
+                    { 
+                        "hostname": "{{ w.name | lower }}", 
+                        "hw-address": "{{ w.macaddr }}", 
+                        "ip-address": "{{ w.ipaddr }}" 
+                    }{% if not loop.last or other is defined %},{% endif %}
+    {% endfor %}
+  {% endif %}
+{% endif %}
+
+{% if other is defined %}
+  {% for o in other %}
+                    { 
+                        "hostname": "{{ o.name }}", 
+                        "hw-address": "{{ o.macaddr }}", 
+                        "ip-address": "{{ o.ipaddr }}" 
+                    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+{% endif %}
+                ]
+                
+            }
+        ]
+    }
+}
